@@ -1,0 +1,19 @@
+[Unit]
+Description=Ethos (aiethos.ru) Next.js server
+After=network.target
+
+[Service]
+Type=simple
+# Directory where the repo is cloned on the server (app lives in ./nextjs)
+WorkingDirectory=/opt/ethos/nextjs
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+# Absolute path to npm so systemd finds it regardless of PATH
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
