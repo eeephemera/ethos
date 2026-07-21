@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s } from './_ui';
+import { s, ymGoal } from './_ui';
 
 const FXCSS = ".mnfx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx5:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.mnfx7:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.mnfx8:hover{border-color:var(--ink) !important}\n.mnfx9:hover{background:#0E4FD1 !important}\n.mnfx10:hover{transform:translateY(-2px) !important}\n.mnfx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.mnfx12:hover{border-color:var(--ink) !important}\n.mnfx13:hover{border-color:var(--ink) !important}\n.mnfx14:hover{transform:scale(1.06) !important}";
 
@@ -610,7 +610,7 @@ export default class MainPage extends React.Component {
       // Platform slider
       h2Size: isMobile ? '30px' : '44px',
       scrollToContact: () => {
-        const el = document.getElementById('contact');
+        ymGoal('cta_contact'); const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
       scrollToProcess: (e) => {
@@ -713,7 +713,7 @@ export default class MainPage extends React.Component {
       <a className="mnfx3" href="#why" style={s(`font-size:15px; font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Почему мы</a>
       <a className="mnfx4" href="#process" style={s(`font-size:15px; font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Процесс</a>
       <a className="mnfx5" href="#contact" style={s(`font-size:15px; font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Контакты</a>
-      <button className="mnfx6" style={s(`font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
+      <button className="mnfx6" onClick={v.scrollToContact} style={s(`font-family:'Inter',sans-serif; font-size:14px; font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
     </div>
 
     <button onClick={v.toggleMobileMenu} style={s(`display:${v.hamburgerDisplay}; width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--paper); flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer;`)}>
@@ -730,7 +730,7 @@ export default class MainPage extends React.Component {
         <a href="#why" onClick={v.closeMobileMenu} style={s(`font-size:16px; font-weight:600; color:var(--ink); text-decoration:none;`)}>Почему мы</a>
         <a href="#process" onClick={v.closeMobileMenu} style={s(`font-size:16px; font-weight:600; color:var(--ink); text-decoration:none;`)}>Процесс</a>
         <a href="#contact" onClick={v.closeMobileMenu} style={s(`font-size:16px; font-weight:600; color:var(--ink); text-decoration:none;`)}>Контакты</a>
-        <button style={s(`font-family:'Inter',sans-serif; font-size:15px; font-weight:600; color:#fff; background:var(--blue); border:none; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
+        <button onClick={v.scrollToContact} style={s(`font-family:'Inter',sans-serif; font-size:15px; font-weight:600; color:#fff; background:var(--blue); border:none; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
     </div>
   </header>
@@ -758,7 +758,7 @@ export default class MainPage extends React.Component {
         </p>
 
         <div style={s(`display:flex; align-items:center; justify-content:center; gap:22px; margin-top:36px; flex-wrap:wrap; ${v.entranceCta}`)}>
-          <button className="mnfx7" style={s(`font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 32px; border-radius:16px; white-space:nowrap; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить консультацию</button>
+          <button className="mnfx7" onClick={v.scrollToContact} style={s(`font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 32px; border-radius:16px; white-space:nowrap; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить консультацию</button>
           <a className="mnfx8" href="#process" onClick={v.scrollToProcess} style={s(`font-size:16px; font-weight:600; color:var(--ink); display:inline-flex; align-items:center; gap:8px; padding:16px 2px; text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.25s ease;`)}>Как мы работаем ↓</a>
         </div>
       </div>
@@ -1354,8 +1354,8 @@ export default class MainPage extends React.Component {
 
       <div style={s(`position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:24px; min-height:260px;`)}>
         <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
-          <a className="mnfx11" href="https://t.me/Terraiib24" target="_blank" rel="noopener" style={s(`display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="mnfx12" href="https://wa.me/79285288598" target="_blank" rel="noopener" style={s(`display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
+          <a className="mnfx11" href="https://t.me/Terraiib24" target="_blank" rel="noopener" onClick={() => ymGoal("telegram")} style={s(`display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
+          <a className="mnfx12" href="https://wa.me/79285288598" target="_blank" rel="noopener" onClick={() => ymGoal("whatsapp")} style={s(`display:flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:16px; font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
         </div>
         <div style={s(`font-size:13px; color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня</div>
       </div>

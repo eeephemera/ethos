@@ -1,6 +1,17 @@
 // Shared UI helpers for the ported ETHOS pages.
 // s(): parse a CSS text string into a React style object, so the design's
 // inline styles port over verbatim (incl. CSS custom properties).
+// Yandex.Metrika counter id (kept here so goal calls stay in one place).
+export const YM_ID = 110919394;
+
+// Fire a Metrika goal (conversion). No-op during SSR or if the counter
+// hasn't loaded yet, so it's always safe to call from a click handler.
+export function ymGoal(name) {
+  if (typeof window !== 'undefined' && typeof window.ym === 'function') {
+    window.ym(YM_ID, 'reachGoal', name);
+  }
+}
+
 export function s(css) {
   const style = {};
   if (!css) return style;
