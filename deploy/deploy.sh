@@ -81,7 +81,14 @@ systemctl --no-pager --full status ethos | head -12 || true
 # nginx
 # ---------------------------------------------------------------------------
 log "Installing nginx site for $DOMAIN"
-cp "$REPO_DIR/deploy/nginx-aiethos.conf" /etc/nginx/sites-available/$DOMAIN
+# Don't clobber a config Certbot has already customized with the SSL/redirect
+# blocks — overwriting it would drop HTTPS. Only install the base config on a
+# first run (or if Certbot hasn't touched it yet).
+if grep -q "managed by Certbot" "/etc/nginx/sites-available/$DOMAIN" 2>/dev/null; then
+  log "Existing nginx site has Certbot-managed HTTPS — leaving it in place."
+else
+  cp "$REPO_DIR/deploy/nginx-aiethos.conf" /etc/nginx/sites-available/$DOMAIN
+fi
 ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/$DOMAIN
 # Drop the default site if it would clash on port 80.
 rm -f /etc/nginx/sites-enabled/default
@@ -96,7 +103,10 @@ SERVER_IP="$(curl -fsSL --max-time 10 https://api.ipify.org || echo '')"
 DOMAIN_IP="$(getent hosts "$DOMAIN" | awk '{print $1}' | head -1 || echo '')"
 log "Server public IP: ${SERVER_IP:-unknown} | $DOMAIN resolves to: ${DOMAIN_IP:-unresolved}"
 
-if [[ -n "$SERVER_IP" && "$DOMAIN_IP" == "$SERVER_IP" ]]; then
+if [[ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]]; then
+  log "TLS certificate for $DOMAIN already exists — skipping certbot."
+  echo "    Renew with the same method you issued it (see deploy/DEPLOY.md)."
+elif [[ -n "$SERVER_IP" && "$DOMAIN_IP" == "$SERVER_IP" ]]; then
   log "DNS points here — obtaining Let's Encrypt certificate"
   apt-get install -y certbot python3-certbot-nginx
   if [[ -n "$CERTBOT_EMAIL" ]]; then
