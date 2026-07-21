@@ -71,11 +71,37 @@ npm run build
 log "Installing systemd service ethos.service"
 # Point WorkingDirectory at the actual checkout location.
 sed "s#/opt/ethos/nextjs#$APP_DIR#g" "$REPO_DIR/deploy/ethos.service" > /etc/systemd/system/ethos.service
+
+# Healthcheck watchdog: restarts the app if it hangs (systemd's Restart= only
+# catches a crashed process, not a hung-but-alive one).
+sed "s#/opt/ethos#$REPO_DIR#g" "$REPO_DIR/deploy/ethos-health.service" > /etc/systemd/system/ethos-health.service
+cp "$REPO_DIR/deploy/ethos-health.timer" /etc/systemd/system/ethos-health.timer
+chmod +x "$REPO_DIR/deploy/ethos-health.sh"
+
 systemctl daemon-reload
 systemctl enable ethos
 systemctl restart ethos
+systemctl enable --now ethos-health.timer
 sleep 2
 systemctl --no-pager --full status ethos | head -12 || true
+
+# ---------------------------------------------------------------------------
+# Swap — protect against OOM kills on low-RAM VPS (the #1 cause of crashes).
+# ---------------------------------------------------------------------------
+if [[ "$(swapon --show --noheadings | wc -l)" -eq 0 ]]; then
+  log "No swap found — creating a 2G swap file"
+  if fallocate -l 2G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=2048; then
+    chmod 600 /swapfile
+    mkswap /swapfile >/dev/null
+    swapon /swapfile
+    grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    log "Swap enabled: $(swapon --show --noheadings | tr -s ' ')"
+  else
+    warn "Could not create swap file (skipping)."
+  fi
+else
+  log "Swap already present — skipping."
+fi
 
 # ---------------------------------------------------------------------------
 # nginx

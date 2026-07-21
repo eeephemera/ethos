@@ -1,0 +1,7 @@
+[Unit]
+Description=ETHOS healthcheck — restart the app if it stops responding
+After=ethos.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/ethos/deploy/ethos-health.sh

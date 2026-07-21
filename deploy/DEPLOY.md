@@ -63,8 +63,41 @@ CERTBOT_EMAIL="you@example.com" bash deploy/deploy.sh
 | Компонент       | Файл                          | Назначение                                |
 |-----------------|-------------------------------|-------------------------------------------|
 | systemd         | `deploy/ethos.service`        | Держит `npm run start` живым на порту 3000 |
+| healthcheck     | `deploy/ethos-health.*`       | Каждые 2 мин проверяет порт, перезапускает при зависании |
 | nginx           | `deploy/nginx-aiethos.conf`   | Реверс-прокси 80/443 → 127.0.0.1:3000     |
 | certbot         | (ставится скриптом)           | Сертификат Let's Encrypt + авто-редирект  |
+| swap            | `/swapfile` (2G)              | Защита от OOM-падений на VPS с малой RAM   |
+
+---
+
+## Отказоустойчивость (чтобы сервис не падал)
+
+`deploy.sh` настраивает самовосстановление:
+
+1. **systemd `Restart=always`** — сервис перезапускается при любом падении (краш,
+   OOM, ошибка) через 3 сек, без лимита попыток (`StartLimitIntervalSec=0`).
+2. **Автозапуск при загрузке** — `systemctl enable ethos`: сервис поднимается сам
+   после перезагрузки сервера.
+3. **Healthcheck-сторож** (`ethos-health.timer`) — каждые 2 минуты дергает
+   `http://127.0.0.1:3000`; если приложение зависло (живо, но не отвечает) —
+   перезапускает его. systemd сам такое не ловит.
+4. **Swap 2 ГБ** — не даёт ядру убивать Node при пике памяти (частая причина
+   падений на VPS с 1–2 ГБ RAM).
+
+Проверить состояние:
+
+```bash
+systemctl status ethos              # активен ли сервис
+systemctl status ethos-health.timer # работает ли сторож
+journalctl -u ethos -n 50 --no-pager
+swapon --show                       # включён ли swap
+```
+
+Быстрый тест самолечения — «убить» приложение и увидеть, что оно вернулось:
+
+```bash
+systemctl kill -s SIGKILL ethos && sleep 5 && systemctl is-active ethos   # -> active
+```
 
 ---
 

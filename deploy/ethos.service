@@ -1,6 +1,8 @@
 [Unit]
-Description=Ethos (aiethos.ru) Next.js server
+Description=ETHOS (aiethos.ru) Next.js server
 After=network.target
+# Never stop trying to restart — disable the "start-limit hit, giving up" state.
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
@@ -11,8 +13,12 @@ Environment=PORT=3000
 Environment=HOSTNAME=127.0.0.1
 # Absolute path to npm so systemd finds it regardless of PATH
 ExecStart=/usr/bin/npm run start
-Restart=on-failure
-RestartSec=5
+# Restart on ANY exit (crash, clean exit, OOM) after a short pause.
+Restart=always
+RestartSec=3
+TimeoutStartSec=90
+# If the kernel OOM-kills a child, restart the service instead of giving up.
+OOMPolicy=continue
 User=root
 
 [Install]
