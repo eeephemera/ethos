@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import CookieNotice from '../components/CookieNotice';
 import './globals.css';
 
 export const metadata = {
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
     <html lang="ru">
       <body>
         {children}
+        <CookieNotice />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
         {/* Yandex.Metrika counter */}

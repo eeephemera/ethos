@@ -927,7 +927,7 @@ export default class Bitrix24Page extends React.Component {
       <a href="#sla" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>Поддержка</a>
       <a href="#faq" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`font-size:13px; color:var(--ink-faint);`)}>© 2026 ETHOS. Все права защищены.</div>
+    <div style={s(`display:flex; gap:16px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--ink-faint);`)}><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS. Все права защищены.</span></div>
   </footer>
 
 </div>
