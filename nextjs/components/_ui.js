@@ -1,4 +1,4 @@
-// Shared UI helpers for the ported Terra pages.
+// Shared UI helpers for the ported ETHOS pages.
 // s(): parse a CSS text string into a React style object, so the design's
 // inline styles port over verbatim (incl. CSS custom properties).
 export function s(css) {

@@ -5,7 +5,7 @@ import { s } from './_ui';
 const FXCSS = ".mnfx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx5:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.mnfx7:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.mnfx8:hover{border-color:var(--ink) !important}\n.mnfx9:hover{background:#0E4FD1 !important}\n.mnfx10:hover{transform:translateY(-2px) !important}\n.mnfx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.mnfx12:hover{border-color:var(--ink) !important}\n.mnfx13:hover{border-color:var(--ink) !important}\n.mnfx14:hover{transform:scale(1.06) !important}";
 
 const VOICE_SCRIPT = [
-  { id: 'hero', label: 'О компании', text: 'Терра — официальный партнёр Битрикс24 уровня энтерпрайз. Мы внедряем, дорабатываем и поддерживаем Битрикс24 — и строим ИИ-агентов, которые снимают рутину с ваших команд.' },
+  { id: 'hero', label: 'О компании', text: 'ETHOS — официальный партнёр Битрикс24 уровня энтерпрайз. Мы внедряем, дорабатываем и поддерживаем Битрикс24 — и строим ИИ-агентов, которые снимают рутину с ваших команд.' },
   { id: 'services', label: 'Услуги', text: 'Работаем в двух направлениях. Если Битрикс24 ещё нет — внедряем систему под ключ: настраиваем процессы и воронки, подключаем интеграции, переносим данные и обучаем команду. Если Битрикс24 уже работает — берём систему на поддержку: техподдержка по SLA, доработки и аудит текущей настройки.' },
   { id: 'ai', label: 'ИИ-решения', text: 'Внедряем ИИ там, где он даёт результат. ИИ-агенты ведут сделки, обрабатывают заявки и отвечают клиентам. Автоматически заполняют карточки товаров на сайте: подбирают фото и пишут SEO-тексты. А ещё автоматизируют аналитику и отчётность.' },
   { id: 'why', label: 'Почему мы', text: 'Мы работаем как расширение вашей команды, а не подрядчик на разовый проект. Сертифицированный статус энтерпрайз, опыт сложных внедрений, одна команда для CRM и ИИ — и сопровождение результата после запуска.' },
@@ -703,7 +703,7 @@ export default class MainPage extends React.Component {
           </g>
         </g>
       </svg>
-      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>Терра</span>
+      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>ETHOS</span>
     </div>
 
     <div style={s(`display:${v.navDisplay}; align-items:center; gap:26px;`)}>
@@ -1390,7 +1390,7 @@ export default class MainPage extends React.Component {
           </g>
         </g>
       </svg>
-      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:15px; color:var(--ink);`)}>Терра</span>
+      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:15px; color:var(--ink);`)}>ETHOS</span>
       <span style={s(`font-size:13px; color:var(--ink-faint); margin-left:4px;`)}>· Битрикс24 и ИИ</span>
     </div>
     <div style={s(`display:flex; gap:24px; flex-wrap:wrap;`)}>
@@ -1400,7 +1400,7 @@ export default class MainPage extends React.Component {
       <a href="#why" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>Почему мы</a>
       <a href="#process" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>Процесс</a>
     </div>
-    <div style={s(`font-size:13px; color:var(--ink-faint);`)}>© 2026 Терра. Все права защищены.</div>
+    <div style={s(`font-size:13px; color:var(--ink-faint);`)}>© 2026 ETHOS. Все права защищены.</div>
   </footer>
 
   <div style={s(`position:fixed; right:${v.fabOffset}; bottom:${v.fabOffset}; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:12px;`)}>

@@ -241,7 +241,7 @@ export default class Bitrix24Page extends React.Component {
         </g>
       </svg>
       <span style={s(`display:flex; align-items:baseline; gap:8px;`)}>
-        <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>Терра</span>
+        <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>ETHOS</span>
         <span style={s(`font-size:12px; font-weight:600; color:var(--ink-faint); white-space:nowrap;`)}>· Битрикс24</span>
       </span>
     </a>
@@ -917,7 +917,7 @@ export default class Bitrix24Page extends React.Component {
           </g>
         </g>
       </svg>
-      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:15px; color:var(--ink);`)}>Терра</span>
+      <span style={s(`font-family:'Manrope',sans-serif; font-weight:800; font-size:15px; color:var(--ink);`)}>ETHOS</span>
       <span style={s(`font-size:13px; color:var(--ink-faint); margin-left:4px;`)}>· Битрикс24 и ИИ</span>
     </div>
     <div style={s(`display:flex; gap:24px; flex-wrap:wrap;`)}>
@@ -927,7 +927,7 @@ export default class Bitrix24Page extends React.Component {
       <a href="#sla" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>Поддержка</a>
       <a href="#faq" style={s(`font-size:14px; color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`font-size:13px; color:var(--ink-faint);`)}>© 2026 Терра. Все права защищены.</div>
+    <div style={s(`font-size:13px; color:var(--ink-faint);`)}>© 2026 ETHOS. Все права защищены.</div>
   </footer>
 
 </div>

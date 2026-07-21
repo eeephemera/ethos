@@ -1,11 +1,11 @@
 import Bitrix24Page from '../../components/Bitrix24Page';
 
 export const metadata = {
-  title: "Внедрение и поддержка Битрикс24 под ключ — настройка CRM, интеграция с 1С | Терра",
+  title: "Внедрение и поддержка Битрикс24 под ключ — настройка CRM, интеграция с 1С | ETHOS",
   description: "Внедрение Битрикс24 под ключ: настройка CRM и воронок, интеграция с 1С, телефонией и сайтом, миграция с amoCRM и Excel с тестовой проверкой данных, обучение команды. Техподдержка и сопровождение по SLA. Официальный партнёр уровня Enterprise.",
   alternates: { canonical: '/bitrix24' },
   openGraph: {
-    title: "Внедрение и поддержка Битрикс24 под ключ | Терра",
+    title: "Внедрение и поддержка Битрикс24 под ключ | ETHOS",
     description: "Настройка CRM под ваши процессы, интеграции с 1С и телефонией, перенос данных из amoCRM, обучение и поддержка по SLA.",
     type: 'website', locale: 'ru_RU', url: '/bitrix24',
   },
@@ -17,7 +17,7 @@ const jsonLd = {
       {
         "@type": "Service",
         "name": "Внедрение и поддержка Битрикс24",
-        "provider": { "@type": "Organization", "name": "Терра" },
+        "provider": { "@type": "Organization", "name": "ETHOS" },
         "areaServed": "RU",
         "serviceType": "Внедрение CRM Битрикс24 под ключ, интеграция с 1С и телефонией, миграция с amoCRM, техподдержка по SLA"
       },

@@ -1,10 +1,10 @@
-# Терра / aiethos.ru — сайт на Next.js
+# ETHOS / aiethos.ru — сайт на Next.js
 
 Три страницы, портированные один-в-один из дизайна (Design Components):
 
 | Роут         | Компонент                     | Что это                                   |
 |--------------|-------------------------------|-------------------------------------------|
-| `/`          | `components/MainPage.jsx`      | Главная (Терра Liquid Glass)              |
+| `/`          | `components/MainPage.jsx`      | Главная (ETHOS Liquid Glass)              |
 | `/bitrix24`  | `components/Bitrix24Page.jsx`  | Внедрение и поддержка Битрикс24           |
 | `/ai`        | `components/AiPage.jsx`        | Внедрение ИИ и автоматизация              |
 
