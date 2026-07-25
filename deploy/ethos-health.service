@@ -4,4 +4,5 @@ After=ethos.service
 
 [Service]
 Type=oneshot
+Environment=APP_PORT=3000
 ExecStart=/opt/ethos/deploy/ethos-health.sh

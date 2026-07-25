@@ -3,7 +3,7 @@
 # systemd's Restart= handles a crashed process; this covers a hung-but-alive one.
 set -uo pipefail
 
-URL="http://127.0.0.1:3000/"
+URL="http://127.0.0.1:${APP_PORT:-3000}/"
 TRIES=3
 
 for i in $(seq 1 "$TRIES"); do

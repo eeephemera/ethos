@@ -19,6 +19,9 @@ DOMAIN="${DOMAIN:-aiethos.ru}"
 WWW_DOMAIN="www.$DOMAIN"
 NODE_MAJOR="${NODE_MAJOR:-22}"
 CERTBOT_EMAIL="${CERTBOT_EMAIL:-}"   # optional; set to enable non-interactive certbot
+# Internal port for this app. Other projects on the same host (e.g. domostroy)
+# must use a different one — override with APP_PORT=3001 bash deploy/deploy.sh
+APP_PORT="${APP_PORT:-3000}"
 
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 warn() { printf '\n\033[1;33m[warn] %s\033[0m\n' "$*"; }
@@ -69,12 +72,26 @@ npm run build
 # systemd service
 # ---------------------------------------------------------------------------
 log "Installing systemd service ethos.service"
-# Point WorkingDirectory at the actual checkout location.
-sed "s#/opt/ethos/nextjs#$APP_DIR#g" "$REPO_DIR/deploy/ethos.service" > /etc/systemd/system/ethos.service
+
+# Refuse to fight another project for the port. ethos may already own it — that
+# is fine, we are about to restart it.
+holder="$(ss -tlnp 2>/dev/null | grep ":$APP_PORT " || true)"
+if [[ -n "$holder" ]] && ! systemctl is-active --quiet ethos; then
+  warn "Port $APP_PORT is already taken by another process:"
+  echo "$holder"
+  echo "    Re-run with a free port, e.g.:  APP_PORT=3001 bash deploy/deploy.sh"
+  exit 1
+fi
+
+# Point WorkingDirectory at the actual checkout location and set the port.
+sed -e "s#/opt/ethos/nextjs#$APP_DIR#g" \
+    -e "s#^Environment=PORT=.*#Environment=PORT=$APP_PORT#" \
+    "$REPO_DIR/deploy/ethos.service" > /etc/systemd/system/ethos.service
 
 # Healthcheck watchdog: restarts the app if it hangs (systemd's Restart= only
 # catches a crashed process, not a hung-but-alive one).
 sed "s#/opt/ethos#$REPO_DIR#g" "$REPO_DIR/deploy/ethos-health.service" > /etc/systemd/system/ethos-health.service
+sed -i "s#^Environment=APP_PORT=.*#Environment=APP_PORT=$APP_PORT#" /etc/systemd/system/ethos-health.service 2>/dev/null || true
 cp "$REPO_DIR/deploy/ethos-health.timer" /etc/systemd/system/ethos-health.timer
 chmod +x "$REPO_DIR/deploy/ethos-health.sh"
 
@@ -125,11 +142,24 @@ log "Installing nginx site for $DOMAIN"
 if grep -q "managed by Certbot" "/etc/nginx/sites-available/$DOMAIN" 2>/dev/null; then
   log "Existing nginx site has Certbot-managed HTTPS — leaving it in place."
 else
-  cp "$REPO_DIR/deploy/nginx-aiethos.conf" /etc/nginx/sites-available/$DOMAIN
+  sed "s#127.0.0.1:3000#127.0.0.1:$APP_PORT#g" \
+    "$REPO_DIR/deploy/nginx-aiethos.conf" > /etc/nginx/sites-available/$DOMAIN
 fi
 ln -sf /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/$DOMAIN
-# Drop the default site if it would clash on port 80.
-rm -f /etc/nginx/sites-enabled/default
+
+# Other projects may live on this server (e.g. domostroy). Our server block is
+# matched by server_name, so the stock default site does not shadow it — only
+# remove the default when it is still Ubuntu's untouched placeholder, never when
+# someone has pointed it at a real site.
+if [[ -e /etc/nginx/sites-enabled/default ]]; then
+  if grep -qE 'server_name\s+(_|localhost)\s*;' /etc/nginx/sites-enabled/default 2>/dev/null \
+     && ! grep -q 'proxy_pass' /etc/nginx/sites-enabled/default 2>/dev/null; then
+    log "Removing Ubuntu's placeholder default site"
+    rm -f /etc/nginx/sites-enabled/default
+  else
+    warn "/etc/nginx/sites-enabled/default serves a real site — leaving it alone."
+  fi
+fi
 mkdir -p /var/www/html
 nginx -t
 systemctl reload nginx
