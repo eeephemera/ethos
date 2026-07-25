@@ -20,18 +20,29 @@ for f in /etc/nginx/sites-enabled/*; do
     | sed 's/^\s*/      /' | sort -u
 done
 
-hdr "Дубли server_name (главная причина «открывается не тот сайт»)"
-dupes="$(grep -rhoP 'server_name\s+\K[^;]+' /etc/nginx/sites-enabled/ 2>/dev/null \
-  | tr ' ' '\n' | grep -v '^$' | sort | uniq -d)"
-if [[ -n "$dupes" ]]; then
-  warn "Один домен объявлен в нескольких конфигах:"; echo "$dupes" | sed 's/^/      /'
-else
-  ok "Дублей нет"
-fi
+hdr "Один домен в нескольких конфигах (причина «открывается не тот сайт»)"
+# ВАЖНО: sites-enabled — это симлинки, поэтому grep -r по каталогу их не читает.
+# Перечисляем файлы явно и печатаем «домен -> в каких конфигах встречается».
+tmp="$(mktemp)"
+for f in /etc/nginx/sites-enabled/*; do
+  [[ -e "$f" ]] || continue
+  grep -hoP 'server_name\s+\K[^;]+' "$f" 2>/dev/null | tr ' ' '\n' | grep -v '^$' \
+    | sort -u | while read -r d; do echo "$d $(basename "$f")"; done
+done > "$tmp"
+found=0
+while read -r dom; do
+  files="$(awk -v d="$dom" '$1==d {printf "%s ", $2}' "$tmp")"
+  warn "$dom объявлен в: $files"; found=1
+done < <(awk '{print $1}' "$tmp" | sort | uniq -d)
+[[ $found -eq 0 ]] && ok "Пересечений нет"
+info_ports="$(awk '{print $1}' "$tmp" | sort -u | wc -l)"
+echo "  (всего уникальных доменов: $info_ports; пересечение на РАЗНЫХ портах — не конфликт)"
+rm -f "$tmp"
 
 hdr "Кто объявлен default_server"
-grep -rn "default_server" /etc/nginx/sites-enabled/ 2>/dev/null | sed 's/^/  /' \
-  || ok "default_server не задан (неизвестный домен попадёт в первый конфиг)"
+ds="$(for f in /etc/nginx/sites-enabled/*; do [[ -e "$f" ]] && grep -Hn "default_server" "$f" 2>/dev/null; done)"
+if [[ -n "$ds" ]]; then echo "$ds" | sed 's/^/  /'
+else ok "default_server не задан (неизвестный домен попадёт в первый по алфавиту конфиг)"; fi
 
 hdr "Сервисы приложений (systemd)"
 systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null \
@@ -58,6 +69,18 @@ fi
 hdr "TLS-сертификаты"
 ls -1 /etc/letsencrypt/live/ 2>/dev/null | grep -v README | sed 's/^/  /' || echo "  нет"
 
-hdr "Память и диск (два проекта на одной машине)"
+hdr "Память и диск (несколько проектов на одной машине)"
 free -h  | sed 's/^/  /'
 df -h /  | sed 's/^/  /'
+swap_used_mb="$(free -m | awk '/^Swap:/{print $3}')"
+mem_avail_mb="$(free -m | awk '/^Mem:/{print $7}')"
+if [[ "${swap_used_mb:-0}" -gt 200 ]]; then
+  warn "Задействовано ${swap_used_mb}MB swap — оперативной памяти не хватает."
+  echo "      Приложения работают медленнее и рискуют быть убитыми при пике."
+fi
+if [[ "${mem_avail_mb:-9999}" -lt 400 ]]; then
+  warn "Свободно всего ${mem_avail_mb}MB — критично мало."
+fi
+echo "  Топ-5 процессов по памяти:"
+ps -eo rss,comm --sort=-rss 2>/dev/null | head -6 \
+  | awk 'NR==1{next} {printf "      %6.0f MB  %s\n", $1/1024, $2}'
