@@ -104,6 +104,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# MSS clamping — fixes "site won't load" for clients behind a smaller MTU
+# (mobile networks, VPN, PPPoE). Without it the TCP handshake succeeds but
+# large packets are silently dropped, so only some networks can open the site.
+# ---------------------------------------------------------------------------
+if iptables -t mangle -C POSTROUTING -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu 2>/dev/null; then
+  log "MSS clamping already enabled"
+else
+  log "Enabling MSS clamping (helps mobile/VPN clients)"
+  bash "$REPO_DIR/deploy/fix-mtu.sh" || warn "Could not enable MSS clamping."
+fi
+
+# ---------------------------------------------------------------------------
 # nginx
 # ---------------------------------------------------------------------------
 log "Installing nginx site for $DOMAIN"
