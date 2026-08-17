@@ -12,11 +12,11 @@ const wrap = {
   margin: '0 auto',
   padding: '48px 24px 96px',
   color: '#14171C',
-  fontFamily: "'Inter', system-ui, sans-serif",
+  fontFamily: "var(--font-inter), system-ui, sans-serif",
   lineHeight: 1.7,
 };
-const h1 = { fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: 'clamp(28px, 5vw, 40px)', letterSpacing: '-0.02em', margin: '20px 0 8px' };
-const h2 = { fontFamily: "'Manrope', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.01em', margin: '38px 0 10px' };
+const h1 = { fontFamily: "var(--font-manrope), sans-serif", fontWeight: 800, fontSize: 'clamp(28px, 5vw, 40px)', letterSpacing: '-0.02em', margin: '20px 0 8px' };
+const h2 = { fontFamily: "var(--font-manrope), sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.01em', margin: '38px 0 10px' };
 const p = { fontSize: '16px', color: '#2C333D', margin: '0 0 12px' };
 const muted = { fontSize: '14px', color: '#8A8F99' };
 const li = { fontSize: '16px', color: '#2C333D', margin: '0 0 8px' };
@@ -102,16 +102,27 @@ export default function PrivacyPage() {
         удаление, а также отозвать согласие на обработку. Для этого свяжитесь с нами по контактам ниже.
       </p>
 
-      <h2 style={h2}>9. Контакты</h2>
+      <h2 style={h2}>9. Реквизиты оператора и контакты</h2>
       <p style={p}>
-        Оператор: ETHOS, сайт <a href="https://aiethos.ru" style={link}>aiethos.ru</a>.<br />
-        Связаться:{' '}
+        Оператор персональных данных:{' '}
+        <strong>Индивидуальный предприниматель Магомедов Закир Асланович</strong> (проект ETHOS).<br />
+        ИНН: 054210247290<br />
+        ОГРНИП: 326050000095170<br />
+        Адрес: Республика Дагестан, г. Дербент<br />
+        Сайт: <a href="https://aiethos.ru" style={link}>aiethos.ru</a>
+      </p>
+      <p style={p}>
+        Для обращений по вопросам обработки персональных данных — в том числе для отзыва согласия,
+        уточнения, блокирования или удаления данных:<br />
+        E-mail: <a href="mailto:magomedov_zak_05@mail.ru" style={link}>magomedov_zak_05@mail.ru</a><br />
+        Телефон: <a href="tel:+79256777027" style={link}>+7 925 677-70-27</a><br />
+        Мессенджеры:{' '}
         <a href="https://t.me/Terraiib24" style={link} target="_blank" rel="noopener">Telegram</a>{' '}·{' '}
-        <a href="https://wa.me/79285288598" style={link} target="_blank" rel="noopener">WhatsApp</a>.
+        <a href="https://wa.me/79285288598" style={link} target="_blank" rel="noopener">WhatsApp</a>
       </p>
       <p style={muted}>
-        Реквизиты юридического лица (наименование, ИНН, адрес электронной почты для обращений)
-        будут указаны здесь после регистрации.
+        Ответ на обращение направляется в течение рабочего дня, но не позднее срока,
+        установленного Федеральным законом № 152-ФЗ «О персональных данных».
       </p>
     </main>
   );

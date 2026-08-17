@@ -65,7 +65,10 @@ fi
 # ---------------------------------------------------------------------------
 log "Installing dependencies and building"
 cd "$APP_DIR"
-npm ci || npm install
+# --include=dev обязателен: сборка проверяет типы через typescript, а он лежит
+# в devDependencies. Без флага NODE_ENV=production в окружении срезал бы их и
+# `next build` упал бы на "Please install typescript".
+npm ci --include=dev || npm install --include=dev
 npm run build
 
 # ---------------------------------------------------------------------------
