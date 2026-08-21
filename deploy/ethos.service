@@ -11,6 +11,10 @@ WorkingDirectory=/opt/ethos/nextjs
 Environment=NODE_ENV=production
 Environment=PORT=3000
 Environment=HOSTNAME=127.0.0.1
+# Secrets (Telegram lead notifications: TG_BOT_TOKEN, TG_CHAT_ID) live in
+# /etc/ethos.env — outside the repo, so git pull never touches them.
+# The dash means "optional": the service still starts if the file is missing.
+EnvironmentFile=-/etc/ethos.env
 # Absolute path to npm so systemd finds it regardless of PATH
 ExecStart=/usr/bin/npm run start
 # Restart on ANY exit (crash, clean exit, OOM) after a short pause.

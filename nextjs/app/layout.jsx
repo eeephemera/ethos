@@ -1,6 +1,7 @@
 import Script from 'next/script';
 import { Inter, Manrope } from 'next/font/google';
 import CookieNotice from '../components/CookieNotice';
+import MobileActionBar from '../components/MobileActionBar';
 import './globals.css';
 
 // Шрифты через next/font: Next скачивает их на этапе сборки и раздаёт со своего
@@ -135,6 +136,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <CookieNotice />
+        <MobileActionBar />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
         {/* Yandex.Metrika counter — lazyOnload: счётчик не конкурирует

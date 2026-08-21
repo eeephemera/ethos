@@ -3,11 +3,10 @@
 # Turnkey deploy for aiethos.ru (Ethos / Терра — Next.js landing).
 # Run this ON the server (Ubuntu/Debian) as root:
 #
-#   ssh root@72.56.5.23
+#   ssh root@185.207.66.202
 #   apt-get update && apt-get install -y git
 #   git clone https://github.com/eeephemera/ethos.git /opt/ethos
-#   cd /opt/ethos && git checkout claude/deploy-ethos-server-nigp2j
-#   bash deploy/deploy.sh
+#   cd /opt/ethos && bash deploy/deploy.sh
 #
 # Re-running is safe: it pulls the latest code, rebuilds, and restarts.
 #
@@ -52,12 +51,12 @@ log "Node $(node -v), npm $(npm -v)"
 if [[ -d "$REPO_DIR/.git" ]]; then
   log "Updating existing checkout in $REPO_DIR"
   git -C "$REPO_DIR" fetch --all --prune
-  git -C "$REPO_DIR" checkout claude/deploy-ethos-server-nigp2j
-  git -C "$REPO_DIR" pull --ff-only origin claude/deploy-ethos-server-nigp2j
+  git -C "$REPO_DIR" checkout main
+  git -C "$REPO_DIR" pull --ff-only origin main
 else
   log "Cloning repo into $REPO_DIR"
   git clone https://github.com/eeephemera/ethos.git "$REPO_DIR"
-  git -C "$REPO_DIR" checkout claude/deploy-ethos-server-nigp2j
+  git -C "$REPO_DIR" checkout main
 fi
 
 # ---------------------------------------------------------------------------

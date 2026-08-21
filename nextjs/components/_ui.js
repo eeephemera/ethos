@@ -90,3 +90,37 @@ export function s(css) {
   });
   return style;
 }
+
+/**
+ * Пауза для тяжёлых секций, пока их нет на экране.
+ *
+ * Зачем. На главной одновременно крутились четыре автоплей-цикла (кран 4,6 с,
+ * канбан 7 с, слайдер 9 с, карточки товаров 7 с) плюс setInterval на 1,5 с,
+ * перерисовывающий компонент целиком. Работали они всегда — и пока человек
+ * читал футер, и пока вкладка была свёрнута. На среднем Android это ровно те
+ * подтормаживания, которые видно при листании.
+ *
+ * Механика та же, что уже была у «Ленты знаний»: data-run='1' на элементе,
+ * а CSS по нему снимает animation-play-state: paused. Здесь наблюдатель
+ * работает в обе стороны — секция ушла из кадра, значит снова пауза.
+ *
+ * onChange получает true/false и гасит JS-таймеры секции. Возвращается
+ * функция отписки для componentWillUnmount.
+ */
+export function observeInView(el, onChange, { rootMargin = '150px' } = {}) {
+  if (typeof window === 'undefined' || !el) return () => {};
+
+  const apply = (inView) => {
+    el.setAttribute('data-run', inView ? '1' : '0');
+    if (typeof onChange === 'function') onChange(inView);
+  };
+
+  // Без IntersectionObserver ничего не делаем: пауза выставляется атрибутом
+  // data-run='0', поэтому по умолчанию демо работает как раньше. Замороженный
+  // на нулевом кадре ролик выглядел бы сломанным — такой ценой экономить нельзя.
+  if (!('IntersectionObserver' in window)) return () => {};
+
+  const io = new IntersectionObserver(([entry]) => apply(entry.isIntersecting), { rootMargin });
+  io.observe(el);
+  return () => io.disconnect();
+}

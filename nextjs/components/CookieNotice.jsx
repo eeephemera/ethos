@@ -25,6 +25,7 @@ export default function CookieNotice() {
   return (
     <div
       role="dialog"
+      className="cookie-notice"
       aria-label="Уведомление об использовании cookie"
       style={{
         position: 'fixed',

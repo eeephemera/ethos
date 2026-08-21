@@ -1,10 +1,15 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, observeInView } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
 
 const FXCSS = ".mnfx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx5:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.mnfx7:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.mnfx8:hover{border-color:var(--ink) !important}\n.mnfx9:hover{background:#0E4FD1 !important}\n.mnfx10:hover{transform:translateY(-2px) !important}\n.mnfx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.mnfx12:hover{border-color:var(--ink) !important}\n.mnfx13:hover{border-color:var(--ink) !important}\n.mnfx14:hover{transform:scale(1.06) !important}";
+
+// Пункт меню. Раньше эта строка была скопирована в каждую ссылку шапки —
+// шесть одинаковых полотен, в которых не видно, чем пункты отличаются.
+const NAV_LINK = `font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`;
+const NAV_LINK_M = `display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`;
 
 const VOICE_SCRIPT = [
   { id: 'hero', label: 'О компании', text: 'ETHOS — сертифицированный интегратор Битрикс24. Мы внедряем, дорабатываем и поддерживаем Битрикс24 — и строим ИИ-агентов, которые снимают рутину с ваших команд.' },
@@ -30,18 +35,26 @@ const PRODUCTS = [
     desc: 'Рюкзак 20 л из водоотталкивающей ткани с отделением для ноутбука 14″. Эргономичные лямки и продуманная организация для работы и поездок.' }
 ];
 
+// Слайдер платформы держится на одном фирменном синем. Раньше у каждого чипа
+// был свой акцент (#155EEF, #B8860B, #12A5E0, #1F8A5B, #D9480F) — пять
+// «главных» цветов в одном ряду, и цвет переставал что-либо означать.
+const BRAND = '#155EEF';
+
 const SLIDER_DATA = [
-  { label: 'CRM и продажи', hue: '#155EEF', icon: 'M4 5h16l-5.5 7v5.5L9.5 20v-8L4 5z',
+  { label: 'CRM и продажи', icon: 'M4 5h16l-5.5 7v5.5L9.5 20v-8L4 5z',
     items: ['Лиды, сделки, контакты', 'Воронки продаж', 'Роботы и триггеры', 'Счета и оплаты', 'Контакт-центр', 'Сквозная аналитика'] },
-  { label: 'Задачи и проекты', hue: '#B8860B', icon: 'M5 4h14v3H5V4zm0 6.5h14v3H5v-3zM5 17h9v3H5v-3z',
+  { label: 'Задачи и проекты', icon: 'M5 4h14v3H5V4zm0 6.5h14v3H5v-3zM5 17h9v3H5v-3z',
     items: ['Задачи и чек-листы', 'Проекты и канбан', 'Смарт-процессы (СПА)', 'Диаграмма Ганта', 'Учёт времени'] },
-  { label: 'ИИ-агенты', hue: '#12A5E0', icon: 'M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2zm7 12l1.1 2.9L23 18l-2.9 1.1L19 22l-1.1-2.9L15 18l2.9-1.1L19 14z',
+  { label: 'ИИ-агенты', icon: 'M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2zm7 12l1.1 2.9L23 18l-2.9 1.1L19 22l-1.1-2.9L15 18l2.9-1.1L19 14z',
     items: ['Обработка заявок', 'Ответы клиентам 24/7', 'Заполнение сделок', 'Расшифровка звонков', 'Речевая аналитика'] },
-  { label: 'Карточки товаров', hue: '#1F8A5B', icon: 'M6 7V6a6 6 0 0112 0v1h3l-1.5 13.5A2 2 0 0117.5 22h-11a2 2 0 01-2-1.5L3 7h3zm2 0h8V6a4 4 0 00-8 0v1z',
+  { label: 'Карточки товаров', icon: 'M6 7V6a6 6 0 0112 0v1h3l-1.5 13.5A2 2 0 0117.5 22h-11a2 2 0 01-2-1.5L3 7h3zm2 0h8V6a4 4 0 00-8 0v1z',
     items: ['Генерация карточек ИИ', 'Подбор фотографий', 'Заполнение характеристик', 'SEO-тексты и описания', 'До 1500 карточек в час', 'Выгрузка на сайт'] },
-  { label: 'Аналитика', hue: '#D9480F', icon: 'M4 20V10h3.5v10H4zm6.25 0V4h3.5v16h-3.5zM16.5 20v-7H20v7h-3.5z',
+  { label: 'Аналитика', icon: 'M4 20V10h3.5v10H4zm6.25 0V4h3.5v16h-3.5zM16.5 20v-7H20v7h-3.5z',
     items: ['Данные из CRM, 1С и сайта', 'Сквозная и unit-аналитика', 'Контроль доходов и расходов', 'Дашборды под роль', 'План-факт и прогноз'] }
 ];
+
+// Размер команды в форме первого экрана: короткие ключи уходят в /api/lead.
+const HERO_SIZES = { s: '2–10 человек', m: '11–50 человек', l: 'больше 50 человек' };
 
 const AI_ROLES = [
   { label: 'Продажи', desc: 'Квалифицирует лиды и ведёт сделки в CRM' },
@@ -75,6 +88,11 @@ export default class MainPage extends React.Component {
     productIdx: 0,
     prodPhase: 'search',
     typed: 0,
+    // Форма-сделка на первом экране
+    heroTask: '',
+    heroSize: null,       // 's' | 'm' | 'l'
+    heroChannel: 'tg',    // 'tg' | 'wa'
+    heroSent: false,
     voiceOpen: false,
     voiceStatus: 'idle',
     voiceIndex: 0,
@@ -88,8 +106,10 @@ export default class MainPage extends React.Component {
   workSumRef = React.createRef();
   succCountRef = React.createRef();
   succSumRef = React.createRef();
-  progressRef = React.createRef();
   headerRef = React.createRef();
+  heroSceneRef = React.createRef();
+  heroInputRef = React.createRef();
+  platformRef = React.createRef();
   auroraRef = React.createRef();
   heroTrackRef = React.createRef();
   sliderTrackRef = React.createRef();
@@ -119,7 +139,12 @@ export default class MainPage extends React.Component {
     // Закрыть мобильное меню, когда экран дорос до десктопного макета.
     // Это поведение, а не раскладка, поэтому его можно держать в JS.
     this._desktopMq = window.matchMedia('(min-width: 1180px)');
-    this._onMqChange = (e) => { if (e.matches) this.setState({ mobileMenuOpen: false }); };
+    this._onMqChange = (e) => {
+      if (e.matches) { this.setState({ mobileMenuOpen: false }); return; }
+      // Голосовой гид живёт только в десктопной шапке. Если окно сузилось при
+      // открытой панели, она осталась бы висеть без кнопки, которая её закрывает.
+      if (this.state.voiceOpen) { this.stopSpeech(); this.setState({ voiceOpen: false }); }
+    };
     this._desktopMq.addEventListener('change', this._onMqChange);
 
     // Entrance reveal is driven by JS state (not a CSS @keyframes animation from
@@ -177,16 +202,27 @@ export default class MainPage extends React.Component {
     this.setupScrollReveal();
 
     this._onScroll = () => {
-      const y = window.scrollY || document.documentElement.scrollTop || 0;
-      if (this.progressRef.current) {
-        const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
-        this.progressRef.current.style.width = Math.max(0, Math.min(1, y / max)) * 100 + '%';
-      }
       if (this._checkReveal) this._checkReveal();
     };
     window.addEventListener('scroll', this._onScroll, { passive: true });
     this._onScroll();
 
+    this.startMetricTimer();
+
+    // Демо живут только пока они в кадре: за пределами вьюпорта и CSS-таймлайны,
+    // и React-таймеры выключены. Раньше всё это крутилось всю дорогу.
+    this._offHeroView = observeInView(this.heroSceneRef.current, (inView) => {
+      if (inView) { this.runCycle(); this.startMetricTimer(); }
+      else { (this.phaseTimers || []).forEach(clearTimeout); clearInterval(this.metricTimer); }
+    });
+    this._offPlatformView = observeInView(this.platformRef.current, (inView) => {
+      if (inView) { this.startSliderTimer(); this.startProductCycle(); }
+      else { clearInterval(this.sliderTimer); this.stopProductCycle(); }
+    });
+  }
+
+  startMetricTimer() {
+    clearInterval(this.metricTimer);
     this.metricTimer = setInterval(() => {
       this.setState(s => ({
         metricLeads: s.metricLeads + Math.floor(Math.random() * 3) + 1,
@@ -194,6 +230,10 @@ export default class MainPage extends React.Component {
         metricAccuracy: 95 + Math.round(Math.random() * 4)
       }));
     }, 1500);
+  }
+
+  stopProductCycle() {
+    clearTimeout(this._pcSearch); clearTimeout(this._pcNext); clearInterval(this._pcType);
   }
 
   // ---- CRM-канбан: курсор переносит сделку «Ромашка» из «В работе» в «Успех» ----
@@ -467,6 +507,8 @@ export default class MainPage extends React.Component {
 
   componentWillUnmount() {
     if (this._offHeader) this._offHeader();
+    if (this._offHeroView) this._offHeroView();
+    if (this._offPlatformView) this._offPlatformView();
     clearInterval(this.sliderTimer);
     (this._dragTimers || []).forEach(clearTimeout);
     clearInterval(this.productTimer);
@@ -492,6 +534,96 @@ export default class MainPage extends React.Component {
       ? 'opacity:1; transform:translateY(0); transition:transform 0.7s cubic-bezier(.16,1,.3,1) ' + delay + 's;'
       : 'opacity:1; transform:translateY(14px);';
   }
+
+  // ---- Форма-сделка первого экрана -----------------------------------------
+  // Одно поле — только задача. Контакт не спрашиваем: человека опознаёт сам
+  // мессенджер, в который он уходит с текстом заявки. Ре-рендер на каждый
+  // символ допустим — меняется только окно формы.
+  onHeroTaskChange = (e) => {
+    const val = e.target.value;
+    // Цель «начал заполнять» — один раз за сессию просмотра, не на каждый символ.
+    if (!this._heroStartSent && val.trim()) {
+      this._heroStartSent = true;
+      ymGoal('hero_form_start');
+    }
+    this.setState({ heroTask: val });
+  };
+
+  pickHeroSize = (key) => {
+    if (this.state.heroSize !== key) ymGoal('hero_form_size');
+    this.setState({ heroSize: key });
+  };
+
+  pickHeroChannel = (key) => this.setState({ heroChannel: key });
+
+  heroLeadText() {
+    const task = this.state.heroTask.trim();
+    const lines = ['Заявка с первого экрана aiethos.ru', 'Задача: ' + task];
+    if (this.state.heroSize) lines.push('Команда: ' + HERO_SIZES[this.state.heroSize]);
+    lines.push('Нужен план на 30 дней.');
+    return lines.join('\n');
+  }
+
+  // Telegram не умеет предзаполнять личный чат текстом — поэтому буфер обмена
+  // (в WhatsApp текст подставляется прямо в ссылку wa.me).
+  copyHeroText(text) {
+    const fallback = () => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (e) {}
+    };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(fallback);
+      } else {
+        fallback();
+      }
+    } catch (e) { fallback(); }
+  }
+
+  submitHeroLead = () => {
+    const task = this.state.heroTask.trim();
+    // Кнопку не блокируем: заблокированная кнопка на первом экране читается
+    // как неработающий сайт. Пустой клик возвращает фокус в поле — сноска под
+    // кнопкой уже объясняет, чего не хватает.
+    if (!task) {
+      if (this.heroInputRef.current) this.heroInputRef.current.focus();
+      return;
+    }
+    const { heroSize, heroChannel } = this.state;
+    const text = this.heroLeadText();
+
+    // Регистрация лида — fire-and-forget: интерфейс не ждёт ответа и не
+    // ломается при ошибке сети (keepalive доносит запрос при уходе со страницы).
+    try {
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task, size: heroSize, channel: heroChannel, source: 'hero' }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (e) {}
+
+    ymGoal('hero_lead');
+    // window.open — синхронно в обработчике клика, иначе Safari решит, что попап.
+    if (heroChannel === 'wa') {
+      ymGoal('whatsapp');
+      window.open('https://wa.me/79285288598?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    } else {
+      ymGoal('telegram');
+      this.copyHeroText(text);
+      window.open('https://t.me/Terraiib24', '_blank', 'noopener');
+    }
+    this.setState({ heroSent: true });
+  };
 
   toggleMobileMenu = () => {
     this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
@@ -526,8 +658,49 @@ export default class MainPage extends React.Component {
     const chipB24StatusColor = b24Flash ? 'var(--blue)' : 'var(--ink-faint)';
     const chipExtBg = extFlash ? 'rgba(18,165,224,0.13)' : 'rgba(18,165,224,0.06)';
     const chipExtBorder = extFlash ? 'rgba(18,165,224,0.55)' : 'rgba(18,165,224,0.22)';
-    const chipExtStatus = extFlash ? '✓ ответ отправлен' : 'сайт · мессенджеры · API';
+    const chipExtStatus = extFlash ? '✓ ответ отправлен' : 'на сайте и в мессенджерах';
     const chipExtStatusColor = extFlash ? 'var(--violet)' : 'var(--ink-faint)';
+
+    // ---- Форма-сделка первого экрана ----------------------------------------
+    // Все производные считаются здесь и уходят в разметку готовыми строками —
+    // как и у остальных блоков страницы.
+    const heroTask = this.state.heroTask;
+    const heroTrim = heroTask.trim();
+    const heroSize = this.state.heroSize;
+    const heroChannel = this.state.heroChannel;
+    const heroHasTask = heroTrim.length > 0;
+    // Порог квалификации: 14 символов — с этой длины фраза похожа на задачу.
+    const heroQual = heroTrim.length >= 14;
+    const heroRobot = heroQual && !!heroSize;
+    const dealRow = (label, on, value, accent) => ({
+      label,
+      on,
+      value: on ? value : '—',
+      dot: on ? (accent ? '#9DCF00' : 'var(--blue)') : 'var(--line)',
+      color: accent ? '#1F8A5B' : 'var(--ink)',
+    });
+    const heroDealRows = [
+      dealRow('сделка', heroHasTask, heroTrim.length > 46 ? heroTrim.slice(0, 46) + '…' : heroTrim),
+      dealRow('источник', heroHasTask, 'aiethos.ru · первый экран'),
+      dealRow('компания', !!heroSize, heroSize ? HERO_SIZES[heroSize] : ''),
+      dealRow('квалификация ИИ', heroQual, 'тёплый — есть задача и объём', true),
+      dealRow('робот', heroRobot, 'назначен ответственный, готовит план'),
+    ];
+    const heroSizeBtns = [
+      { key: 's', label: '2–10' },
+      { key: 'm', label: '11–50' },
+      { key: 'l', label: '50+' },
+    ].map((b) => ({ ...b, active: heroSize === b.key, onClick: () => this.pickHeroSize(b.key) }));
+    const heroChannelBtns = [
+      { key: 'tg', label: 'Telegram' },
+      { key: 'wa', label: 'WhatsApp' },
+    ].map((b) => ({ ...b, active: heroChannel === b.key, onClick: () => this.pickHeroChannel(b.key) }));
+    const heroFootnote = heroHasTask && heroSize
+      ? 'Сделка уйдёт в Битрикс24 с этими полями — переписывать нечего.'
+      : 'Опишите задачу и отметьте размер команды — карточка заполнится сама.';
+    const heroSuccessText = heroChannel === 'wa'
+      ? 'Открываем WhatsApp — текст заявки уже подставлен в сообщение. Отправьте его, и план на 30 дней придёт в течение рабочего дня.'
+      : 'Открываем Telegram — текст заявки уже в буфере обмена. Вставьте его в чат, и план на 30 дней придёт в течение рабочего дня.';
 
     // Platform slider
     const sliderIdx = this.state.sliderIdx;
@@ -538,11 +711,11 @@ export default class MainPage extends React.Component {
         label: d.label,
         onClick: () => this.setSlide(i),
         color: active ? '#fff' : 'var(--ink)',
-        bg: active ? d.hue : '#FFFFFF',
-        border: active ? d.hue : 'var(--line)',
-        iconBg: active ? 'rgba(255,255,255,0.22)' : d.hue + '1A',
+        bg: active ? BRAND : '#FFFFFF',
+        border: active ? BRAND : 'var(--line)',
+        iconBg: active ? 'rgba(255,255,255,0.22)' : 'rgba(21,94,239,0.10)',
         icon: React.createElement('svg', { width: 13, height: 13, viewBox: '0 0 24 24' },
-          React.createElement('path', { d: d.icon, fill: active ? '#fff' : d.hue })),
+          React.createElement('path', { d: d.icon, fill: active ? '#fff' : BRAND })),
         // Полоска обратного отсчёта имеет смысл только пока слайды
         // переключаются сами — в ручном режиме она бы врала.
         progress: active && sliderAuto
@@ -564,7 +737,7 @@ export default class MainPage extends React.Component {
           opacity: 0, animation: 'sliderItemIn 0.4s ease forwards', animationDelay: (j * 0.28) + 's'
         }
       },
-        React.createElement('span', { style: { width: '7px', height: '7px', borderRadius: '50%', background: slide.hue, flexShrink: 0 } }),
+        React.createElement('span', { style: { width: '7px', height: '7px', borderRadius: '50%', background: BRAND, flexShrink: 0 } }),
         it
       ))
     );
@@ -610,10 +783,10 @@ export default class MainPage extends React.Component {
       }),
       searching ? React.createElement('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#EEF2F6', zIndex: 3 } },
         React.createElement('div', { style: { width: '28px', height: '28px', borderRadius: '50%', border: '3px solid #CDD5DE', borderTopColor: '#1F8A5B', animation: 'spin .8s linear infinite' } }),
-        React.createElement('div', { style: { fontSize: '10px', fontWeight: 600, color: '#5A626E' } }, 'Подбираю фото…')
+        React.createElement('div', { style: { fontSize: 'var(--mock-xs)', fontWeight: 600, color: '#5A626E' } }, 'Подбираю фото…')
       ) : null
     );
-    const productCatEl = searching ? null : React.createElement('div', { key: pKey + '-cat', style: Object.assign({ fontSize: '10px', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: product.hue }, fadeStyle) }, product.cat);
+    const productCatEl = searching ? null : React.createElement('div', { key: pKey + '-cat', style: Object.assign({ fontSize: 'var(--mock-xs)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: product.hue }, fadeStyle) }, product.cat);
     const productNameEl = searching ? null : React.createElement('div', { key: pKey + '-name', style: Object.assign({ fontFamily: "var(--font-manrope),sans-serif", fontWeight: 800, fontSize: '15px', lineHeight: 1.25, color: 'var(--ink)' }, fadeStyle) }, product.name);
     const productPriceEl = searching ? null : React.createElement('div', { key: pKey + '-price', style: Object.assign({ fontFamily: 'monospace', fontSize: '16px', fontWeight: 800, color: 'var(--ink)' }, fadeStyle) }, '₽' + product.price);
     const productDescTyped = searching ? '' : product.desc.slice(0, typed);
@@ -691,7 +864,6 @@ export default class MainPage extends React.Component {
       whyGap: 'var(--mig-gap)',
       processPad: 'var(--sec-pad)',
       contactSecPad: 'var(--contact-sec-pad)',
-      fabOffset: 'var(--fab-offset)',
 
       mobileMenuRows: mobileMenuOpen ? '1fr' : '0fr',
       mobileMenuOpen,
@@ -757,11 +929,6 @@ export default class MainPage extends React.Component {
         ymGoal('cta_contact'); const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
-      scrollToProcess: (e) => {
-        if (e && e.preventDefault) e.preventDefault();
-        const el = document.getElementById('process');
-        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
-      },
       sliderChips,
       sliderList,
       vis,
@@ -770,7 +937,6 @@ export default class MainPage extends React.Component {
       workSumRef: this.workSumRef,
       succCountRef: this.succCountRef,
       succSumRef: this.succSumRef,
-      progressRef: this.progressRef,
       auroraRef: this.auroraRef,
       productImgEl,
       productCatEl,
@@ -805,12 +971,24 @@ export default class MainPage extends React.Component {
 
       // Управление сценой ИИ-агента в первом экране
       heroAuto: this.state.heroAuto,
+      heroSceneRef: this.heroSceneRef,
+      heroTask,
+      heroInputRef: this.heroInputRef,
+      onHeroTaskChange: this.onHeroTaskChange,
+      submitHeroLead: this.submitHeroLead,
+      heroSent: this.state.heroSent,
+      heroDealRows,
+      heroSizeBtns,
+      heroChannelBtns,
+      heroFootnote,
+      heroSuccessText,
+      platformRef: this.platformRef,
       heroSwipe: this.heroSwipe,
       heroPrev: () => this.stepRole(-1),
       heroNext: () => this.stepRole(1),
       heroToggleAuto: this.toggleHeroAuto,
       heroAutoLabel: this.state.heroAuto ? 'Остановить автопоказ' : 'Включить автопоказ',
-      heroPosLabel: (activeRole + 1) + ' / ' + AI_ROLES.length,
+      heroPosLabel: 'Сцена ' + (activeRole + 1) + ' из ' + AI_ROLES.length,
       heroAtStart: activeRole === 0,
       heroAtEnd: activeRole === AI_ROLES.length - 1,
 
@@ -833,15 +1011,14 @@ export default class MainPage extends React.Component {
         <style dangerouslySetInnerHTML={{ __html: FXCSS }} />
 
 
-<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#535C69; --ink-faint:#8A8F99; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
+<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#3F4650; --ink-faint:#6B7280; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
 
-  <div ref={v.progressRef} style={s(`position:fixed; top:0; left:0; height:3px; width:0; z-index:70; background:linear-gradient(90deg, var(--blue), var(--violet)); box-shadow:0 0 14px rgba(21,94,239,0.55); pointer-events:none;`)}></div>
 
-  <div aria-hidden="true" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
-    <div style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; top:36%; left:34%; width:38vw; height:38vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(45,212,191,0.3), transparent 70%); filter:blur(95px); animation:driftBlobB 24s ease-in-out infinite alternate;`)}></div>
+  <div aria-hidden="true" className="aurora" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
+    <div className="aurora-blob" style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:36%; left:34%; width:38vw; height:38vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(45,212,191,0.3), transparent 70%); filter:blur(95px); animation:driftBlobB 24s ease-in-out infinite alternate;`)}></div>
   </div>
 
   <header ref={this.headerRef} className="site-header" style={s(`position:sticky; top:14px; z-index:50; margin:14px ${v.padX} 0; display:flex; align-items:center; justify-content:space-between; padding:12px 14px 12px 20px; background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.34)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.7); border-radius:22px; box-shadow:0 16px 40px -16px rgba(20,23,28,0.32), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
@@ -876,14 +1053,25 @@ export default class MainPage extends React.Component {
       <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>ETHOS</span>
     </div>
 
-    <div style={s(`display:${v.navDisplay}; align-items:center; gap:26px;`)}>
-      <a className="mnfx0" href="#services" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Услуги</a>
-      <a className="mnfx1" href="/bitrix24" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Битрикс24</a>
-      <a className="mnfx2" href="/ai" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>ИИ-решения</a>
-      <a className="mnfx3" href="#why" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Почему мы</a>
-      <a className="mnfx4" href="#process" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Процесс</a>
-      <a className="mnfx5" href="#contact" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Контакты</a>
+    <div style={s(`display:${v.navDisplay}; align-items:center; gap:22px;`)}>
+      <a className="mnfx0" href="/bitrix24" style={s(NAV_LINK)}>Битрикс24</a>
+      <a className="mnfx1" href="/ai" style={s(NAV_LINK)}>ИИ-решения</a>
+      <a className="mnfx2" href="#process" style={s(NAV_LINK)}>Процесс</a>
+      <a className="mnfx3" href="/contacts" style={s(NAV_LINK)}>Контакты</a>
+      <a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`font-size:var(--t15); font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap;`)}>+7 925 677-70-27</a>
       <button className="mnfx6" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
+      {/* Голосовой гид: фича остаётся, но больше не занимает низ экрана —
+          самое доступное место на телефоне. На мобильном контейнер меню
+          скрыт целиком, поэтому там гида нет вовсе. */}
+      <button
+        className="mnfx14"
+        onClick={v.toggleVoice}
+        aria-label="Голосовой гид"
+        aria-expanded={v.voiceOpen}
+        style={s(`width:40px; height:40px; flex-shrink:0; border-radius:50%; border:1px solid ${v.voiceOpen ? 'var(--blue)' : 'var(--line)'}; background:${v.voiceOpen ? 'var(--blue)' : 'var(--paper)'}; color:${v.voiceOpen ? '#fff' : 'var(--ink-soft)'}; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;`)}
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z" fill="currentColor"></path><path d="M15 8.5c1 .9 1.6 2.1 1.6 3.5S16 14.6 15 15.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path><path d="M17.5 6c1.8 1.5 2.9 3.6 2.9 6s-1.1 4.5-2.9 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"></path></svg>
+      </button>
     </div>
 
     <button onClick={v.toggleMobileMenu} aria-label="Меню" aria-expanded={v.mobileMenuOpen} aria-controls="main-mobile-menu" style={s(`display:${v.hamburgerDisplay}; width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--paper); flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer;`)}>
@@ -895,196 +1083,184 @@ export default class MainPage extends React.Component {
     <div id="main-mobile-menu" style={s(`position:absolute; top:calc(100% + 8px); left:0; right:0; display:grid; grid-template-rows:${v.mobileMenuRows}; transition:grid-template-rows 0.38s cubic-bezier(.16,1,.3,1); z-index:49;`)}>
      <div style={s(`overflow:hidden; min-height:0;`)}>
       <div style={s(`display:flex; flex-direction:column; padding:14px 24px 22px; gap:2px; background:#FFFFFF; border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 48px -16px rgba(20,23,28,0.3);`)}>
-        <a href="#services" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Услуги</a>
-        <a href="/bitrix24" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Битрикс24</a>
-        <a href="/ai" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>ИИ-решения</a>
-        <a href="#why" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Почему мы</a>
-        <a href="#process" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Процесс</a>
-        <a href="#contact" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Контакты</a>
-        <button onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
+        <a href="/bitrix24" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Битрикс24</a>
+        <a href="/ai" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>ИИ-решения</a>
+        <a href="#process" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Процесс</a>
+        <a href="/contacts" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Контакты</a>
+        <a href="tel:+79256777027" onClick={() => { ymGoal('phone'); v.closeMobileMenu(); }} style={s(`display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none; border-top:1px solid var(--line); margin-top:6px; padding-top:6px;`)}>+7 925 677-70-27</a>
+        <button onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; min-height:48px; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
      </div>
     </div>
+
+    {(v.voiceOpen) && (
+      <div style={s(`position:absolute; top:calc(100% + 10px); right:0; width:296px; z-index:51; background:#FFFFFF; border:1px solid var(--line); border-radius:18px; box-shadow:0 28px 56px -18px rgba(20,23,28,0.3); padding:18px;`)}>
+        <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:8px;`)}>
+          <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t15); color:var(--ink);`)}>Голосовой гид</div>
+          <div style={s(`font-size:var(--t13); font-weight:600; color:${v.voiceStatusColor};`)}>{v.voiceStatusLabel}</div>
+        </div>
+        <div style={s(`font-size:var(--t13); color:var(--ink-soft); margin-top:4px; line-height:1.5;`)}>Озвучу содержание сайта раздел за разделом.</div>
+        <div style={s(`display:flex; flex-direction:column; gap:6px; margin-top:14px;`)}>
+          {(v.voiceSections||[]).map((vs, $index) => (<React.Fragment key={$index}>
+            <button onClick={vs.onPlay} style={s(`display:flex; align-items:center; gap:10px; background:${vs.bg}; border:1px solid ${vs.border}; border-radius:10px; padding:9px 12px; cursor:pointer; text-align:left; font-family:var(--font-inter),sans-serif; transition:background 0.2s ease, border-color 0.2s ease;`)}>
+              <span style={s(`width:6px; height:6px; border-radius:50%; background:${vs.dot}; flex-shrink:0; animation:${vs.dotAnim};`)}></span>
+              <span style={s(`font-size:var(--t13); font-weight:600; color:${vs.color};`)}>{vs.label}</span>
+            </button>
+          </React.Fragment>))}
+        </div>
+        <div style={s(`display:flex; gap:8px; margin-top:14px;`)}>
+          <button onClick={v.voicePrimaryAction} style={s(`flex:1; font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; color:#fff; background:var(--grad); border:none; border-radius:10px; padding:11px 12px; cursor:pointer;`)}>{v.voicePrimaryLabel}</button>
+          <button className="mnfx13" onClick={v.stopVoice} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; color:var(--ink-soft); background:transparent; border:1px solid var(--line); border-radius:10px; padding:11px 14px; cursor:pointer; transition:border-color 0.2s ease;`)}>Стоп</button>
+        </div>
+      </div>
+    )}
   </header>
 
   <section id="hero" data-screen-label="Hero" style={s(`position:relative; padding:${v.heroPad}; max-width:var(--wrap); margin:0 auto; overflow:visible;`)}>
 
-    <div style={s(`position:absolute; top:-140px; right:-100px; width:540px; height:540px; border-radius:50%; background:var(--blue); opacity:0.15; filter:blur(95px); animation:driftBlobA 17s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
-    <div style={s(`position:absolute; bottom:-180px; left:-140px; width:480px; height:480px; border-radius:50%; background:var(--violet); opacity:0.13; filter:blur(105px); animation:driftBlobB 21s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
+    <div style={s(`position:relative; z-index:1; display:grid; grid-template-columns:${v.heroGridTemplateColumns}; gap:var(--hero-gap); align-items:center;`)}>
 
-    <div style={s(`position:relative; z-index:1; max-width:var(--hero-narrow); margin:0 auto; display:flex; flex-direction:column; align-items:center; text-align:center;`)}>
-
+      {/* -------- левая колонка: оффер -------- */}
       <div>
-        <div style={s(`display:inline-flex; align-items:center; flex-wrap:${v.badgeWrap}; row-gap:8px; gap:10px; background:linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.32)); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%); border:1px solid rgba(255,255,255,0.72); border-radius:${v.badgeRadius}; box-shadow:0 8px 24px -10px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9); padding:6px 16px 6px 6px; box-shadow:0 1px 2px rgba(20,23,28,0.05); ${v.entranceBadge}`)}>
+        <div style={s(`display:inline-flex; align-items:center; flex-wrap:${v.badgeWrap}; row-gap:8px; gap:10px; background:var(--paper); border:1px solid var(--line); border-radius:${v.badgeRadius}; box-shadow:0 8px 24px -14px rgba(20,23,28,0.18); padding:6px 16px 6px 6px; ${v.entranceBadge}`)}>
           <div style={s(`width:26px; height:26px; border-radius:8px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 4px, #F6F6F4 4px, #F6F6F4 8px); border:1px dashed #C9CDD3; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:8px; color:#8A8F99;`)}>Б24</div>
           <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink); min-width:0;`)}>Сертифицированный интегратор Битрикс24</span>
         </div>
 
-        <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.06; letter-spacing:-0.03em; margin:28px 0 0; color:var(--ink); ${v.entranceH1}`)}>
+        <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.06; letter-spacing:-0.03em; margin:var(--hero-h1-mt) 0 0; color:var(--ink); ${v.entranceH1}`)}>
           Битрикс24 и ИИ —<br />
-          <span style={s(`background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>в одной системе роста</span>
+          <span style={s(`color:var(--blue);`)}>в одной системе роста</span>
         </h1>
 
-        <p style={s(`font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:calc(620px * var(--t-scale)); margin:24px auto 0; ${v.entranceP}`)}>
+        <p style={s(`font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:calc(620px * var(--t-scale)); margin:var(--hero-p-mt) 0 0; ${v.entranceP}`)}>
           Сертифицированный интегратор Битрикс24: <a href="/bitrix24" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>внедряем Битрикс24 под ключ</a>, дорабатываем и поддерживаем систему — и строим <a href="/ai" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>ИИ-агентов для бизнеса</a>, которые снимают рутину с ваших команд.
         </p>
 
-        <div style={s(`display:flex; align-items:center; justify-content:center; gap:22px; margin-top:36px; flex-wrap:wrap; ${v.entranceCta}`)}>
-          <button className="mnfx7" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 32px; border-radius:16px; white-space:nowrap; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить консультацию</button>
-          <a className="mnfx8" href="#process" onClick={v.scrollToProcess} style={s(`font-size:var(--t16); font-weight:600; color:var(--ink); display:inline-flex; align-items:center; gap:8px; padding:16px 2px; text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.25s ease;`)}>Как мы работаем ↓</a>
+        <div style={s(`margin-top:var(--hero-accent-mt); padding:14px 18px; border-left:2px solid var(--blue); background:var(--paper); font-size:var(--t15); line-height:1.55; color:var(--ink); max-width:calc(560px * var(--t-scale)); ${v.entranceCta}`)}>
+          <span className="hero-accent-d">Опишите задачу справа — увидите, как её примет ваш будущий Битрикс24.</span>
+          <span className="hero-accent-m">Опишите задачу ниже — увидите, как её примет ваш будущий Битрикс24.</span>
+        </div>
+
+        <div style={s(`display:${v.onlyDesktopFlex}; gap:20px; flex-wrap:wrap; margin-top:26px; font-family:monospace; font-size:12px; color:var(--ink-faint); ${v.entranceCta}`)}>
+          <span>план в течение рабочего дня</span>
+          <span>без звонков</span>
+          <span>без ТЗ на входе</span>
         </div>
       </div>
 
-      <div
-        role="group"
-        aria-roledescription="карусель"
-        aria-label="Сцены работы ИИ-агента"
-        style={s(`margin-top:56px; position:relative; width:100%; max-width:460px;`)}
-      >
-        <div {...v.heroSwipe} ref={v.heroTrackRef} className="carousel-drag" style={s(`position:relative; touch-action:pan-y;`)}>
-          <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(26px) saturate(180%); -webkit-backdrop-filter:blur(26px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; overflow:hidden; box-shadow:0 40px 70px -24px rgba(20,23,28,0.28), inset 0 1px 1px rgba(255,255,255,0.9); ${v.entranceCard}`)}>
+      {/* -------- окно «ИИ-агент · активен»: форма, собирающая сделку -------- */}
+      <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:0 40px 70px -34px rgba(20,23,28,0.3); ${v.entranceCard}`)}>
 
-            <div style={s(`display:flex; align-items:center; gap:8px; padding:0 16px; height:44px; border-bottom:1px solid var(--line); background:#FBFBF9;`)}>
-              <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
-              <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
-              <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
-              <span style={s(`margin-left:auto; font-size:12px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:6px;`)}>
-                <span style={s(`width:7px; height:7px; border-radius:50%; background:#9DCF00; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>
-                ИИ-агент · активен
-              </span>
+        <div style={s(`display:flex; align-items:center; gap:8px; padding:0 16px; height:44px; border-bottom:1px solid var(--line); background:#FBFBF9;`)}>
+          <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+          <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+          <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+          <span style={s(`margin-left:auto; font-size:12px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:6px;`)}>
+            <span style={s(`width:7px; height:7px; border-radius:50%; background:#9DCF00; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>
+            ИИ-агент · активен
+          </span>
+        </div>
+
+        {v.heroSent ? (
+          <div style={s(`padding:44px 28px 48px; text-align:center;`)}>
+            <div style={s(`width:46px; height:46px; border-radius:12px; background:var(--grad); margin:0 auto; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(21,94,239,0.5);`)}>
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            </div>
+            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin-top:18px;`)}>Сделка создана</div>
+            <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px auto 0; max-width:360px;`)}>{v.heroSuccessText}</p>
+          </div>
+        ) : (
+          <>
+            <div style={s(`display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid #F0EFEB;`)}>
+              <span aria-hidden="true" style={s(`font-family:monospace; font-size:15px; font-weight:700; color:var(--blue); flex-shrink:0;`)}>&gt;</span>
+              <label className="vh-label" htmlFor="hero-task">Опишите задачу, которую нужно автоматизировать</label>
+              <input
+                id="hero-task"
+                ref={v.heroInputRef}
+                className="hero-input"
+                type="text"
+                value={v.heroTask}
+                onChange={v.onHeroTaskChange}
+                placeholder="Заявки из WhatsApp теряются между менеджерами"
+                autoComplete="off"
+                style={s(`flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:var(--font-inter),sans-serif; color:var(--ink); padding:0;`)}
+              />
             </div>
 
-            <div style={s(`padding:26px 24px 24px; display:flex; flex-direction:column; gap:22px;`)}>
-
-              <div aria-live="polite" style={s(`text-align:center;`)}>
-                <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t16); color:var(--ink); transition:opacity 0.2s ease;`)}>{v.activeRoleLabel}</div>
-                <div style={s(`font-size:12px; color:var(--ink-faint); margin-top:4px; max-width:230px; margin-left:auto; margin-right:auto;`)}>{v.activeRoleDesc}</div>
-              </div>
-
-              <div style={s(`position:relative; height:134px;`)}>
-                <div style={s(`position:absolute; left:6%; top:5px; width:14px; height:11px; background:var(--ink-faint); border-radius:2px;`)}></div>
-                <div style={s(`position:absolute; left:13%; top:10px; width:5px; height:104px; background:var(--ink-faint); border-radius:2px;`)}></div>
-                <div style={s(`position:absolute; left:8%; width:80%; top:8px; height:5px; background:var(--ink-faint); border-radius:2px;`)}></div>
-                <div style={s(`position:absolute; left:5%; right:5%; top:120px; height:1px; background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px);`)}></div>
-
-                <div style={s(`position:absolute; left:24%; bottom:14px; width:22px; height:13px; background:var(--line); border-radius:3px; transform:translateX(-50%);`)}></div>
-                <div style={s(`position:absolute; left:24%; bottom:1px; width:22px; height:13px; background:var(--line); border-radius:3px; transform:translateX(-50%);`)}></div>
-
-                <div style={s(`position:absolute; left:${v.trolleyLeftPct}%; top:0; transform:translateX(-50%); transition:left 0.8s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; align-items:center; z-index:3;`)}>
-                  <div style={s(`width:22px; height:17px; margin-top:1px; border-radius:5px; background:var(--grad); box-shadow:0 6px 14px -4px rgba(21,94,239,0.45); display:flex; align-items:center; justify-content:center; gap:4px; flex-shrink:0;`)}>
-                    <span style={s(`width:4px; height:4px; border-radius:50%; background:#fff;`)}></span>
-                    <span style={s(`width:4px; height:4px; border-radius:50%; background:#fff;`)}></span>
+            <div aria-live="polite" style={s(`padding:14px 20px 4px;`)}>
+              <div style={s(`font-family:monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);`)}>Карточка сделки собирается</div>
+              <div style={s(`margin-top:4px;`)}>
+                {v.heroDealRows.map((row, i) => (
+                  <div key={row.label} style={s(`display:flex; align-items:baseline; gap:10px; padding:9px 0; border-bottom:${i === 4 ? 'none' : '1px solid #F5F4F1'};`)}>
+                    <span style={s(`width:6px; height:6px; border-radius:50%; background:${row.dot}; flex-shrink:0; align-self:center; transition:background 0.25s ease;`)}></span>
+                    <span style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); width:118px; flex-shrink:0;`)}>{row.label}</span>
+                    {row.on
+                      ? <span className="hero-fill" style={s(`font-size:13px; font-weight:600; color:${row.color}; min-width:0; overflow-wrap:anywhere;`)}>{row.value}</span>
+                      : <span style={s(`font-size:13px; font-weight:600; color:#B9BCC2;`)}>—</span>}
                   </div>
-                  <div style={s(`width:2px; height:${v.cableHeightPx}px; background:var(--ink-faint); transition:height 0.5s ease;`)}></div>
-                  <div style={s(`width:12px; height:11px; border-radius:0 0 6px 6px; border:2px solid var(--ink-soft); border-top:none; background:var(--paper); margin-top:-1px; flex-shrink:0;`)}></div>
-                  {(v.isCarrying) && (<>
-                    <div style={s(`width:22px; height:20px; border-radius:6px; background:${v.carryColorCss}; box-shadow:0 8px 16px -4px rgba(20,23,28,0.35); margin-top:1px;`)}></div>
-                  </>)}
-                </div>
-
-                <div style={s(`position:absolute; left:78%; bottom:1px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; gap:2px; z-index:2;`)}>
-                  {(v.buildingBlocks||[]).map((blk, $index) => (<React.Fragment key={$index}>
-                    <div style={s(`width:28px; height:14px; border-radius:3px; background:${blk}; box-shadow:0 2px 5px rgba(20,23,28,0.18);`)}></div>
-                  </React.Fragment>))}
-                </div>
-              </div>
-
-              {/* Роли кликабельны: можно сразу перейти к нужной сцене,
-                  не дожидаясь автосмены. */}
-              <div style={s(`display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px;`)}>
-                {[v.role0, v.role1, v.role2, v.role3].map((r, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={r.onClick}
-                    aria-pressed={r.current}
-                    aria-label={'Показать сцену: ' + r.label}
-                    style={s(`display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px; border-radius:12px; background:${r.bg}; border:1px solid ${r.border}; transform:${r.transform}; opacity:${r.opacity}; box-shadow:${r.shadow}; cursor:pointer; font-family:var(--font-inter),sans-serif; transition:transform 0.35s cubic-bezier(.16,1,.3,1), opacity 0.35s ease, background 0.35s ease, border-color 0.35s ease;`)}
-                  >
-                    <div style={s(`width:7px; height:7px; border-radius:50%; background:${r.dot};`)}></div>
-                    <div style={s(`font-size:11px; font-weight:700; color:${r.textColor}; text-align:center; line-height:1.2;`)}>{r.label}</div>
-                  </button>
                 ))}
               </div>
-
-              <div style={s(`display:flex; gap:10px;`)}>
-                <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                  <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Заявок обработано</div>
-                  <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricLeads}</div>
-                </div>
-                <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                  <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Часов сэкономлено</div>
-                  <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricHours}</div>
-                </div>
-                <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                  <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Точность</div>
-                  <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricAccuracy}</div>
-                </div>
-              </div>
-
-              <div>
-                <div style={s(`position:relative; height:30px;`)}>
-                  <div style={s(`position:absolute; left:50%; top:0; width:1px; height:10px; background:var(--line);`)}></div>
-                  <div style={s(`position:absolute; left:25%; right:25%; top:10px; height:1px; background:var(--line);`)}></div>
-                  <div style={s(`position:absolute; left:25%; top:10px; width:1px; height:14px; background:var(--line);`)}></div>
-                  <div style={s(`position:absolute; left:75%; top:10px; width:1px; height:14px; background:var(--line);`)}></div>
-                  <div style={s(`position:absolute; width:7px; height:7px; border-radius:50%; background:${v.pulseColor}; box-shadow:0 0 10px ${v.pulseColor}; transform:translate(-50%,-50%); left:${v.pulseLeft}; top:${v.pulseTop}; opacity:${v.pulseOpacity}; transition:${v.pulseTransition}; z-index:2;`)}></div>
-                </div>
-                <div style={s(`display:flex; justify-content:space-between; gap:12px;`)}>
-                  <div style={s(`flex:1; display:flex; align-items:center; gap:8px; background:${v.chipB24Bg}; border:1px solid ${v.chipB24Border}; border-radius:10px; padding:8px 10px; transition:background 0.35s ease, border-color 0.35s ease;`)}>
-                    <div style={s(`width:20px; height:20px; border-radius:6px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 3px, #F6F6F4 3px, #F6F6F4 6px); border:1px dashed #C9CDD3; flex-shrink:0;`)}></div>
-                    <div>
-                      <div style={s(`font-size:11px; font-weight:700; color:var(--ink);`)}>Битрикс24</div>
-                      <div style={s(`font-size:var(--mock-xs); color:${v.chipB24StatusColor}; transition:color 0.35s ease;`)}>{v.chipB24Status}</div>
-                    </div>
-                  </div>
-                  <div style={s(`flex:1; display:flex; align-items:center; gap:8px; background:${v.chipExtBg}; border:1px solid ${v.chipExtBorder}; border-radius:10px; padding:8px 10px; transition:background 0.35s ease, border-color 0.35s ease;`)}>
-                    <div style={s(`width:20px; height:20px; border-radius:6px; background:var(--grad); opacity:0.75; flex-shrink:0;`)}></div>
-                    <div>
-                      <div style={s(`font-size:11px; font-weight:700; color:var(--ink);`)}>Независимо</div>
-                      <div style={s(`font-size:var(--mock-xs); color:${v.chipExtStatusColor}; transition:color 0.35s ease;`)}>{v.chipExtStatus}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
             </div>
-          </div>
+
+            <div style={s(`padding:8px 20px 18px;`)} role="radiogroup" aria-label="Размер команды">
+              <div style={s(`font-family:monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);`)}>Размер команды</div>
+              <div style={s(`display:flex; gap:8px; margin-top:10px;`)}>
+                {v.heroSizeBtns.map((b) => (
+                  <button
+                    key={b.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={b.active}
+                    onClick={b.onClick}
+                    className="hero-size-btn"
+                    style={s(`flex:1; border-radius:10px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; cursor:pointer; background:${b.active ? '#EEF3FE' : 'var(--paper)'}; border:1px solid ${b.active ? 'var(--blue)' : '#E2E1DC'}; color:${b.active ? 'var(--blue)' : 'var(--ink-soft)'}; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;`)}
+                  >{b.label}</button>
+                ))}
+              </div>
+            </div>
+
+            <div style={s(`border-top:1px solid #F0EFEB; background:#FBFBF9; padding:18px 20px 20px;`)}>
+              <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;`)} role="radiogroup" aria-label="Куда прислать план">
+                <span style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint);`)}>куда прислать план</span>
+                <div style={s(`display:flex; gap:8px;`)}>
+                  {v.heroChannelBtns.map((b) => (
+                    <button
+                      key={b.key}
+                      type="button"
+                      role="radio"
+                      aria-checked={b.active}
+                      onClick={b.onClick}
+                      className="hero-pill"
+                      style={s(`padding:0 16px; border-radius:999px; font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; cursor:pointer; background:${b.active ? 'var(--ink)' : 'var(--paper)'}; border:1px solid ${b.active ? 'var(--ink)' : '#E2E1DC'}; color:${b.active ? '#fff' : 'var(--ink-soft)'}; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;`)}
+                    >{b.label}</button>
+                  ))}
+                </div>
+              </div>
+
+              <button type="button" onClick={v.submitHeroLead} className="mnfx7" style={s(`display:block; width:100%; height:52px; margin-top:14px; border:none; border-radius:14px; background:var(--grad); color:#fff; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; cursor:pointer; box-shadow:0 12px 28px -8px rgba(21,94,239,0.5); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить план на 30 дней</button>
+
+              <div style={s(`font-size:12px; line-height:1.5; color:var(--ink-faint); text-align:center; margin-top:12px;`)}>{v.heroFootnote}</div>
+              <div style={s(`font-size:12px; line-height:1.5; color:var(--ink-faint); text-align:center; margin-top:6px;`)}>
+                Нажимая кнопку, вы соглашаетесь с <a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>политикой конфиденциальности</a>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* строка доверия на телефоне — после окна, чтобы не разрывать путь к форме */}
+      <div style={s(`display:${v.onlyMobile};`)}>
+        <div style={s(`display:flex; gap:14px 20px; flex-wrap:wrap; font-family:monospace; font-size:12px; color:var(--ink-faint);`)}>
+          <span>план в течение рабочего дня</span>
+          <span>без звонков</span>
+          <span>без ТЗ на входе</span>
         </div>
-
-        {/* Управление сценой: стрелки, точки и пауза. Раньше сцена
-            переключалась сама каждые 4,6 с — дочитать карточку роли было
-            невозможно. Теперь листается пальцем и кнопками, а автопоказ
-            выключается при первом же ручном действии. */}
-        <div style={s(`display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px;`)}>
-          <button type="button" className="swipe-btn" onClick={v.heroPrev} disabled={v.heroAtStart} aria-label="Предыдущая сцена" style={s(`opacity:${v.heroAtStart ? 0.4 : 1}; cursor:${v.heroAtStart ? 'default' : 'pointer'};`)}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-          </button>
-
-          <div style={s(`display:flex; align-items:center; gap:7px;`)}>
-            {[v.role0, v.role1, v.role2, v.role3].map((r, i) => (
-              <button key={i} type="button" className="swipe-dot" aria-current={r.current} aria-label={'Сцена ' + (i + 1) + ': ' + r.label} onClick={r.onClick}></button>
-            ))}
-          </div>
-
-          <button type="button" className="swipe-btn" onClick={v.heroNext} disabled={v.heroAtEnd} aria-label="Следующая сцена" style={s(`opacity:${v.heroAtEnd ? 0.4 : 1}; cursor:${v.heroAtEnd ? 'default' : 'pointer'};`)}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-          </button>
-
-          <button type="button" className="swipe-btn" onClick={v.heroToggleAuto} aria-label={v.heroAutoLabel} title={v.heroAutoLabel} style={s(`width:34px; height:34px;`)}>
-            {v.heroAuto
-              ? <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1.2" fill="currentColor"></rect></svg>
-              : <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8L19 12 8 5.6z" fill="currentColor"></path></svg>}
-          </button>
-        </div>
-
-        <div style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); margin-top:14px; text-align:center;`)}>// сцена {v.heroPosLabel} — листайте свайпом или стрелками</div>
       </div>
 
     </div>
   </section>
 
-  <section id="platform" data-screen-label="Platform slider" style={s(`padding:${v.platformPad}; max-width:var(--wrap); margin:0 auto;`)}>
+  <section ref={v.platformRef} className="fxpause" id="platform" data-screen-label="Platform slider" style={s(`padding:${v.platformPad}; max-width:var(--wrap); margin:0 auto;`)}>
     <div data-reveal style={s(`text-align:center; max-width:calc(720px * var(--t-scale)); margin:0 auto;`)}>
       <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--blue);`)}>Платформа</div>
       <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; letter-spacing:-0.02em; line-height:1.12; color:var(--ink); margin:16px 0 0;`)}>Что вы получаете с&nbsp;Битрикс24</h2>
@@ -1124,25 +1300,25 @@ export default class MainPage extends React.Component {
               <span style={s(`width:22px; height:22px; border-radius:6px; background:#155EEF; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="12" height="12" viewBox="0 0 24 24"><path d="M4 5h16l-5.5 7v5.5L9.5 20v-8L4 5z" fill="#fff"></path></svg></span>
               <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t13); color:var(--ink);`)}>Сделки · Канбан</span>
               <span style={s(`display:inline-flex; align-items:center; font-size:var(--mock-sm); font-weight:600; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:3px 8px;`)}>Мои сделки</span>
-              <span style={s(`margin-left:auto; font-size:11px; color:var(--ink-faint);`)}>Итого</span>
+              <span style={s(`margin-left:auto; font-size:var(--mock-11); color:var(--ink-faint);`)}>Итого</span>
               <span style={s(`font-family:monospace; font-size:var(--t13); font-weight:800; color:var(--ink); animation:mkCountPulse 3.4s ease-in-out infinite;`)}>₽4,78M</span>
             </div>
-            <div style={s(`position:relative; flex:1; display:flex; gap:10px; padding:14px; background:#EEF2F6; min-height:0;`)}>
+            <div style={s(`position:relative; flex:1; display:${v.onlyDesktopFlex}; gap:10px; padding:14px; background:#EEF2F6; min-height:0;`)}>
 
               
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#E3E8EE; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#5A626E;`)}>Новые</span><span style={s(`font-size:var(--mock-sm); font-weight:700; color:#8A8F99;`)}>2</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#5A626E;`)}>Новые</span><span style={s(`font-size:var(--mock-sm); font-weight:700; color:#8A8F99;`)}>2</span></div>
                   <div style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#5A626E; margin-top:2px;`)}>₽1,46M</div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #9AA2AE; animation:sliderItemIn .5s ease both; animation-delay:.1s;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>ТД «Восток»</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽260 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>ТД «Восток»</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽260 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#B8860B;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>ТВ</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span></div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #9AA2AE; animation:sliderItemIn .5s ease both; animation-delay:.2s;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Аптека, сеть</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽1 200 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Аптека, сеть</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽1 200 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#7A6FF0;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>АС</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span></div>
                 </div>
               </div>
@@ -1150,12 +1326,12 @@ export default class MainPage extends React.Component {
               
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#DCE8FF; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#155EEF;`)}>В работе</span><span ref={v.workCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#155EEF;`)}>2</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#155EEF;`)}>В работе</span><span ref={v.workCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#155EEF;`)}>2</span></div>
                   <div ref={v.workSumRef} style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#155EEF; margin-top:2px;`)}>₽1,22M</div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #155EEF;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>СтройДом</div>
-                  <div style={s(`font-family: monospace; font-size: 11px; font-weight: 700; color: var(--ink-soft); margin-top: 4px; position: relative`)}>₽740 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>СтройДом</div>
+                  <div style={s(`font-family: monospace; font-size:var(--mock-11); font-weight: 700; color: var(--ink-soft); margin-top: 4px; position: relative`)}>₽740 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#155EEF;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>СД</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#3DDC84;`)}></span></div>
                 </div>
               </div>
@@ -1163,12 +1339,12 @@ export default class MainPage extends React.Component {
               
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#DCF3E6; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#1F8A5B;`)}>Успех</span><span ref={v.succCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#1F8A5B;`)}>1</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#1F8A5B;`)}>Успех</span><span ref={v.succCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#1F8A5B;`)}>1</span></div>
                   <div ref={v.succSumRef} style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#1F8A5B; margin-top:2px;`)}>₽2,10M</div>
                 </div>
                 <div style={s(`background:#EBF7F0; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.06); border-left:3px solid #1F8A5B;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>IT-Парк</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:800; color:#1F8A5B; margin-top:4px;`)}>₽2 100 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>IT-Парк</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:800; color:#1F8A5B; margin-top:4px;`)}>₽2 100 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#1F8A5B;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>IP</span><span style={s(`width:14px;height:14px;border-radius:50%;background:#1F8A5B;display:flex;align-items:center;justify-content:center;`)}><svg width="8" height="8" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span></div>
                 </div>
               </div>
@@ -1176,10 +1352,10 @@ export default class MainPage extends React.Component {
               
               <div ref={v.dragRef} style={s(`position:absolute; left:calc(34px + 2*(100% - 48px)/3); width:calc((100% - 48px)/3); top:141px; background:#fff; border-radius:8px; padding:9px 10px; border-left:3px solid #12A5E0; box-shadow:0 2px 6px rgba(20,23,28,.12); transform:translate(calc(-100% - 10px),0); pointer-events:none; z-index:7; animation:b24Carry 7s cubic-bezier(.6,.02,.35,1) infinite; will-change:transform,opacity;`)}>
                 <div style={s(`display:flex; align-items:center; gap:5px;`)}>
-                  <span style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;`)}>ООО «Ромашка»</span>
+                  <span style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;`)}>ООО «Ромашка»</span>
                   <span style={s(`width:6px;height:6px;border-radius:50%;background:#3DDC84;flex-shrink:0;`)}></span>
                 </div>
-                <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽480 000</div>
+                <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽480 000</div>
                 <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}>
                   <span style={s(`width:16px;height:16px;border-radius:50%;background:#12A5E0;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>РМ</span>
                   <span style={s(`font-size:var(--mock-xs); color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>перетаскивание</span>
@@ -1191,6 +1367,42 @@ export default class MainPage extends React.Component {
               </div>
 
             </div>
+
+              <div style={s(`display:${v.onlyMobile}; padding:14px; background:#EEF2F6;`)}>
+                <div style={s(`display:flex; flex-direction:column; gap:10px;`)}>
+
+                  <div style={s(`border-radius:8px; background:#DCE8FF; padding:9px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px;`)}>
+                    <span style={s(`font-size:var(--mock-11); font-weight:700; color:#155EEF;`)}>В работе · 1</span>
+                    <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:#155EEF;`)}>₽740K</span>
+                  </div>
+                  <div style={s(`background:#fff; border-radius:8px; padding:11px 12px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #155EEF;`)}>
+                    <div style={s(`font-size:var(--mock-12); font-weight:700; color:var(--ink);`)}>СтройДом</div>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽740 000</div>
+                  </div>
+
+                  <div style={s(`display:flex; align-items:center; gap:8px; color:var(--blue); padding:2px 0;`)}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v16m0 0l-6-6m6 6l6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+                    <span style={s(`font-size:var(--mock-11); font-weight:600;`)}>ИИ-агент закрыл сделку и перенёс её дальше</span>
+                  </div>
+
+                  <div style={s(`border-radius:8px; background:#DCF3E6; padding:9px 12px; display:flex; align-items:center; justify-content:space-between; gap:10px;`)}>
+                    <span style={s(`font-size:var(--mock-11); font-weight:700; color:#1F8A5B;`)}>Успех · 2</span>
+                    <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:#1F8A5B;`)}>₽2,58M</span>
+                  </div>
+                  <div style={s(`background:#fff; border-radius:8px; padding:11px 12px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #12A5E0;`)}>
+                    <div style={s(`display:flex; align-items:center; gap:6px;`)}>
+                      <span style={s(`font-size:var(--mock-12); font-weight:700; color:var(--ink); flex:1;`)}>ООО «Ромашка»</span>
+                      <span style={s(`width:16px; height:16px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="9" height="9" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
+                    </div>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽480 000</div>
+                  </div>
+                  <div style={s(`background:#EBF7F0; border-radius:8px; padding:11px 12px; box-shadow:0 1px 3px rgba(20,23,28,.06); border-left:3px solid #1F8A5B;`)}>
+                    <div style={s(`font-size:var(--mock-12); font-weight:700; color:var(--ink);`)}>IT-Парк</div>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:800; color:#1F8A5B; margin-top:4px;`)}>₽2 100 000</div>
+                  </div>
+
+                </div>
+              </div>
           </div>
         </div>
 
@@ -1201,7 +1413,7 @@ export default class MainPage extends React.Component {
               <span style={s(`width:22px; height:22px; border-radius:6px; background:#B8860B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="12" height="12" viewBox="0 0 24 24"><path d="M5 4h14v3H5V4zm0 6.5h14v3H5v-3zM5 17h9v3H5v-3z" fill="#fff"></path></svg></span>
               <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t13); color:var(--ink);`)}>Задачи · Запуск сайта</span>
               <span style={s(`display:inline-flex; align-items:center; font-size:var(--mock-sm); font-weight:600; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:3px 8px;`)}>Проект</span>
-              <span style={s(`margin-left:auto; font-family:monospace; font-size:12px; font-weight:800; color:#B8860B;`)}>3/4</span>
+              <span style={s(`margin-left:auto; font-family:monospace; font-size:var(--mock-12); font-weight:800; color:#B8860B;`)}>3/4</span>
             </div>
             <div style={s(`padding:12px 16px 0;`)}>
               <div style={s(`height:6px; background:#F0EDE4; border-radius:3px; overflow:hidden;`)}><div style={s(`height:100%; width:75%; background:#B8860B; border-radius:3px; transform-origin:left; animation:mkGrow 1.2s cubic-bezier(.2,.7,.3,1) both; animation-delay:0.4s;`)}></div></div>
@@ -1209,7 +1421,7 @@ export default class MainPage extends React.Component {
 
             
             <div style={s(`margin:14px 16px 0; background:#FBFAF6; border:1px solid #F0EDE4; border-radius:10px; padding:11px 12px;`)}>
-              <div style={s(`display:flex; align-items:center; gap:6px; margin-bottom:10px;`)}><svg width="12" height="12" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#B8860B"></path></svg><span style={s(`font-size:11px; font-weight:700; color:#B8860B;`)}>Смарт-процесс · Согласование договора</span></div>
+              <div style={s(`display:flex; align-items:center; gap:6px; margin-bottom:10px;`)}><svg width="12" height="12" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="#B8860B"></path></svg><span style={s(`font-size:var(--mock-11); font-weight:700; color:#B8860B;`)}>Смарт-процесс · Согласование договора</span></div>
               {/* «Согласование» не влезало в свою колонку и обрезалось на
                   телефоне. Взяли короткое «Виза» — это тот же этап на языке
                   документооборота, — и запретили тексту переполнять чип. */}
@@ -1222,9 +1434,9 @@ export default class MainPage extends React.Component {
             </div>
 
             <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; padding:14px 16px; min-height:0;`)}>
-              <div style={s(`display:flex; align-items:center; gap:10px; background:#FBFAF6; border:1px solid #F0EDE4; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; background:#B8860B; flex-shrink:0; display:flex; align-items:center; justify-content:center; animation:mkPop 0.4s ease both; animation-delay:0.3s;`)}><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span style={s(`font-size:12px; color:var(--ink); flex:1;`)}>Собрать требования</span><span style={s(`width:20px; height:20px; border-radius:50%; background:#7A6FF0; color:#fff; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>МС</span></div>
-              <div style={s(`display:flex; align-items:center; gap:10px; background:#FBFAF6; border:1px solid #F0EDE4; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; background:#B8860B; flex-shrink:0; display:flex; align-items:center; justify-content:center; animation:mkPop 0.4s ease both; animation-delay:0.7s;`)}><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span style={s(`font-size:12px; color:var(--ink); flex:1;`)}>Дизайн-макет</span><span style={s(`width:20px; height:20px; border-radius:50%; background:#C0334A; color:#fff; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>АК</span></div>
-              <div style={s(`display:flex; align-items:center; gap:10px; border:1px solid #EDEFF2; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; border:2px solid #D6D2C6; flex-shrink:0; animation:mkPulseBlue 2.4s ease-in-out infinite;`)}></span><span style={s(`font-size:12px; color:var(--ink); flex:1;`)}>Вёрстка страниц</span><span style={s(`font-size:var(--mock-xs); font-weight:600; color:#B8860B; background:#F5EFDF; border-radius:5px; padding:2px 6px; flex-shrink:0;`)}>сегодня</span></div>
+              <div style={s(`display:flex; align-items:center; gap:10px; background:#FBFAF6; border:1px solid #F0EDE4; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; background:#B8860B; flex-shrink:0; display:flex; align-items:center; justify-content:center; animation:mkPop 0.4s ease both; animation-delay:0.3s;`)}><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span style={s(`font-size:var(--mock-12); color:var(--ink); flex:1;`)}>Собрать требования</span><span style={s(`width:20px; height:20px; border-radius:50%; background:#7A6FF0; color:#fff; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>МС</span></div>
+              <div style={s(`display:flex; align-items:center; gap:10px; background:#FBFAF6; border:1px solid #F0EDE4; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; background:#B8860B; flex-shrink:0; display:flex; align-items:center; justify-content:center; animation:mkPop 0.4s ease both; animation-delay:0.7s;`)}><svg width="10" height="10" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span><span style={s(`font-size:var(--mock-12); color:var(--ink); flex:1;`)}>Дизайн-макет</span><span style={s(`width:20px; height:20px; border-radius:50%; background:#C0334A; color:#fff; font-size:8px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>АК</span></div>
+              <div style={s(`display:flex; align-items:center; gap:10px; border:1px solid #EDEFF2; border-radius:9px; padding:9px 11px;`)}><span style={s(`width:18px; height:18px; border-radius:5px; border:2px solid #D6D2C6; flex-shrink:0; animation:mkPulseBlue 2.4s ease-in-out infinite;`)}></span><span style={s(`font-size:var(--mock-12); color:var(--ink); flex:1;`)}>Вёрстка страниц</span><span style={s(`font-size:var(--mock-xs); font-weight:600; color:#B8860B; background:#F5EFDF; border-radius:5px; padding:2px 6px; flex-shrink:0;`)}>сегодня</span></div>
             </div>
           </div>
         </div>
@@ -1235,14 +1447,14 @@ export default class MainPage extends React.Component {
             <div style={s(`display:flex; align-items:center; gap:9px; padding:12px 16px; border-bottom:1px solid #1E2836;`)}>
               <span style={s(`width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#12A5E0,#155EEF); display:flex; align-items:center; justify-content:center;`)}><svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2L12 2z" fill="#fff"></path></svg></span>
               <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t13); color:#fff;`)}>ИИ-агент · Поддержка</span>
-              <span style={s(`margin-left:auto; display:flex; align-items:center; gap:5px;`)}><span style={s(`width:7px; height:7px; border-radius:50%; background:#3DDC84; animation:mkBlink 1.8s ease-in-out infinite;`)}></span><span style={s(`font-size:11px; color:#7C8A9C;`)}>онлайн</span></span>
+              <span style={s(`margin-left:auto; display:flex; align-items:center; gap:5px;`)}><span style={s(`width:7px; height:7px; border-radius:50%; background:#3DDC84; animation:mkBlink 1.8s ease-in-out infinite;`)}></span><span style={s(`font-size:var(--mock-11); color:#7C8A9C;`)}>онлайн</span></span>
             </div>
             {/* Полноценный живой диалог на 18-секундном цикле: клиент пишет →
                 агент «печатает» → отвечает → клиент просит трек → агент
                 присылает номер. Раньше переписка обрывалась на многоточии,
                 и было непонятно, чем всё закончилось. */}
             <div style={s(`flex:1; display:flex; flex-direction:column; gap:9px; padding:14px 16px; min-height:0; justify-content:flex-end; overflow:hidden;`)}>
-              <div style={s(`align-self:flex-end; max-width:80%; background:#243244; border-radius:14px 14px 4px 14px; padding:9px 12px; animation:chatMsg1 18s linear infinite;`)}><div style={s(`font-size:12.5px; color:#DDE5EF; line-height:1.45;`)}>Здравствуйте! Мой заказ ещё не приехал 😕</div></div>
+              <div style={s(`align-self:flex-end; max-width:80%; background:#243244; border-radius:14px 14px 4px 14px; padding:9px 12px; animation:chatMsg1 18s linear infinite;`)}><div style={s(`font-size:var(--mock-12); color:#DDE5EF; line-height:1.45;`)}>Здравствуйте! Мой заказ ещё не приехал 😕</div></div>
 
               <div style={s(`align-self:flex-start; display:flex; align-items:center; gap:4px; background:#1A2432; border-radius:12px 12px 12px 4px; padding:10px 13px; animation:chatType1 18s linear infinite;`)}>
                 <span style={s(`width:6px; height:6px; border-radius:50%; background:#7C8A9C; animation:mkBlink 1.2s ease-in-out infinite;`)}></span>
@@ -1250,9 +1462,9 @@ export default class MainPage extends React.Component {
                 <span style={s(`width:6px; height:6px; border-radius:50%; background:#7C8A9C; animation:mkBlink 1.2s ease-in-out infinite 0.4s;`)}></span>
               </div>
 
-              <div style={s(`align-self:flex-start; max-width:84%; background:linear-gradient(135deg,#12A5E0,#155EEF); border-radius:14px 14px 14px 4px; padding:9px 12px; animation:chatMsg2 18s linear infinite;`)}><div style={s(`font-size:12.5px; color:#fff; line-height:1.45;`)}>Проверил по CRM: заказ №4821 в пути, доставка сегодня до 19:00. Прислать трек-номер?</div></div>
+              <div style={s(`align-self:flex-start; max-width:84%; background:linear-gradient(135deg,#12A5E0,#155EEF); border-radius:14px 14px 14px 4px; padding:9px 12px; animation:chatMsg2 18s linear infinite;`)}><div style={s(`font-size:var(--mock-12); color:#fff; line-height:1.45;`)}>Проверил по CRM: заказ №4821 в пути, доставка сегодня до 19:00. Прислать трек-номер?</div></div>
 
-              <div style={s(`align-self:flex-end; max-width:80%; background:#243244; border-radius:14px 14px 4px 14px; padding:9px 12px; animation:chatMsg3 18s linear infinite;`)}><div style={s(`font-size:12.5px; color:#DDE5EF; line-height:1.45;`)}>Да, пришлите пожалуйста</div></div>
+              <div style={s(`align-self:flex-end; max-width:80%; background:#243244; border-radius:14px 14px 4px 14px; padding:9px 12px; animation:chatMsg3 18s linear infinite;`)}><div style={s(`font-size:var(--mock-12); color:#DDE5EF; line-height:1.45;`)}>Да, пришлите пожалуйста</div></div>
 
               <div style={s(`align-self:flex-start; display:flex; align-items:center; gap:4px; background:#1A2432; border-radius:12px 12px 12px 4px; padding:10px 13px; animation:chatType2 18s linear infinite;`)}>
                 <span style={s(`width:6px; height:6px; border-radius:50%; background:#7C8A9C; animation:mkBlink 1.2s ease-in-out infinite;`)}></span>
@@ -1261,7 +1473,7 @@ export default class MainPage extends React.Component {
               </div>
 
               <div style={s(`align-self:flex-start; max-width:88%; background:linear-gradient(135deg,#12A5E0,#155EEF); border-radius:14px 14px 14px 4px; padding:9px 12px; animation:chatMsg4 18s linear infinite;`)}>
-                <div style={s(`font-size:12.5px; color:#fff; line-height:1.45;`)}>Трек-номер <b style={s(`font-family:monospace; letter-spacing:0.02em;`)}>RU482100317</b> — отслеживание по ссылке. Курьер позвонит за час.</div>
+                <div style={s(`font-size:var(--mock-12); color:#fff; line-height:1.45;`)}>Трек-номер <b style={s(`font-family:monospace; letter-spacing:0.02em;`)}>RU482100317</b> — отслеживание по ссылке. Курьер позвонит за час.</div>
                 <div style={s(`display:flex; align-items:center; gap:6px; margin-top:7px; padding-top:7px; border-top:1px solid rgba(255,255,255,0.25);`)}>
                   <span style={s(`width:14px; height:14px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="8" height="8" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#155EEF" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
                   <span style={s(`font-size:var(--mock-sm); color:rgba(255,255,255,0.92);`)}>обращение закрыто · без оператора</span>
@@ -1294,7 +1506,7 @@ export default class MainPage extends React.Component {
                 {/* Описание жёстко ограничено по строкам: на телефоне карточка
                     фиксированной высоты, и без этого хвост текста обрезался
                     прямо посреди буквы. */}
-                <div style={s(`flex:1; min-height:0; overflow:hidden; font-size:11.5px; line-height:1.55; color:var(--ink-soft); display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:var(--card-desc-lines); box-orient:vertical;`)}>{v.productDescTyped}<span style={s(`display:${v.productCaretDisplay}; color:#1F8A5B; font-weight:800; animation:mkBlink 1s step-end infinite;`)}>▋</span></div>
+                <div style={s(`flex:1; min-height:0; overflow:hidden; font-size:var(--mock-11); line-height:1.55; color:var(--ink-soft); display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:var(--card-desc-lines); box-orient:vertical;`)}>{v.productDescTyped}<span style={s(`display:${v.productCaretDisplay}; color:#1F8A5B; font-weight:800; animation:mkBlink 1s step-end infinite;`)}>▋</span></div>
                 <div style={s(`display:${v.productBadgesDisplay}; flex-wrap:wrap; gap:6px; flex-shrink:0;`)}><span style={s(`font-size:var(--mock-sm); font-weight:600; color:#1F8A5B; background:#EBF7F0; border-radius:6px; padding:4px 8px;`)}>SEO-текст ✓</span><span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>alt-теги ✓</span><span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>характеристики ✓</span></div>
               </div>
             </div>
@@ -1383,7 +1595,7 @@ export default class MainPage extends React.Component {
                 <div style={s(`font-size:var(--mock-sm); font-weight:700; color:var(--ink-soft);`)}>Источники сделок</div>
                 <div style={s(`flex:1; display:flex; align-items:center; justify-content:center; gap:10px;`)}>
                   <div style={s(`width:66px; height:66px; border-radius:50%; background:conic-gradient(#155EEF 0turn 0.42turn, #12A5E0 0.42turn 0.68turn, #B8860B 0.68turn 0.86turn, #C0334A 0.86turn 1turn); animation:dashDonut 14s cubic-bezier(.2,.9,.3,1) infinite; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>
-                    <div style={s(`position:relative; width:38px; height:38px; border-radius:50%; background:#FAFAF8; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:11px; font-weight:800; color:var(--ink);`)}>
+                    <div style={s(`position:relative; width:38px; height:38px; border-radius:50%; background:#FAFAF8; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:var(--mock-11); font-weight:800; color:var(--ink);`)}>
                       <span style={s(`position:absolute; animation:dashValA 14s linear infinite;`)}>1240</span>
                       <span style={s(`position:absolute; animation:dashValB 14s linear infinite;`)}>1312</span>
                     </div>
@@ -1424,7 +1636,7 @@ export default class MainPage extends React.Component {
               : <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8L19 12 8 5.6z" fill="currentColor"></path></svg>}
           </button>
 
-          <span aria-live="polite" style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); flex-basis:100%; text-align:center;`)}>// экран {v.sliderPosLabel} — листайте свайпом или стрелками</span>
+          <span aria-live="polite" style={s(`font-family:monospace; font-size:var(--mock-11); color:var(--ink-faint); flex-basis:100%; text-align:center;`)}>// экран {v.sliderPosLabel} — листайте свайпом или стрелками</span>
         </div>
 
       </div>
@@ -1508,6 +1720,161 @@ export default class MainPage extends React.Component {
         <p style={s(`font-size:var(--t15); color:rgba(255,255,255,0.55); margin:0; max-width:calc(560px * var(--t-scale));`)}>Сценарии по ролям, кейсы и ответы на частые вопросы — на отдельной странице об ИИ-решениях.</p>
         <a className="mnfx10" href="/ai" style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; text-decoration:none; white-space:nowrap; transition:transform 0.2s ease;`)}>Все сценарии ИИ →</a>
       </div>
+
+      {/* Живая сцена работы агента. Раньше стояла на первом экране; по ТЗ
+          первый экран отдан форме заявки, а демо — здесь, среди описания
+          ИИ-решений, где оно объясняет, а не отвлекает. Разметка и таймеры
+          перенесены как есть (пауза вне вьюпорта через observeInView). */}
+      <div data-reveal style={s(`max-width:460px; margin:72px auto 0;`)}>
+        <div
+          ref={v.heroSceneRef}
+          className="fxpause"
+          role="group"
+          aria-roledescription="карусель"
+          aria-label="Сцены работы ИИ-агента"
+          style={s(`margin-top:56px; position:relative; width:100%; max-width:460px;`)}
+        >
+          <div {...v.heroSwipe} ref={v.heroTrackRef} className="carousel-drag" style={s(`position:relative; touch-action:pan-y;`)}>
+            <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(26px) saturate(180%); -webkit-backdrop-filter:blur(26px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; overflow:hidden; box-shadow:0 40px 70px -24px rgba(20,23,28,0.28), inset 0 1px 1px rgba(255,255,255,0.9); ${v.entranceCard}`)}>
+
+              <div style={s(`display:flex; align-items:center; gap:8px; padding:0 16px; height:44px; border-bottom:1px solid var(--line); background:#FBFBF9;`)}>
+                <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+                <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+                <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
+                <span style={s(`margin-left:auto; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:6px;`)}>
+                  <span style={s(`width:7px; height:7px; border-radius:50%; background:#9DCF00; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>
+                  ИИ-агент · активен
+                </span>
+              </div>
+
+              <div style={s(`padding:26px 24px 24px; display:flex; flex-direction:column; gap:22px;`)}>
+
+                <div aria-live="polite" style={s(`text-align:center;`)}>
+                  <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t16); color:var(--ink); transition:opacity 0.2s ease;`)}>{v.activeRoleLabel}</div>
+                  <div style={s(`font-size:var(--mock-12); color:var(--ink-faint); margin-top:4px; max-width:230px; margin-left:auto; margin-right:auto;`)}>{v.activeRoleDesc}</div>
+                </div>
+
+                <div style={s(`position:relative; height:134px;`)}>
+                  <div style={s(`position:absolute; left:6%; top:5px; width:14px; height:11px; background:var(--ink-faint); border-radius:2px;`)}></div>
+                  <div style={s(`position:absolute; left:13%; top:10px; width:5px; height:104px; background:var(--ink-faint); border-radius:2px;`)}></div>
+                  <div style={s(`position:absolute; left:8%; width:80%; top:8px; height:5px; background:var(--ink-faint); border-radius:2px;`)}></div>
+                  <div style={s(`position:absolute; left:5%; right:5%; top:120px; height:1px; background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px);`)}></div>
+
+                  <div style={s(`position:absolute; left:24%; bottom:14px; width:22px; height:13px; background:var(--line); border-radius:3px; transform:translateX(-50%);`)}></div>
+                  <div style={s(`position:absolute; left:24%; bottom:1px; width:22px; height:13px; background:var(--line); border-radius:3px; transform:translateX(-50%);`)}></div>
+
+                  <div style={s(`position:absolute; left:${v.trolleyLeftPct}%; top:0; transform:translateX(-50%); transition:left 0.8s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; align-items:center; z-index:3;`)}>
+                    <div style={s(`width:22px; height:17px; margin-top:1px; border-radius:5px; background:var(--grad); box-shadow:0 6px 14px -4px rgba(21,94,239,0.45); display:flex; align-items:center; justify-content:center; gap:4px; flex-shrink:0;`)}>
+                      <span style={s(`width:4px; height:4px; border-radius:50%; background:#fff;`)}></span>
+                      <span style={s(`width:4px; height:4px; border-radius:50%; background:#fff;`)}></span>
+                    </div>
+                    <div style={s(`width:2px; height:${v.cableHeightPx}px; background:var(--ink-faint); transition:height 0.5s ease;`)}></div>
+                    <div style={s(`width:12px; height:11px; border-radius:0 0 6px 6px; border:2px solid var(--ink-soft); border-top:none; background:var(--paper); margin-top:-1px; flex-shrink:0;`)}></div>
+                    {(v.isCarrying) && (<>
+                      <div style={s(`width:22px; height:20px; border-radius:6px; background:${v.carryColorCss}; box-shadow:0 8px 16px -4px rgba(20,23,28,0.35); margin-top:1px;`)}></div>
+                    </>)}
+                  </div>
+
+                  <div style={s(`position:absolute; left:78%; bottom:1px; transform:translateX(-50%); display:flex; flex-direction:column-reverse; gap:2px; z-index:2;`)}>
+                    {(v.buildingBlocks||[]).map((blk, $index) => (<React.Fragment key={$index}>
+                      <div style={s(`width:28px; height:14px; border-radius:3px; background:${blk}; box-shadow:0 2px 5px rgba(20,23,28,0.18);`)}></div>
+                    </React.Fragment>))}
+                  </div>
+                </div>
+
+                {/* Роли кликабельны: можно сразу перейти к нужной сцене,
+                    не дожидаясь автосмены. */}
+                <div style={s(`display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px;`)}>
+                  {[v.role0, v.role1, v.role2, v.role3].map((r, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={r.onClick}
+                      aria-pressed={r.current}
+                      aria-label={'Показать сцену: ' + r.label}
+                      style={s(`display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 4px; border-radius:12px; background:${r.bg}; border:1px solid ${r.border}; transform:${r.transform}; opacity:${r.opacity}; box-shadow:${r.shadow}; cursor:pointer; font-family:var(--font-inter),sans-serif; transition:transform 0.35s cubic-bezier(.16,1,.3,1), opacity 0.35s ease, background 0.35s ease, border-color 0.35s ease;`)}
+                    >
+                      <div style={s(`width:7px; height:7px; border-radius:50%; background:${r.dot};`)}></div>
+                      <div style={s(`font-size:var(--mock-11); font-weight:700; color:${r.textColor}; text-align:center; line-height:1.2;`)}>{r.label}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <div style={s(`display:flex; gap:10px;`)}>
+                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Заявок обработано</div>
+                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricLeads}</div>
+                  </div>
+                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Часов сэкономлено</div>
+                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricHours}</div>
+                  </div>
+                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
+                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Точность</div>
+                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricAccuracy}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={s(`position:relative; height:30px;`)}>
+                    <div style={s(`position:absolute; left:50%; top:0; width:1px; height:10px; background:var(--line);`)}></div>
+                    <div style={s(`position:absolute; left:25%; right:25%; top:10px; height:1px; background:var(--line);`)}></div>
+                    <div style={s(`position:absolute; left:25%; top:10px; width:1px; height:14px; background:var(--line);`)}></div>
+                    <div style={s(`position:absolute; left:75%; top:10px; width:1px; height:14px; background:var(--line);`)}></div>
+                    <div style={s(`position:absolute; width:7px; height:7px; border-radius:50%; background:${v.pulseColor}; box-shadow:0 0 10px ${v.pulseColor}; transform:translate(-50%,-50%); left:${v.pulseLeft}; top:${v.pulseTop}; opacity:${v.pulseOpacity}; transition:${v.pulseTransition}; z-index:2;`)}></div>
+                  </div>
+                  <div style={s(`display:flex; justify-content:space-between; gap:12px;`)}>
+                    <div style={s(`flex:1; display:flex; align-items:center; gap:8px; background:${v.chipB24Bg}; border:1px solid ${v.chipB24Border}; border-radius:10px; padding:8px 10px; transition:background 0.35s ease, border-color 0.35s ease;`)}>
+                      <div style={s(`width:20px; height:20px; border-radius:6px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 3px, #F6F6F4 3px, #F6F6F4 6px); border:1px dashed #C9CDD3; flex-shrink:0;`)}></div>
+                      <div>
+                        <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink);`)}>Битрикс24</div>
+                        <div style={s(`font-size:var(--mock-xs); color:${v.chipB24StatusColor}; transition:color 0.35s ease;`)}>{v.chipB24Status}</div>
+                      </div>
+                    </div>
+                    <div style={s(`flex:1; display:flex; align-items:center; gap:8px; background:${v.chipExtBg}; border:1px solid ${v.chipExtBorder}; border-radius:10px; padding:8px 10px; transition:background 0.35s ease, border-color 0.35s ease;`)}>
+                      <div style={s(`width:20px; height:20px; border-radius:6px; background:var(--grad); opacity:0.75; flex-shrink:0;`)}></div>
+                      <div>
+                        <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink);`)}>Без Битрикс24</div>
+                        <div style={s(`font-size:var(--mock-xs); color:${v.chipExtStatusColor}; transition:color 0.35s ease;`)}>{v.chipExtStatus}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Управление сценой: стрелки, точки и пауза. Раньше сцена
+              переключалась сама каждые 4,6 с — дочитать карточку роли было
+              невозможно. Теперь листается пальцем и кнопками, а автопоказ
+              выключается при первом же ручном действии. */}
+          <div style={s(`display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px;`)}>
+            <button type="button" className="swipe-btn" onClick={v.heroPrev} disabled={v.heroAtStart} aria-label="Предыдущая сцена" style={s(`opacity:${v.heroAtStart ? 0.4 : 1}; cursor:${v.heroAtStart ? 'default' : 'pointer'};`)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            </button>
+
+            <div style={s(`display:flex; align-items:center; gap:7px;`)}>
+              {[v.role0, v.role1, v.role2, v.role3].map((r, i) => (
+                <button key={i} type="button" className="swipe-dot" aria-current={r.current} aria-label={'Сцена ' + (i + 1) + ': ' + r.label} onClick={r.onClick}></button>
+              ))}
+            </div>
+
+            <button type="button" className="swipe-btn" onClick={v.heroNext} disabled={v.heroAtEnd} aria-label="Следующая сцена" style={s(`opacity:${v.heroAtEnd ? 0.4 : 1}; cursor:${v.heroAtEnd ? 'default' : 'pointer'};`)}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"></path></svg>
+            </button>
+
+            <button type="button" className="swipe-btn" onClick={v.heroToggleAuto} aria-label={v.heroAutoLabel} title={v.heroAutoLabel} style={s(`width:34px; height:34px;`)}>
+              {v.heroAuto
+                ? <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1.2" fill="currentColor"></rect></svg>
+                : <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.6v12.8L19 12 8 5.6z" fill="currentColor"></path></svg>}
+            </button>
+          </div>
+
+          <div style={s(`font-size:var(--t13); color:rgba(255,255,255,0.55); margin-top:14px; text-align:center;`)}>{v.heroPosLabel} · листайте свайпом или стрелками</div>
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -1519,7 +1886,7 @@ export default class MainPage extends React.Component {
       <span aria-hidden="true" style={s(`position:absolute; top:-140px; right:-100px; width:360px; height:360px; border-radius:50%; background:var(--grad); opacity:0.12; filter:blur(90px); pointer-events:none;`)}></span>
 
       <span style={s(`position:relative; z-index:1; display:block; min-width:0;`)}>
-        <span style={s(`display:inline-flex; align-items:center; gap:8px; font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#1F8A5B; background:#EBF7F0; border-radius:999px; padding:5px 12px;`)}>
+        <span style={s(`display:inline-flex; align-items:center; gap:8px; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#1F8A5B; background:#EBF7F0; border-radius:999px; padding:5px 12px;`)}>
           <span style={s(`width:6px; height:6px; border-radius:50%; background:#1F8A5B; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>Готовый продукт
         </span>
         <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(21px,2.6vw,28px); line-height:1.2; letter-spacing:-0.02em; color:var(--ink); margin-top:14px;`)}>ИИ-генератор карточек товаров</span>
@@ -1536,7 +1903,7 @@ export default class MainPage extends React.Component {
           ].map(([n, l]) => (
             <span key={l} style={s(`display:block; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px;`)}>
               <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; color:var(--ink);`)}>{n}</span>
-              <span style={s(`display:block; font-size:12px; color:var(--ink-faint); margin-top:3px;`)}>{l}</span>
+              <span style={s(`display:block; font-size:var(--mock-12); color:var(--ink-faint); margin-top:3px;`)}>{l}</span>
             </span>
           ))}
         </span>
@@ -1705,8 +2072,16 @@ export default class MainPage extends React.Component {
     </div>
   </section>
 
-  <footer style={s(`padding:0 ${v.padX} 48px; max-width:var(--wrap); margin:0 auto; display:flex; flex-direction:${v.footerDirection}; align-items:${v.footerAlign}; justify-content:space-between; gap:24px; border-top:1px solid var(--line); padding-top:36px;`)}>
-    <div style={s(`display:flex; align-items:center; gap:10px;`)}>
+  {/* Раньше три группы — знак, пять ссылок и реквизиты ИП — стояли одной
+      строкой: на 1180–1400px они сходились почти вплотную и все были набраны
+      13px серым. Теперь это колонки с заголовками, а реквизиты набраны
+      основным цветом текста: для B2B это сигнал доверия, а не сноска. */}
+  <footer style={s(`padding:0 ${v.padX} 48px; max-width:var(--wrap); margin:0 auto; border-top:1px solid var(--line); padding-top:44px;`)}>
+
+    <div style={s(`display:grid; grid-template-columns:${v.cols4}; gap:32px 28px;`)}>
+
+      <div>
+        <div style={s(`display:flex; align-items:center; gap:10px;`)}>
       <svg width="28" height="28" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
@@ -1733,45 +2108,51 @@ export default class MainPage extends React.Component {
           </g>
         </g>
       </svg>
-      <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t15); color:var(--ink);`)}>ETHOS</span>
-      <span style={s(`font-size:var(--t13); color:var(--ink-faint); margin-left:4px;`)}>· Битрикс24 и ИИ</span>
-    </div>
-    <div style={s(`display:flex; gap:24px; flex-wrap:wrap;`)}>
-      <a href="#services" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Услуги</a>
-      <a href="/bitrix24" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Внедрение Битрикс24</a>
-      <a href="/ai" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>ИИ-решения</a>
-      <a href="#why" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Почему мы</a>
-      <a href="#process" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Процесс</a>
-    </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>ИП Магомедов З. А. · ИНН 054210247290 · ОГРНИП 326050000095170</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
-  </footer>
+          <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t17); color:var(--ink);`)}>ETHOS</span>
+        </div>
+        <p style={s(`font-size:var(--t14); line-height:1.6; color:var(--ink-soft); margin:12px 0 0; max-width:260px;`)}>
+          Сертифицированный интегратор Битрикс24 и разработчик ИИ-агентов для бизнеса.
+        </p>
+      </div>
 
-  <div style={s(`position:fixed; right:${v.fabOffset}; bottom:${v.fabOffset}; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:12px;`)}>
-    {(v.voiceOpen) && (<>
-      <div style={s(`width:296px; background:rgba(255,255,255,0.72); backdrop-filter:blur(18px) saturate(1.6); -webkit-backdrop-filter:blur(18px) saturate(1.6); border:1px solid rgba(255,255,255,0.6); border-radius:18px; box-shadow:0 28px 56px -18px rgba(20,23,28,0.3); padding:18px;`)}>
-        <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:8px;`)}>
-          <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t15); color:var(--ink);`)}>Голосовой гид</div>
-          <div style={s(`font-size:11px; font-weight:600; color:${v.voiceStatusColor};`)}>{v.voiceStatusLabel}</div>
-        </div>
-        <div style={s(`font-size:12px; color:var(--ink-soft); margin-top:4px; line-height:1.5;`)}>Озвучу содержание сайта раздел за разделом.</div>
-        <div style={s(`display:flex; flex-direction:column; gap:6px; margin-top:14px;`)}>
-          {(v.voiceSections||[]).map((vs, $index) => (<React.Fragment key={$index}>
-            <button onClick={vs.onPlay} style={s(`display:flex; align-items:center; gap:10px; background:${vs.bg}; border:1px solid ${vs.border}; border-radius:10px; padding:9px 12px; cursor:pointer; text-align:left; font-family:var(--font-inter),sans-serif; transition:background 0.2s ease, border-color 0.2s ease;`)}>
-              <span style={s(`width:6px; height:6px; border-radius:50%; background:${vs.dot}; flex-shrink:0; animation:${vs.dotAnim};`)}></span>
-              <span style={s(`font-size:var(--t13); font-weight:600; color:${vs.color};`)}>{vs.label}</span>
-            </button>
-          </React.Fragment>))}
-        </div>
-        <div style={s(`display:flex; gap:8px; margin-top:14px;`)}>
-          <button onClick={v.voicePrimaryAction} style={s(`flex:1; font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; color:#fff; background:var(--grad); border:none; border-radius:10px; padding:11px 12px; cursor:pointer;`)}>{v.voicePrimaryLabel}</button>
-          <button className="mnfx13" onClick={v.stopVoice} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; color:var(--ink-soft); background:transparent; border:1px solid var(--line); border-radius:10px; padding:11px 14px; cursor:pointer; transition:border-color 0.2s ease;`)}>Стоп</button>
+      <div>
+        <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink); margin-bottom:14px;`)}>Услуги</div>
+        <div style={s(`display:flex; flex-direction:column; gap:10px;`)}>
+          <a href="/bitrix24" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Внедрение Битрикс24</a>
+          <a href="/ai" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>ИИ-решения</a>
+          <a href="#services" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Поддержка и доработки</a>
+          <a href="#process" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Как мы работаем</a>
         </div>
       </div>
-    </>)}
-    <button className="mnfx14" onClick={v.toggleVoice} aria-label="Голосовой гид" style={s(`width:54px; height:54px; border-radius:50%; border:1px solid rgba(255,255,255,0.5); background:linear-gradient(135deg, #155EEF, #12A5E0); cursor:pointer; box-shadow:0 12px 28px rgba(21,94,239,0.4), inset 0 1px 2px rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center; transition:transform 0.2s ease;`)}>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 9.5v5h3.2L12 18.6V5.4L7.2 9.5H4z" fill="#fff"></path><path d="M15 8.5c1 .9 1.6 2.1 1.6 3.5S16 14.6 15 15.5" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"></path><path d="M17.5 6c1.8 1.5 2.9 3.6 2.9 6s-1.1 4.5-2.9 6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"></path></svg>
-    </button>
-  </div>
+
+      <div>
+        <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink); margin-bottom:14px;`)}>Контакты</div>
+        <div style={s(`display:flex; flex-direction:column; gap:10px;`)}>
+          <a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`font-size:var(--t16); font-weight:700; color:var(--ink); text-decoration:none;`)}>+7 925 677-70-27</a>
+          <a href="mailto:magomedov_zak_05@mail.ru" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a>
+          <a href="https://t.me/Terraiib24" target="_blank" rel="noopener" onClick={() => ymGoal('telegram')} style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Telegram</a>
+          <a href="/contacts" style={s(`font-size:var(--t14); color:var(--blue); text-decoration:none;`)}>Все контакты и реквизиты</a>
+        </div>
+      </div>
+
+      <div>
+        <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink); margin-bottom:14px;`)}>Реквизиты</div>
+        <div style={s(`display:flex; flex-direction:column; gap:6px; font-size:var(--t14); line-height:1.6; color:var(--ink);`)}>
+          <div>ИП Магомедов Закир Асланович</div>
+          <div>ИНН 054210247290</div>
+          <div>ОГРНИП 326050000095170</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style={s(`display:flex; flex-wrap:wrap; align-items:center; gap:10px 22px; margin-top:36px; padding-top:22px; border-top:1px solid var(--line); font-size:var(--t13); color:var(--ink-soft);`)}>
+      <span>© 2026 ETHOS</span>
+      <a href="/privacy" style={s(`color:var(--ink-soft); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a>
+    </div>
+
+  </footer>
+
 
 </div>
 

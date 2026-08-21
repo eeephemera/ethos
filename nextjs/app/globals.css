@@ -36,7 +36,7 @@ a:hover { color: #12A5E0; }
   --banner-pad: clamp(24px, 4vw, 40px) clamp(20px, 4.4vw, 52px);
   --contact-pad: clamp(24px, 5vw, 64px);
   --step-gap: clamp(14px, 3.4vw, 30px);
-  --hero-gap: 0px;
+  --hero-gap: 32px;
   --hero-visual-mt: clamp(36px, 8vw, 56px);
   --chat-h: auto;
 
@@ -72,10 +72,12 @@ a:hover { color: #12A5E0; }
   --h2-size: clamp(23px, 6.4vw, 30px);
 
   /* главная: первый экран, тёмный блок, слайдер платформы */
-  --hero-pad-main: clamp(36px, 8vw, 80px) var(--pad-x) clamp(64px, 12vw, 110px);
+  --hero-pad-main: 20px var(--pad-x) clamp(56px, 10vw, 110px);
+  --hero-h1-mt: 20px;
+  --hero-p-mt: 18px;
+  --hero-accent-mt: 20px;
   --badge-radius: 16px;
   --ai-card-pad: clamp(24px, 4vw, 32px);
-  --fab-offset: 16px;
   --cols-why: minmax(0, 1fr);
   --divider-v: none;
   --divider-h: 1px solid rgba(255, 255, 255, 0.14);
@@ -83,13 +85,18 @@ a:hover { color: #12A5E0; }
   --platform-card-pad: clamp(20px, 4vw, 40px);
   --platform-gap: clamp(24px, 4vw, 48px);
   --cols-platform: minmax(0, 1fr);
-  --platform-slot-h: 300px;
+  /* высота демо на телефоне — по контенту: фиксированные 300px заставляли
+     макет сжиматься до нечитаемого вместо того, чтобы вытянуться вниз */
+  --platform-slot-h: auto;
   --card-desc-lines: 4;
-  /* подписи внутри демо-интерфейсов: на телефоне крупнее, чем на десктопе —
-     макет там растянут почти на всю ширину, и 9px просто не читаются */
-  --mock-xs: calc(10.5px * var(--t-scale));
-  --mock-sm: calc(11.5px * var(--t-scale));
-  --sql-size: calc(11px * var(--t-scale));
+  /* Подписи внутри демо-интерфейсов. На телефоне — не мельче 13px: демо там
+     занимает почти всю ширину, и 9–11px просто не читаются. На десктопе
+     макет мелкий и плотный, поэтому размеры возвращаются в 1180px-блоке. */
+  --mock-xs: calc(13px * var(--t-scale));
+  --mock-sm: calc(13px * var(--t-scale));
+  --mock-11: calc(13px * var(--t-scale));
+  --mock-12: calc(13px * var(--t-scale));
+  --sql-size: calc(13px * var(--t-scale));
   /* «Лента знаний» — размеры сцены */
   --mem-h: 244px;
   --mem-blk: 54px;
@@ -133,24 +140,29 @@ a:hover { color: #12A5E0; }
 /* десктоп — полное меню, двухколоночный герой, фиксированные высоты демо */
 @media (min-width: 1180px) {
   :root {
-    --cols-hero: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    --cols-hero: minmax(0, 1fr) 540px;
+    --hero-pad-main: clamp(36px, 4vw, 80px) var(--pad-x) clamp(64px, 6vw, 110px);
+    --hero-h1-mt: 28px;
+    --hero-p-mt: 24px;
+    --hero-accent-mt: 30px;
     --cols-4: repeat(4, minmax(0, 1fr));
     --cols-why: minmax(0, 0.9fr) minmax(0, 1.1fr);
     --cols-platform: 340px minmax(0, 1fr);
-    --hero-gap: clamp(48px, 5vw, 104px);
+    --hero-gap: 60px;
     --hero-visual-mt: 0px;
     --chat-h: 470px;
     --h1-size: clamp(38px, 4.4vw, 56px);
     --h1-size-xl: clamp(40px, 5.4vw, 68px);
     --h2-size: clamp(30px, 3vw, 40px);
     --badge-radius: 999px;
-    --fab-offset: 24px;
     --divider-v: 1px solid rgba(255, 255, 255, 0.14);
     --divider-h: none;
     --platform-slot-h: 400px;
     --card-desc-lines: 5;
     --mock-xs: calc(9.5px * var(--t-scale));
     --mock-sm: calc(10.5px * var(--t-scale));
+    --mock-11: calc(11px * var(--t-scale));
+    --mock-12: calc(12px * var(--t-scale));
     --sql-size: calc(12.5px * var(--t-scale));
     --mem-h: 252px;
     --mem-blk: 68px;
@@ -297,7 +309,6 @@ img, svg, video, canvas, iframe { max-width: 100%; }
       20%      { transform: scale(0.84); }
       28%,100% { transform: scale(1); }
     }
-    @keyframes mkCountPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes mkPulseGold { 0%,100% { box-shadow: 0 0 0 0 rgba(184,134,11,0.35); } 50% { box-shadow: 0 0 0 6px rgba(184,134,11,0); } }
     @keyframes mkTravel {
@@ -617,3 +628,171 @@ section [style*="display: grid"] > * { min-width: 0; }
   .carousel-track, .carousel-drag, .swipe-btn, .swipe-dot { transition: none; }
 }
 
+
+/* ==========================================================================
+   Производительность на телефоне и планшете
+   --------------------------------------------------------------------------
+   До этого на любом экране одновременно жили шесть радиальных пятен 38–55 vw
+   с blur(80–105px) и бесконечным дрейфом, а поверх — backdrop-filter на шапке,
+   карточках, слайдере и панелях. Каждое такое пятно — отдельный слой, который
+   композитор переразмывает на каждом кадре; на среднем Android это и давало
+   подтормаживания при листании.
+
+   Ниже 1180px пятен всё равно не видно за контентом (колонка занимает почти
+   всю ширину), поэтому там они выключаются целиком, а фон заменяется статичным
+   градиентом — визуально та же мягкая подложка, но нулевой ценой.
+   ========================================================================== */
+@media (max-width: 1179px) {
+  .aurora-blob { display: none !important; }
+  .aurora {
+    background:
+      radial-gradient(circle at 12% 6%, rgba(21, 94, 239, 0.13), transparent 46%),
+      radial-gradient(circle at 88% 22%, rgba(18, 165, 224, 0.12), transparent 48%),
+      radial-gradient(circle at 30% 92%, rgba(139, 92, 246, 0.10), transparent 50%);
+  }
+  /* Инлайновый backdrop-filter перебивается только !important. Стеклянные
+     поверхности остаются полупрозрачными — уходит лишь дорогое размытие. */
+  [style*="backdrop-filter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ---- демо на паузе, пока его нет на экране -------------------------------
+   Обобщение механики, которая уже работала для «Ленты знаний» (.memfx):
+   пока секция за пределами вьюпорта, её CSS-таймлайны стоят и не занимают
+   композитор. data-run переключает IntersectionObserver в обе стороны —
+   демо оживает при входе в кадр и засыпает при выходе.
+
+   !important обязателен: в инлайн-стилях стоит сокращённая запись
+   animation:<name> 7s ..., а она сбрасывает animation-play-state в running. */
+/* Пауза — состояние, которое НАЗНАЧАЕТСЯ, а не подразумевается: если скрипт
+   почему-то не отработал, демо просто крутится как раньше, а не остаётся
+   замороженным на нулевом кадре (это выглядит сломанным). */
+.fxpause[data-run='0'] * { animation-play-state: paused !important; }
+
+/* ---- видимый фокус на всём интерактиве -----------------------------------
+   Раньше :focus-visible был описан только у карусели, и человек, идущий по
+   странице с клавиатуры, терял курсор на кнопках шапки, CTA и ссылках меню. */
+.site-header a:focus-visible,
+.site-header button:focus-visible,
+.mobile-bar a:focus-visible,
+.mobile-bar button:focus-visible,
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #155EEF;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---- текущий раздел в меню ------------------------------------------------
+   Пункты вели на разные страницы, но выглядели одинаково: понять, где ты
+   находишься, было невозможно. */
+.site-header a[aria-current='page'] {
+  color: #155EEF !important;
+  background-size: 100% 1.5px !important;
+}
+
+/* ==========================================================================
+   Нижняя панель действий на телефоне
+   --------------------------------------------------------------------------
+   Низ экрана — самое дорогое место на телефоне: туда дотягивается большой
+   палец. Раньше там сидели круглая кнопка голосового гида и баннер о cookie,
+   то есть самое доступное место занимала озвучка, а не действие, ради которого
+   человек пришёл. Теперь там два целевых действия, высота касания 48px.
+   ========================================================================== */
+.mobile-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1px solid #E7E6E2;
+  box-shadow: 0 -8px 24px -16px rgba(20, 23, 28, 0.4);
+}
+@media (min-width: 1180px) {
+  .mobile-bar { display: none; }
+}
+.mobile-bar > a {
+  flex: 1;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-bar .mb-call {
+  color: #14171C;
+  background: #FFFFFF;
+  border: 1px solid #D8DCE2;
+}
+.mobile-bar .mb-tg {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #155EEF, #12A5E0);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+.mobile-bar > a:active { transform: scale(0.98); }
+
+/* Панель перекрывала бы конец страницы и баннер о cookie — резервируем место. */
+@media (max-width: 1179px) {
+  body { padding-bottom: 70px; }
+  .cookie-notice { bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important; }
+}
+
+/* Градиентная заливка текста (background-clip:text + color:transparent) в
+   режиме высокой контрастности отдаёт пустое место вместо строки. Заголовки
+   первого экрана переведены на сплошной цвет, а для оставшихся надзаголовков
+   держим страховку. */
+@media (forced-colors: active) {
+  [style*="background-clip"] { color: CanvasText !important; background: none !important; }
+}
+
+/* ==========================================================================
+   Первый экран: форма-сделка внутри окна «ИИ-агент · активен»
+   --------------------------------------------------------------------------
+   Все размеры, зависящие от брейкпоинта, живут здесь, а не в JS: разметка
+   на сервере и клиенте должна совпадать побайтово (см. блок токенов выше).
+   Мобильные значения — базовые: касания 44px и 16px в поле ввода, чтобы iOS
+   не зумила страницу при фокусе. Десктоп компактнее.
+   ========================================================================== */
+.hero-input { font-size: 16px; }
+.hero-size-btn { min-height: 44px; }
+.hero-pill { min-height: 44px; }
+/* Акцентная строка: «справа» на десктопе, «ниже» на телефоне — переключение
+   текста только через CSS, чтобы SSR-разметка не зависела от ширины окна. */
+.hero-accent-d { display: none; }
+.hero-accent-m { display: inline; }
+@media (min-width: 1180px) {
+  .hero-input { font-size: 15px; }
+  .hero-size-btn { min-height: 40px; }
+  .hero-pill { min-height: 32px; }
+  .hero-accent-d { display: inline; }
+  .hero-accent-m { display: none; }
+}
+/* Появление заполненного значения в карточке сделки. */
+.hero-fill { animation: sliderItemIn 0.35s ease both; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-fill { animation: none; }
+}
+/* Визуально скрытая подпись для скринридеров. */
+.vh-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

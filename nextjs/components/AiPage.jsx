@@ -326,23 +326,23 @@ export default class AiPage extends React.Component {
         <style dangerouslySetInnerHTML={{ __html: FXCSS }} />
 
 
-<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#535C69; --ink-faint:#8A8F99; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
+<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#3F4650; --ink-faint:#6B7280; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
 
   <div ref={v.progressRef} style={s(`position:fixed; top:0; left:0; height:3px; width:0; z-index:70; background:linear-gradient(90deg, var(--blue), var(--violet)); box-shadow:0 0 14px rgba(21,94,239,0.55); pointer-events:none;`)}></div>
 
-  <div aria-hidden="true" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
-    <div style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
+  <div aria-hidden="true" className="aurora" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
+    <div className="aurora-blob" style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
   </div>
 
   <header ref={this.headerRef} className="site-header" style={s(`position:sticky; top:14px; z-index:50; margin:14px ${v.padX} 0; display:flex; align-items:center; justify-content:space-between; padding:12px 14px 12px 20px; background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.34)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.7); border-radius:22px; box-shadow:0 16px 40px -16px rgba(20,23,28,0.32), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
 
-    <a href="/" style={s(`display:flex; align-items:center; gap:12px; text-decoration:none;`)}>
+    <a href="/" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; gap:12px; text-decoration:none;`)}>
       <img src="/logo.png" alt="" width="36" height="36" style={s(`display:block; flex-shrink:0;`)} />
       <span style={s(`display:flex; align-items:baseline; gap:8px;`)}>
         <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>ETHOS</span>
-        <span style={s(`font-size:12px; font-weight:600; color:var(--ink-faint); white-space:nowrap;`)}>· ИИ-решения</span>
+        <span style={s(`font-size:var(--mock-12); font-weight:600; color:var(--ink-faint); white-space:nowrap;`)}>· ИИ-решения</span>
       </span>
     </a>
 
@@ -366,7 +366,7 @@ export default class AiPage extends React.Component {
     <div id="ai-mobile-menu" style={s(`position:absolute; top:calc(100% + 8px); left:0; right:0; display:grid; grid-template-rows:${v.mobileMenuRows}; transition:grid-template-rows 0.38s cubic-bezier(.16,1,.3,1); z-index:49;`)}>
      <div style={s(`overflow:hidden; min-height:0;`)}>
       <div style={s(`display:flex; flex-direction:column; padding:14px 24px 22px; gap:2px; background:#FFFFFF; border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 48px -16px rgba(20,23,28,0.3);`)}>
-        <a href="/" style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none; padding-bottom:14px; border-bottom:1px solid var(--line);`)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0; display:block;`)}><path d="M19 12H5m0 0l6-6m-6 6l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Главная</span></a>
+        <a href="/" onClick={v.closeMobileMenu} style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none; padding-bottom:14px; border-bottom:1px solid var(--line);`)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0; display:block;`)}><path d="M19 12H5m0 0l6-6m-6 6l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Главная</span></a>
         <a href="#agents" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Сценарии</a>
         <a href="#assistant" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>ИИ-ассистент</a>
         <a href="#content" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Карточки товаров</a>
@@ -374,8 +374,8 @@ export default class AiPage extends React.Component {
         <a href="#data" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Ваши данные</a>
         <a href="#process" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Внедрение</a>
         <a href="#faq" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>FAQ</a>
-        <a href="/bitrix24" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none;`)}>Битрикс24 →</a>
-        <a href="/ai" aria-current="page" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none;`)}>ИИ-решения · вы здесь</a>
+        <a href="/bitrix24" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none;`)}>Битрикс24 →</a>
+        <a href="/ai" aria-current="page" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none;`)}>ИИ-решения · вы здесь</a>
         <button onClick={v.scrollToContactMobile} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
      </div>
@@ -383,7 +383,7 @@ export default class AiPage extends React.Component {
   </header>
 
   <section id="hero" data-screen-label="Hero — ИИ-агенты" style={s(`position:relative; padding:${v.heroPad}; max-width:var(--wrap); margin:0 auto; overflow:visible;`)}>
-    <div style={s(`position:absolute; top:-140px; right:-100px; width:540px; height:540px; border-radius:50%; background:var(--violet); opacity:0.14; filter:blur(95px); animation:driftBlobA 17s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:-140px; right:-100px; width:540px; height:540px; border-radius:50%; background:var(--violet); opacity:0.14; filter:blur(95px); animation:driftBlobA 17s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
 
     <div style={s(`position:relative; z-index:1; display:grid; grid-template-columns:${v.heroCols}; gap:${v.heroGap}; align-items:center;`)}>
       <div>
@@ -400,7 +400,7 @@ export default class AiPage extends React.Component {
 
         <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.07; letter-spacing:-0.03em; margin:26px 0 0; color:var(--ink); ${v.entranceH1}`)}>
           У вас есть боль —{' '}
-          <span style={s(`background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>мы решаем её с помощью ИИ</span>
+          <span style={s(`color:var(--blue);`)}>мы решаем её с помощью ИИ</span>
         </h1>
 
         <p style={s(`font-size:var(--t18); line-height:1.65; color:var(--ink-soft); max-width:calc(540px * var(--t-scale)); margin:22px 0 0; ${v.entranceP}`)}>
@@ -442,28 +442,28 @@ export default class AiPage extends React.Component {
 
               <div style={s(`align-self:flex-start; max-width:82%; animation:aiMsg1 20s linear infinite; animation-play-state:${v.heroPlayState};`)}>
                 <div style={s(`background:#fff; border:1px solid var(--line); border-radius:14px 14px 14px 4px; padding:10px 13px; box-shadow:0 1px 3px rgba(20,23,28,.07);`)}>
-                  <div style={s(`font-size:12.5px; line-height:1.5; color:var(--ink);`)}>Добрый день. Нужен кабель ВВГнг-LS 3×2,5, объём 1 200 м. Есть на складе?</div>
+                  <div style={s(`font-size:var(--mock-12); line-height:1.5; color:var(--ink);`)}>Добрый день. Нужен кабель ВВГнг-LS 3×2,5, объём 1 200 м. Есть на складе?</div>
                 </div>
                 <div style={s(`font-size:var(--mock-xs); color:var(--ink-faint); margin:4px 0 0 6px;`)}>Клиент · 19:42</div>
               </div>
 
               <div style={s(`align-self:flex-end; max-width:82%; animation:aiMsg2 20s linear infinite; animation-play-state:${v.heroPlayState};`)}>
                 <div style={s(`background:linear-gradient(135deg, #155EEF, #12A5E0); border-radius:14px 14px 4px 14px; padding:10px 13px; box-shadow:0 6px 16px -6px rgba(21,94,239,0.55);`)}>
-                  <div style={s(`font-size:12.5px; line-height:1.5; color:#fff;`)}>Добрый день! Проверил по 1С: на складе 860 м, ещё ~400 м придут в четверг. Могу поставить резерв на весь объём — подойдёт?</div>
+                  <div style={s(`font-size:var(--mock-12); line-height:1.5; color:#fff;`)}>Добрый день! Проверил по 1С: на складе 860 м, ещё ~400 м придут в четверг. Могу поставить резерв на весь объём — подойдёт?</div>
                 </div>
                 <div style={s(`font-size:var(--mock-xs); color:var(--ink-faint); margin:4px 6px 0 0; text-align:right;`)}>Агент · 19:43</div>
               </div>
 
               <div style={s(`align-self:flex-start; max-width:82%; animation:aiMsg3 20s linear infinite; animation-play-state:${v.heroPlayState};`)}>
                 <div style={s(`background:#fff; border:1px solid var(--line); border-radius:14px 14px 14px 4px; padding:10px 13px; box-shadow:0 1px 3px rgba(20,23,28,.07);`)}>
-                  <div style={s(`font-size:12.5px; line-height:1.5; color:var(--ink);`)}>Ставьте резерв. И нужны счёт и сертификаты соответствия — закупка под госконтракт</div>
+                  <div style={s(`font-size:var(--mock-12); line-height:1.5; color:var(--ink);`)}>Ставьте резерв. И нужны счёт и сертификаты соответствия — закупка под госконтракт</div>
                 </div>
                 <div style={s(`font-size:var(--mock-xs); color:var(--ink-faint); margin:4px 0 0 6px;`)}>Клиент · 19:47</div>
               </div>
 
               <div style={s(`align-self:flex-end; max-width:82%; animation:aiMsg4 20s linear infinite; animation-play-state:${v.heroPlayState};`)}>
                 <div style={s(`background:linear-gradient(135deg, #155EEF, #12A5E0); border-radius:14px 14px 4px 14px; padding:10px 13px; box-shadow:0 6px 16px -6px rgba(21,94,239,0.55);`)}>
-                  <div style={s(`font-size:12.5px; line-height:1.5; color:#fff;`)}>Резерв поставил до пятницы. Счёт и сертификаты подготовит менеджер завтра с утра и пришлёт сюда. Подскажите, пожалуйста, ИНН организации</div>
+                  <div style={s(`font-size:var(--mock-12); line-height:1.5; color:#fff;`)}>Резерв поставил до пятницы. Счёт и сертификаты подготовит менеджер завтра с утра и пришлёт сюда. Подскажите, пожалуйста, ИНН организации</div>
                 </div>
                 <div style={s(`font-size:var(--mock-xs); color:var(--ink-faint); margin:4px 6px 0 0; text-align:right;`)}>Агент · 19:47</div>
               </div>
@@ -471,7 +471,7 @@ export default class AiPage extends React.Component {
               <div style={s(`align-self:center; width:94%; animation:aiEvent 20s linear infinite; animation-play-state:${v.heroPlayState};`)}>
                 <div style={s(`display:flex; align-items:center; gap:9px; background:#EBF7F0; border:1px solid rgba(31,138,91,0.3); border-radius:10px; padding:9px 13px;`)}>
                   <span style={s(`width:18px; height:18px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="9" height="9" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
-                  <span style={s(`font-size:11.5px; font-weight:600; color:#1F8A5B; min-width:0;`)}>Лид в Битрикс24 · резерв 1 260 м в 1С · задача менеджеру: счёт и сертификаты</span>
+                  <span style={s(`font-size:var(--mock-11); font-weight:600; color:#1F8A5B; min-width:0;`)}>Лид в Битрикс24 · резерв 1 260 м в 1С · задача менеджеру: счёт и сертификаты</span>
                 </div>
               </div>
 
@@ -479,11 +479,11 @@ export default class AiPage extends React.Component {
           </div>
         </div>
         <div style={s(`display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:14px;`)}>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>Telegram · WhatsApp · сайт</span>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.4s;`)}></span>Остатки и резерв — из 1С</span>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.8s;`)}></span>Ночью и в выходные</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>Telegram · WhatsApp · сайт</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.4s;`)}></span>Остатки и резерв — из 1С</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.8s;`)}></span>Ночью и в выходные</span>
         </div>
-        <div style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); margin-top:12px; text-align:center;`)}>// менеджеры ушли в 18:00 — ИИ проверил остатки, поставил резерв и оставил менеджеру готовый лид</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-11); color:var(--ink-faint); margin-top:12px; text-align:center;`)}>// менеджеры ушли в 18:00 — ИИ проверил остатки, поставил резерв и оставил менеджеру готовый лид</div>
       </div>
     </div>
   </section>
@@ -529,7 +529,7 @@ export default class AiPage extends React.Component {
             </span>
             <span style={s(`display:flex; flex-direction:column; min-width:0;`)}>
               <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t14); color:#fff;`)}>ИИ-ассистент · слушает</span>
-              <span style={s(`font-size:11px; color:rgba(255,255,255,0.45);`)}>Битрикс24 · 1С · склад · почта</span>
+              <span style={s(`font-size:var(--mock-11); color:rgba(255,255,255,0.45);`)}>Битрикс24 · 1С · склад · почта</span>
             </span>
             <span aria-hidden="true" style={s(`margin-left:auto; display:flex; align-items:center; gap:3px; height:22px;`)}>
               <span style={s(`width:3px; height:100%; border-radius:2px; background:rgba(94,159,255,0.85); transform-origin:center; animation:vaWave 1.1s ease-in-out infinite;`)}></span>
@@ -554,11 +554,11 @@ export default class AiPage extends React.Component {
                 </div>
                 <div style={s(`display:flex; gap:10px; align-items:flex-start; padding-left:32px;`)}>
                   <span style={s(`font-family:monospace; font-size:var(--mock-sm); letter-spacing:0.05em; text-transform:uppercase; color:rgba(255,255,255,0.38); flex-shrink:0; margin-top:2px;`)}>→</span>
-                  <span style={s(`font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.66);`)}>{c.act}</span>
+                  <span style={s(`font-size:var(--mock-12); line-height:1.5; color:rgba(255,255,255,0.66);`)}>{c.act}</span>
                 </div>
                 <div style={s(`margin-top:auto; display:flex; align-items:center; gap:9px; background:rgba(31,138,91,0.14); border:1px solid rgba(31,138,91,0.38); border-radius:10px; padding:10px 13px;`)}>
                   <span style={s(`width:17px; height:17px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="9" height="9" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
-                  <span style={s(`font-size:12px; font-weight:600; color:#7BE0AC; min-width:0;`)}>{c.done}</span>
+                  <span style={s(`font-size:var(--mock-12); font-weight:600; color:#7BE0AC; min-width:0;`)}>{c.done}</span>
                   <span style={s(`margin-left:auto; font-family:monospace; font-size:var(--mock-xs); color:rgba(255,255,255,0.4); white-space:nowrap; flex-shrink:0;`)}>{c.sys}</span>
                 </div>
               </div>
@@ -635,11 +635,11 @@ export default class AiPage extends React.Component {
           {/* строка вопроса — оба чипа побайтово одинаковы, иначе «тот же вопрос» не прочитается */}
           <div style={s(`position:relative; height:26px; flex-shrink:0;`)}>
             <span data-mem="ask1" style={s(`position:absolute; right:0; top:0; display:inline-flex; align-items:center; gap:6px; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 12px 4px 6px; opacity:0; animation:memAsk1 24s linear infinite; will-change:transform,opacity;`)}>
-              <span style={s(`width:16px; height:16px; border-radius:50%; background:#F1F3F5; color:var(--ink-soft); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>?</span>
+              <span style={s(`width:16px; height:16px; border-radius:50%; background:#F1F3F5; color:var(--ink-soft); font-size:var(--mock-xs); font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>?</span>
               <span style={s(`font-size:var(--mock-sm); color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Ламинат можно на тёплый пол?</span>
             </span>
             <span data-mem="ask2" style={s(`position:absolute; right:0; top:0; display:inline-flex; align-items:center; gap:6px; max-width:100%; background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 12px 4px 6px; opacity:0; animation:memAsk2 24s linear infinite; will-change:transform,opacity;`)}>
-              <span style={s(`width:16px; height:16px; border-radius:50%; background:#F1F3F5; color:var(--ink-soft); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>?</span>
+              <span style={s(`width:16px; height:16px; border-radius:50%; background:#F1F3F5; color:var(--ink-soft); font-size:var(--mock-xs); font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}>?</span>
               <span style={s(`font-size:var(--mock-sm); color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Ламинат можно на тёплый пол?</span>
             </span>
           </div>
@@ -828,8 +828,8 @@ export default class AiPage extends React.Component {
       <div ref={v.contentRef}>
         <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
           <div style={s(`display:flex; align-items:center; gap:10px;`)}>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:4px 10px; flex-shrink:0;`)}>Вход</span>
-            <span key={v.prodKey + '-sku'} style={s(`font-family:monospace; font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:sliderItemIn 0.4s ease both;`)}>{v.prod.sku}</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:4px 10px; flex-shrink:0;`)}>Вход</span>
+            <span key={v.prodKey + '-sku'} style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:sliderItemIn 0.4s ease both;`)}>{v.prod.sku}</span>
           </div>
 
           <div style={s(`display:flex; align-items:center; gap:10px; margin:16px 0;`)}>
@@ -879,14 +879,14 @@ export default class AiPage extends React.Component {
                   {!v.prodSearching && v.prod.priceNote ? <span style={s(`font-size:var(--mock-sm); color:var(--ink-faint); white-space:nowrap;`)}>{v.prod.priceNote}</span> : null}
                 </span>
               </div>
-              <div style={s(`font-size:12.5px; line-height:1.6; color:var(--ink-soft); margin-top:8px;`)}>
+              <div style={s(`font-size:var(--mock-12); line-height:1.6; color:var(--ink-soft); margin-top:8px;`)}>
                 {v.prodTypedText}
                 <span style={s(`display:${v.prodCaret}; width:6px; height:12px; background:var(--violet); vertical-align:-1px; margin-left:1px; animation:genCursor 1s step-end infinite;`)}></span>
               </div>
             </div>
 
             <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid var(--line);`)}>
-              <span style={s(`display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; color:${v.prodStatusColor};`)}>
+              <span style={s(`display:inline-flex; align-items:center; gap:6px; font-size:var(--mock-11); font-weight:600; color:${v.prodStatusColor};`)}>
                 {v.prodDone
                   ? <span style={s(`width:14px; height:14px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="8" height="8" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
                   : <span style={s(`width:8px; height:8px; border-radius:50%; background:var(--violet); flex-shrink:0; animation:pulseDot 1.4s ease-in-out infinite;`)}></span>}
@@ -937,7 +937,7 @@ export default class AiPage extends React.Component {
 
       <div data-reveal-children="110" style={s(`display:grid; grid-template-columns:${v.cols3}; gap:20px; margin-top:64px;`)}>
         <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03)); backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%); border:1px solid rgba(255,255,255,0.16); border-radius:22px; padding:34px 32px; box-shadow:0 24px 60px -20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);`)}>
-          <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Каждое утро</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Каждое утро</div>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; margin:12px 0 0; color:#fff;`)}>Сводка по продажам</h3>
           <p style={s(`font-size:var(--t145); line-height:1.6; color:rgba(255,255,255,0.7); margin:12px 0 0;`)}>Новые сделки и суммы, зависшие задачи, просроченные звонки, план-факт по менеджерам — короткий дайджест к началу дня.</p>
           <div style={s(`margin-top:auto; padding-top:24px;`)}>
@@ -952,7 +952,7 @@ export default class AiPage extends React.Component {
                   просто «красивая волна». */}
               <div style={s(`position:relative; height:74px; margin-top:12px;`)}>
                 <div style={s(`position:absolute; left:0; right:0; top:27%; height:1px; background-image:repeating-linear-gradient(90deg, rgba(255,255,255,0.3) 0 4px, transparent 4px 8px); z-index:2;`)}></div>
-                <span style={s(`position:absolute; right:0; top:27%; transform:translateY(-100%); font-family:monospace; font-size:8.5px; color:rgba(255,255,255,0.42); z-index:3;`)}>план ₽380К</span>
+                <span style={s(`position:absolute; right:0; top:27%; transform:translateY(-100%); font-family:monospace; font-size:var(--mock-xs); color:rgba(255,255,255,0.42); z-index:3;`)}>план ₽380К</span>
                 <div style={s(`position:absolute; inset:0; display:flex; align-items:flex-end; gap:6px;`)}>
                   {[
                     { d: 'Пн', h: 40, sum: '210К', leads: 18 },
@@ -963,7 +963,7 @@ export default class AiPage extends React.Component {
                     { d: 'Сб', h: 14, sum: '70К', leads: 16 },
                   ].map((b, i) => (
                     <div key={b.d} style={s(`flex:1; min-width:0; display:flex; flex-direction:column; justify-content:flex-end; height:100%; position:relative;`)}>
-                      <span style={s(`position:absolute; left:50%; bottom:calc(${b.h}% + 3px); transform:translateX(-50%); font-family:monospace; font-size:8px; font-weight:700; color:${b.best ? '#7BC4FF' : 'rgba(255,255,255,0.5)'}; white-space:nowrap; opacity:0; animation:dotPop .5s cubic-bezier(.2,1.1,.4,1) forwards; animation-delay:${0.5 + i * 0.11}s;`)}>{b.leads}</span>
+                      <span style={s(`position:absolute; left:50%; bottom:calc(${b.h}% + 3px); transform:translateX(-50%); font-family:monospace; font-size:var(--mock-xs); font-weight:700; color:${b.best ? '#7BC4FF' : 'rgba(255,255,255,0.5)'}; white-space:nowrap; opacity:0; animation:dotPop .5s cubic-bezier(.2,1.1,.4,1) forwards; animation-delay:${0.5 + i * 0.11}s;`)}>{b.leads}</span>
                       <span style={s(`display:block; height:${b.h}%; border-radius:3px 3px 0 0; background:${b.best ? 'linear-gradient(180deg,#5E9FFF,#12A5E0)' : 'rgba(94,159,255,0.34)'}; transform-origin:bottom; animation:barGrow .7s cubic-bezier(.2,.8,.3,1) both; animation-delay:${i * 0.1}s;`)}></span>
                     </div>
                   ))}
@@ -971,7 +971,7 @@ export default class AiPage extends React.Component {
               </div>
               <div style={s(`display:flex; gap:6px; margin-top:5px;`)}>
                 {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].map((d) => (
-                  <span key={d} style={s(`flex:1; min-width:0; text-align:center; font-family:monospace; font-size:8.5px; color:rgba(255,255,255,0.4);`)}>{d}</span>
+                  <span key={d} style={s(`flex:1; min-width:0; text-align:center; font-family:monospace; font-size:var(--mock-xs); color:rgba(255,255,255,0.4);`)}>{d}</span>
                 ))}
               </div>
 
@@ -990,13 +990,13 @@ export default class AiPage extends React.Component {
                 </div>
               </div>
 
-              <div style={s(`font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.85); margin-top:10px;`)}>«Сергей принёс ₽1,84 млн — 34% выручки отдела при 128 лидах. Пятница дала 28% недели: там были входящие с сайта, стоит усилить канал»</div>
+              <div style={s(`font-size:var(--mock-12); line-height:1.55; color:rgba(255,255,255,0.85); margin-top:10px;`)}>«Сергей принёс ₽1,84 млн — 34% выручки отдела при 128 лидах. Пятница дала 28% недели: там были входящие с сайта, стоит усилить канал»</div>
             </div>
           </div>
         </div>
 
         <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(21,94,239,0.22), rgba(18,165,224,0.08)); backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%); border:1px solid rgba(94,159,255,0.45); border-radius:22px; padding:34px 32px; box-shadow:0 24px 60px -20px rgba(21,94,239,0.35), inset 0 1px 1px rgba(255,255,255,0.25);`)}>
-          <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>После каждого звонка</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>После каждого звонка</div>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; margin:12px 0 0; color:#fff;`)}>Разбор звонков менеджеров</h3>
           <p style={s(`font-size:var(--t145); line-height:1.6; color:rgba(255,255,255,0.7); margin:12px 0 0;`)}>Транскрибация разговоров, оценка по вашему чек-листу, причины отказов и возражения — РОП слушает не всё подряд, а только проблемные звонки.</p>
           <div style={s(`margin-top:auto; padding-top:24px;`)}>
@@ -1018,26 +1018,26 @@ export default class AiPage extends React.Component {
                 <span style={s(`width:3px; height:35%; border-radius:2px; background:rgba(94,159,255,0.75); animation:eqBar 1.2s ease-in-out infinite -1.08s;`)}></span>
                 <span style={s(`width:3px; height:55%; border-radius:2px; background:rgba(94,159,255,0.75); animation:eqBar 1.2s ease-in-out infinite -1.17s;`)}></span>
               </div>
-              <div style={s(`font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.85); margin-top:6px;`)}>«7/10 по чек-листу: не спросил про сроки, не назначил следующий шаг. Возражение — "дорого", отработано частично»</div>
+              <div style={s(`font-size:var(--mock-12); line-height:1.55; color:rgba(255,255,255,0.85); margin-top:6px;`)}>«7/10 по чек-листу: не спросил про сроки, не назначил следующий шаг. Возражение — "дорого", отработано частично»</div>
             </div>
           </div>
         </div>
 
         <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03)); backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%); border:1px solid rgba(255,255,255,0.16); border-radius:22px; padding:34px 32px; box-shadow:0 24px 60px -20px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.2);`)}>
-          <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>По запросу</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>По запросу</div>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; margin:12px 0 0; color:#fff;`)}>Ответы цифрами из CRM</h3>
           <p style={s(`font-size:var(--t145); line-height:1.6; color:rgba(255,255,255,0.7); margin:12px 0 0;`)}>Спрашиваете как человека: «сколько сделок закрыл отдел в марте», «какая конверсия из заявки в оплату» — агент отвечает данными, а не ощущениями.</p>
           <div style={s(`margin-top:auto; padding-top:24px;`)}>
             <div style={s(`background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:13px 15px;`)}>
               <div style={s(`font-family:monospace; font-size:var(--mock-sm); color:rgba(255,255,255,0.45);`)}>вы → ИИ</div>
-              <div style={s(`font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.85); margin-top:6px;`)}>«Почему в апреле упала конверсия?»</div>
+              <div style={s(`font-size:var(--mock-12); line-height:1.55; color:rgba(255,255,255,0.85); margin-top:6px;`)}>«Почему в апреле упала конверсия?»</div>
               <div style={s(`position:relative; margin-top:7px;`)}>
                 <span aria-hidden="true" style={s(`position:absolute; left:2px; top:6px; display:inline-flex; gap:4px; animation:aiQaDots 9s linear infinite;`)}>
                   <span style={s(`width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.75); animation:aiQaDot 0.9s ease-in-out infinite;`)}></span>
                   <span style={s(`width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.75); animation:aiQaDot 0.9s ease-in-out infinite 0.18s;`)}></span>
                   <span style={s(`width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.75); animation:aiQaDot 0.9s ease-in-out infinite 0.36s;`)}></span>
                 </span>
-                <div style={s(`font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.85); animation:aiQaAns 9s linear infinite;`)}>— «С 18% до 12%. Основная просадка — заявки с рекламы: 40 без первого звонка более суток»</div>
+                <div style={s(`font-size:var(--mock-12); line-height:1.55; color:rgba(255,255,255,0.85); animation:aiQaAns 9s linear infinite;`)}>— «С 18% до 12%. Основная просадка — заявки с рекламы: 40 без первого звонка более суток»</div>
               </div>
             </div>
           </div>
@@ -1074,7 +1074,7 @@ export default class AiPage extends React.Component {
 
       <div>
         <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-          <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Как это работает</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Как это работает</div>
 
           <div style={s(`display:flex; flex-direction:column; gap:0; margin-top:14px;`)}>
             <div style={s(`display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--line); align-items:baseline;`)}>
@@ -1108,8 +1108,8 @@ export default class AiPage extends React.Component {
 
             <div style={s(`padding:14px 16px 16px;`)}>
               <div style={s(`display:flex; gap:8px; animation:sqlAsk 14s linear infinite;`)}>
-                <span style={s(`font-family:monospace; font-size:11px; color:#5B6C86; flex-shrink:0;`)}>?</span>
-                <span style={s(`font-size:12.5px; line-height:1.5; color:#C9D6E8;`)}>«Сколько ВВГнг 3×2,5 на складе в Ростове?»</span>
+                <span style={s(`font-family:monospace; font-size:var(--mock-11); color:#5B6C86; flex-shrink:0;`)}>?</span>
+                <span style={s(`font-size:var(--mock-12); line-height:1.5; color:#C9D6E8;`)}>«Сколько ВВГнг 3×2,5 на складе в Ростове?»</span>
               </div>
 
               <div style={s(`margin-top:12px; font-family:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace; font-size:var(--sql-size); line-height:1.75; overflow-x:auto;`)}>
@@ -1122,17 +1122,17 @@ export default class AiPage extends React.Component {
                 <div style={s(`display:flex; gap:10px; padding:6px 10px; background:#111C2E; font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; text-transform:uppercase; color:#6B7F9C;`)}>
                   <span style={s(`flex:1.3; min-width:0;`)}>sku</span><span style={s(`flex:1; min-width:0; text-align:right;`)}>stock</span><span style={s(`flex:1.2; min-width:0; text-align:right;`)}>warehouse</span>
                 </div>
-                <div style={s(`display:flex; gap:10px; padding:6px 10px; font-family:monospace; font-size:11.5px; color:#D6E3F5; animation:sqlRow 14s linear infinite;`)}>
+                <div style={s(`display:flex; gap:10px; padding:6px 10px; font-family:monospace; font-size:var(--mock-11); color:#D6E3F5; animation:sqlRow 14s linear infinite;`)}>
                   <span style={s(`flex:1.3; min-width:0; color:#F09A76;`)}>VVG-3x2.5</span><span style={s(`flex:1; min-width:0; text-align:right; color:#B5CEA8;`)}>860</span><span style={s(`flex:1.2; min-width:0; text-align:right;`)}>Ростов-1</span>
                 </div>
-                <div style={s(`display:flex; gap:10px; padding:6px 10px; border-top:1px solid #16202F; font-family:monospace; font-size:11.5px; color:#D6E3F5; animation:sqlRow 14s linear infinite; animation-delay:0.35s;`)}>
+                <div style={s(`display:flex; gap:10px; padding:6px 10px; border-top:1px solid #16202F; font-family:monospace; font-size:var(--mock-11); color:#D6E3F5; animation:sqlRow 14s linear infinite; animation-delay:0.35s;`)}>
                   <span style={s(`flex:1.3; min-width:0; color:#F09A76;`)}>VVG-3x2.5</span><span style={s(`flex:1; min-width:0; text-align:right; color:#B5CEA8;`)}>400</span><span style={s(`flex:1.2; min-width:0; text-align:right;`)}>в пути</span>
                 </div>
               </div>
 
               <div style={s(`display:flex; align-items:flex-start; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid #1E2A3C; animation:sqlAnswer 14s linear infinite;`)}>
                 <span style={s(`width:17px; height:17px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;`)}><svg width="9" height="9" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
-                <span style={s(`font-size:12.5px; color:#E6EEF9; line-height:1.5;`)}>«860 м в Ростове, ещё 400 м придут в четверг — поставить резерв?»</span>
+                <span style={s(`font-size:var(--mock-12); color:#E6EEF9; line-height:1.5;`)}>«860 м в Ростове, ещё 400 м придут в четверг — поставить резерв?»</span>
               </div>
             </div>
           </div>
@@ -1158,7 +1158,7 @@ export default class AiPage extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Диагностика процессов и данных</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–5 дней · бесплатно</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–5 дней · бесплатно</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Смотрим, где рутина съедает часы: поток обращений, контент, отчёты, документы. Проверяем, какие данные есть для обучения ИИ, и выбираем 1–2 сценария с самым быстрым эффектом.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>карта сценариев с оценкой эффекта и сметой</span></div>
@@ -1173,7 +1173,7 @@ export default class AiPage extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Доступы и разбор архитектуры</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–10 дней · параллельно</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–10 дней · параллельно</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Самый недооценённый этап: доступы к Битрикс24, 1С, телефонии и базе данных согласовываются дольше, чем пишется код. Начинаем запрашивать их сразу и параллельно разбираем ваш ландшафт — что где стоит, какие версии, где реплика, а где живой контур, кто владелец каждой системы. Заранее находим места, где интеграция упрётся в чужой регламент.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>схема систем, список доступов и ответственных — без сюрпризов на запуске</span></div>
@@ -1188,7 +1188,7 @@ export default class AiPage extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Пилот на одном сценарии</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>2–3 недели</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>2–3 недели</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Собираем решение на ваших данных: база знаний, прайсы, регламенты, история диалогов. Тестируем на реальных обращениях и меряем качество ответов до боевого запуска.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>работающая автоматизация и цифры «до/после»</span></div>
@@ -1203,7 +1203,7 @@ export default class AiPage extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Интеграция в системы</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Подключаем ИИ к <a href="/bitrix24" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>Битрикс24</a>, мессенджерам, сайту, телефонии и 1С, а также напрямую к вашей базе данных — PostgreSQL, MySQL, MS SQL и другим, — чтобы агент работал на актуальных остатках, ценах и заказах. Настраиваем права и границы: что ИИ делает сам, что — только с подтверждением человека.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>ИИ работает в боевом контуре, под контролем</span></div>
@@ -1218,7 +1218,7 @@ export default class AiPage extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Обучение команды</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–4 дня</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–4 дня</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Показываем, как ставить ИИ задачи, проверять его работу и что делать с нестандартными случаями. Фиксируем регламенты: где ИИ решает сам, где — человек.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>команда работает с ИИ уверенно, без страха</span></div>
@@ -1232,7 +1232,7 @@ export default class AiPage extends React.Component {
         <div style={s(`min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Сопровождение и развитие</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>постоянно</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>постоянно</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Следим за качеством ответов, дообучаем систему на новых данных и добавляем сценарии: после продаж — поддержка, после карточек — аналитика.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>система становится точнее с каждым месяцем</span></div>
@@ -1251,49 +1251,49 @@ export default class AiPage extends React.Component {
 
     <div data-reveal-children="120" style={s(`display:grid; grid-template-columns:${v.cols3}; gap:24px; margin-top:56px; align-items:stretch;`)}>
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--blue); background:rgba(21,94,239,0.08); border:1px solid rgba(21,94,239,0.18); border-radius:999px; padding:6px 13px;`)}>Оптовая торговля</span>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--blue); background:rgba(21,94,239,0.08); border:1px solid rgba(21,94,239,0.18); border-radius:999px; padding:6px 13px;`)}>Оптовая торговля</span>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Каталог из 4 800 позиций описан за месяц</h3>
         <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Контент-менеджер тратил 30–40 минут на карточку — каталог не был бы готов и за год. ИИ собирает карточки по прайсу поставщика, человек выборочно проверяет.</p>
         <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>×12</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>быстрее на карточку</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>быстрее на карточку</div>
           </div>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>100%</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>каталога в поиске</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>каталога в поиске</div>
           </div>
         </div>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--violet); background:rgba(18,165,224,0.08); border:1px solid rgba(18,165,224,0.2); border-radius:999px; padding:6px 13px;`)}>B2B-услуги</span>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--violet); background:rgba(18,165,224,0.08); border:1px solid rgba(18,165,224,0.2); border-radius:999px; padding:6px 13px;`)}>B2B-услуги</span>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Заявки перестали «остывать» за ночь</h3>
         <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Вечерние и ночные заявки ждали утра — часть клиентов уходила к тем, кто ответил первым. ИИ отвечает за минуту, квалифицирует и бронирует время звонка.</p>
         <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>2 ч → 1 мин</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>время первого ответа</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>время первого ответа</div>
           </div>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>+31%</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>заявок доходит до встречи</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>заявок доходит до встречи</div>
           </div>
         </div>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:11.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#1F8A5B; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); border-radius:999px; padding:6px 13px;`)}>Интернет-магазин</span>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#1F8A5B; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); border-radius:999px; padding:6px 13px;`)}>Интернет-магазин</span>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Поддержка перестала тонуть в «где заказ?»</h3>
         <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Операторы разгребали однотипные вопросы по статусам и доставке. ИИ отвечает по данным заказа сам, людям остаются возвраты и спорные случаи.</p>
         <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>7 из 10</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>обращений закрывает ИИ</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>обращений закрывает ИИ</div>
           </div>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>24/7</div>
-            <div style={s(`font-size:11.5px; color:var(--ink-faint); margin-top:2px;`)}>без смен и очередей</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>без смен и очередей</div>
           </div>
         </div>
       </div>
@@ -1313,7 +1313,7 @@ export default class AiPage extends React.Component {
       </div>
 
       <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Что влияет на стоимость</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Что влияет на стоимость</div>
         <div style={s(`display:flex; flex-direction:column; gap:0; margin-top:14px;`)}>
           <div style={s(`display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--line); align-items:baseline;`)}>
             <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t13); color:var(--blue); flex-shrink:0;`)}>01</span>
@@ -1438,7 +1438,7 @@ export default class AiPage extends React.Component {
     <a className="aifx13" data-reveal href="/bitrix24" style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
       <span style={s(`position:absolute; top:-120px; right:-80px; width:340px; height:340px; border-radius:50%; background:var(--grad); opacity:0.25; filter:blur(90px); pointer-events:none;`)}></span>
       <span style={s(`position:relative; z-index:1; display:block;`)}>
-        <span style={s(`display:block; font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>
+        <span style={s(`display:block; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>
         <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(20px,2.4vw,26px); letter-spacing:-0.01em; color:#fff; margin-top:10px;`)}>Внедрение и поддержка Битрикс24</span>
         <span style={s(`display:block; font-size:var(--t15); color:rgba(255,255,255,0.6); margin-top:8px; max-width:calc(520px * var(--t-scale));`)}>Настройка CRM под процессы, интеграции с 1С и телефонией, миграция с amoCRM, поддержка по SLA — на отдельной странице.</span>
       </span>

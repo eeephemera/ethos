@@ -176,19 +176,19 @@ export default class Bitrix24Page extends React.Component {
         <style dangerouslySetInnerHTML={{ __html: FXCSS }} />
 
 
-<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#535C69; --ink-faint:#8A8F99; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
+<div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#3F4650; --ink-faint:#6B7280; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
 
   <div ref={v.progressRef} style={s(`position:fixed; top:0; left:0; height:3px; width:0; z-index:70; background:linear-gradient(90deg, var(--blue), var(--violet)); box-shadow:0 0 14px rgba(21,94,239,0.55); pointer-events:none;`)}></div>
 
-  <div aria-hidden="true" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
-    <div style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
-    <div style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
+  <div aria-hidden="true" className="aurora" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
+    <div className="aurora-blob" style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:10%; right:-14%; width:50vw; height:50vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(18,165,224,0.46), transparent 68%); filter:blur(85px); animation:driftBlobB 27s ease-in-out infinite alternate;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; bottom:-20%; left:20%; width:54vw; height:54vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,0.4), transparent 70%); filter:blur(95px); animation:driftBlobA 31s ease-in-out infinite alternate;`)}></div>
   </div>
 
   <header ref={this.headerRef} className="site-header" style={s(`position:sticky; top:14px; z-index:50; margin:14px ${v.padX} 0; display:flex; align-items:center; justify-content:space-between; padding:12px 14px 12px 20px; background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.34)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.7); border-radius:22px; box-shadow:0 16px 40px -16px rgba(20,23,28,0.32), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
 
-    <a href="/" style={s(`display:flex; align-items:center; gap:12px; text-decoration:none;`)}>
+    <a href="/" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; gap:12px; text-decoration:none;`)}>
       <svg width="36" height="36" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
@@ -217,7 +217,7 @@ export default class Bitrix24Page extends React.Component {
       </svg>
       <span style={s(`display:flex; align-items:baseline; gap:8px;`)}>
         <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; letter-spacing:-0.01em; color:var(--ink);`)}>ETHOS</span>
-        <span style={s(`font-size:12px; font-weight:600; color:var(--ink-faint); white-space:nowrap;`)}>· Битрикс24</span>
+        <span style={s(`font-size:var(--mock-12); font-weight:600; color:var(--ink-faint); white-space:nowrap;`)}>· Битрикс24</span>
       </span>
     </a>
 
@@ -241,14 +241,14 @@ export default class Bitrix24Page extends React.Component {
     <div id="b24-mobile-menu" style={s(`position:absolute; top:calc(100% + 8px); left:0; right:0; display:grid; grid-template-rows:${v.mobileMenuRows}; transition:grid-template-rows 0.38s cubic-bezier(.16,1,.3,1); z-index:49;`)}>
      <div style={s(`overflow:hidden; min-height:0;`)}>
       <div style={s(`display:flex; flex-direction:column; padding:14px 24px 22px; gap:2px; background:#FFFFFF; border:1px solid var(--line); border-radius:20px; box-shadow:0 24px 48px -16px rgba(20,23,28,0.3);`)}>
-        <a href="/" style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none; padding-bottom:14px; border-bottom:1px solid var(--line);`)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0; display:block;`)}><path d="M19 12H5m0 0l6-6m-6 6l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Главная</span></a>
+        <a href="/" onClick={v.closeMobileMenu} style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none; padding-bottom:14px; border-bottom:1px solid var(--line);`)}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0; display:block;`)}><path d="M19 12H5m0 0l6-6m-6 6l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg><span>Главная</span></a>
         <a href="#steps" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Этапы</a>
         <a href="#integrations" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Интеграции</a>
         <a href="#migration" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Миграция</a>
         <a href="#sla" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Поддержка</a>
         <a href="#faq" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>FAQ</a>
-        <a href="/bitrix24" aria-current="page" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none;`)}>Битрикс24 · вы здесь</a>
-        <a href="/ai" style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none;`)}>ИИ-решения →</a>
+        <a href="/bitrix24" aria-current="page" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none;`)}>Битрикс24 · вы здесь</a>
+        <a href="/ai" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink-soft); text-decoration:none;`)}>ИИ-решения →</a>
         <button onClick={v.scrollToContactMobile} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
      </div>
@@ -256,7 +256,7 @@ export default class Bitrix24Page extends React.Component {
   </header>
 
   <section id="hero" data-screen-label="Hero — внедрение Битрикс24" style={s(`position:relative; padding:${v.heroPad}; max-width:var(--wrap); margin:0 auto; overflow:visible;`)}>
-    <div style={s(`position:absolute; top:-140px; right:-100px; width:540px; height:540px; border-radius:50%; background:var(--blue); opacity:0.13; filter:blur(95px); animation:driftBlobA 17s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
+    <div className="aurora-blob" style={s(`position:absolute; top:-140px; right:-100px; width:540px; height:540px; border-radius:50%; background:var(--blue); opacity:0.13; filter:blur(95px); animation:driftBlobA 17s ease-in-out infinite alternate; z-index:0; pointer-events:none;`)}></div>
 
     <div style={s(`position:relative; z-index:1; display:grid; grid-template-columns:${v.heroCols}; gap:${v.heroGap}; align-items:center;`)}>
       <div>
@@ -273,7 +273,7 @@ export default class Bitrix24Page extends React.Component {
 
         <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.07; letter-spacing:-0.03em; margin:26px 0 0; color:var(--ink); ${v.entranceH1}`)}>
           Внедрение и поддержка<br />
-          <span style={s(`background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Битрикс24 под ключ</span>
+          <span style={s(`color:var(--blue);`)}>Битрикс24 под ключ</span>
         </h1>
 
         <p style={s(`font-size:var(--t18); line-height:1.65; color:var(--ink-soft); max-width:calc(540px * var(--t-scale)); margin:22px 0 0; ${v.entranceP}`)}>
@@ -299,58 +299,58 @@ export default class Bitrix24Page extends React.Component {
               <span style={s(`width:22px; height:22px; border-radius:6px; background:#155EEF; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="12" height="12" viewBox="0 0 24 24"><path d="M4 5h16l-5.5 7v5.5L9.5 20v-8L4 5z" fill="#fff"></path></svg></span>
               <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t13); color:var(--ink);`)}>Сделки · Канбан</span>
               <span style={s(`display:inline-flex; align-items:center; font-size:var(--mock-sm); font-weight:600; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:3px 8px;`)}>Мои сделки</span>
-              <span style={s(`margin-left:auto; font-size:11px; color:var(--ink-faint);`)}>Итого</span>
+              <span style={s(`margin-left:auto; font-size:var(--mock-11); color:var(--ink-faint);`)}>Итого</span>
               <span style={s(`font-family:monospace; font-size:var(--t13); font-weight:800; color:var(--ink); animation:mkCountPulse 3.4s ease-in-out infinite;`)}>₽4,78M</span>
             </div>
             <div style={s(`position:relative; flex:1; display:flex; gap:10px; padding:14px; background:#EEF2F6; min-height:0;`)}>
 
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#E3E8EE; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#5A626E;`)}>Новые</span><span style={s(`font-size:var(--mock-sm); font-weight:700; color:#8A8F99;`)}>2</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#5A626E;`)}>Новые</span><span style={s(`font-size:var(--mock-sm); font-weight:700; color:#8A8F99;`)}>2</span></div>
                   <div style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#5A626E; margin-top:2px;`)}>₽1,46M</div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #9AA2AE;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>ТД «Восток»</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽260 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>ТД «Восток»</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽260 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#B8860B;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>ТВ</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span></div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #9AA2AE;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Аптека, сеть</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽1 200 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>Аптека, сеть</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽1 200 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#7A6FF0;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>АС</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#D6DAE0;`)}></span></div>
                 </div>
               </div>
 
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#DCE8FF; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#155EEF;`)}>В работе</span><span ref={v.workCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#155EEF;`)}>2</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#155EEF;`)}>В работе</span><span ref={v.workCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#155EEF;`)}>2</span></div>
                   <div ref={v.workSumRef} style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#155EEF; margin-top:2px;`)}>₽1,22M</div>
                 </div>
                 <div style={s(`background:#fff; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.09); border-left:3px solid #155EEF;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>СтройДом</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽740 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>СтройДом</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽740 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#155EEF;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>СД</span><span style={s(`width:5px;height:5px;border-radius:50%;background:#3DDC84;`)}></span></div>
                 </div>
               </div>
 
               <div style={s(`flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;`)}>
                 <div style={s(`border-radius:8px; background:#DCF3E6; padding:7px 10px;`)}>
-                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:11px; font-weight:700; color:#1F8A5B;`)}>Успех</span><span ref={v.succCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#1F8A5B;`)}>1</span></div>
+                  <div style={s(`display:flex; align-items:center; justify-content:space-between;`)}><span style={s(`font-size:var(--mock-11); font-weight:700; color:#1F8A5B;`)}>Успех</span><span ref={v.succCountRef} style={s(`font-size:var(--mock-sm); font-weight:700; color:#1F8A5B;`)}>1</span></div>
                   <div ref={v.succSumRef} style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; color:#1F8A5B; margin-top:2px;`)}>₽2,10M</div>
                 </div>
                 <div style={s(`background:#EBF7F0; border-radius:8px; padding:9px 10px; box-shadow:0 1px 3px rgba(20,23,28,.06); border-left:3px solid #1F8A5B;`)}>
-                  <div style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>IT-Парк</div>
-                  <div style={s(`font-family:monospace; font-size:11px; font-weight:800; color:#1F8A5B; margin-top:4px;`)}>₽2 100 000</div>
+                  <div style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>IT-Парк</div>
+                  <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:800; color:#1F8A5B; margin-top:4px;`)}>₽2 100 000</div>
                   <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}><span style={s(`width:16px;height:16px;border-radius:50%;background:#1F8A5B;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>IP</span><span style={s(`width:14px;height:14px;border-radius:50%;background:#1F8A5B;display:flex;align-items:center;justify-content:center;`)}><svg width="8" height="8" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span></div>
                 </div>
               </div>
 
               <div ref={v.dragRef} style={s(`position:absolute; left:calc(34px + 2*(100% - 48px)/3); width:calc((100% - 48px)/3); top:141px; background:#fff; border-radius:8px; padding:9px 10px; border-left:3px solid #12A5E0; box-shadow:0 2px 6px rgba(20,23,28,.12); transform:translate(calc(-100% - 10px),0); pointer-events:none; z-index:7; animation:b24Carry 7s cubic-bezier(.6,.02,.35,1) infinite; animation-play-state:${v.heroPlayState}; will-change:transform,opacity;`)}>
                 <div style={s(`display:flex; align-items:center; gap:5px;`)}>
-                  <span style={s(`font-size:11.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;`)}>ООО «Ромашка»</span>
+                  <span style={s(`font-size:var(--mock-11); font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;`)}>ООО «Ромашка»</span>
                   <span style={s(`width:6px;height:6px;border-radius:50%;background:#3DDC84;flex-shrink:0;`)}></span>
                 </div>
-                <div style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽480 000</div>
+                <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); margin-top:4px;`)}>₽480 000</div>
                 <div style={s(`display:flex; align-items:center; gap:5px; margin-top:7px;`)}>
                   <span style={s(`width:16px;height:16px;border-radius:50%;background:#12A5E0;color:#fff;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;`)}>РМ</span>
                   <span style={s(`font-size:var(--mock-xs); color:var(--ink-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;`)}>перетаскивание</span>
@@ -364,11 +364,11 @@ export default class Bitrix24Page extends React.Component {
           </div>
         </div>
         <div style={s(`display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-top:14px;`)}>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>1С · счета и остатки</span>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.4s;`)}></span>Телефония · записи звонков</span>
-          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.8s;`)}></span>Сайт · лиды с форм</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>1С · счета и остатки</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.4s;`)}></span>Телефония · записи звонков</span>
+          <span style={s(`display:inline-flex; align-items:center; gap:7px; font-size:var(--mock-12); font-weight:600; color:var(--ink-soft); background:linear-gradient(135deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:7px 14px; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:#3DDC84; animation:pulseDot 1.8s ease-in-out infinite; animation-delay:.8s;`)}></span>Сайт · лиды с форм</span>
         </div>
-        <div style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); margin-top:12px; text-align:center;`)}>// так выглядит CRM после внедрения</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-11); color:var(--ink-faint); margin-top:12px; text-align:center;`)}>// так выглядит CRM после внедрения</div>
       </div>
     </div>
   </section>
@@ -431,7 +431,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Аудит процессов</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–5 дней</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–5 дней</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Интервью с руководителем и командой, разбор текущих инструментов: как приходят заявки, где теряются, кто за что отвечает и что тормозит продажи.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>карта процессов и план внедрения с оценкой</span></div>
@@ -446,7 +446,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Проектирование системы</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>~1 неделя</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>~1 неделя</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Проектируем структуру CRM: воронки и стадии, поля и карточки, роли и права, сценарии автоматизации. Всё согласовываем до начала настройки.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>ТЗ, по которому строится система</span></div>
@@ -461,7 +461,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Настройка Битрикс24</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Разворачиваем портал: CRM, задачи, роботы, отчёты, структура компании. Показываем промежуточные версии — а не «сюрприз» в конце проекта.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>настроенный портал на ваших сценариях</span></div>
@@ -476,7 +476,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Интеграции и перенос данных</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>1–2 недели</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Подключаем 1С, телефонию, сайт и мессенджеры. Переносим базу из старой CRM или таблиц: сначала тестовый прогон на копии, проверка — и только потом боевой перенос.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>единый контур без ручного переноса</span></div>
@@ -491,7 +491,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`padding-bottom:40px; min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Обучение команды</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–4 дня</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>3–4 дня</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Отдельные сценарии для менеджеров, РОПа и руководителя. Записи занятий, инструкции и регламенты остаются у вас — новички обучаются сами.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>команда работает в системе с первого дня</span></div>
@@ -505,7 +505,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`min-width:0;`)}>
           <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap;`)}>
             <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; margin:0; color:var(--ink);`)}>Запуск и сопровождение</h3>
-            <span style={s(`font-family:monospace; font-size:11px; font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>постоянно</span>
+            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 9px;`)}>постоянно</span>
           </div>
           <p style={s(`font-size:var(--t16); line-height:1.65; color:var(--ink-soft); margin:10px 0 0; max-width:calc(640px * var(--t-scale));`)}>Первые недели — самые важные: следим, как команда пользуется системой, донастраиваем, отвечаем на вопросы. Дальше — <a href="#sla" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>поддержка по SLA</a>.</p>
           <div style={s(`display:flex; align-items:baseline; gap:10px; margin-top:14px;`)}><span style={s(`font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#1F8A5B; flex-shrink:0;`)}>Результат</span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>система живёт и развивается вместе с бизнесом</span></div>
@@ -539,7 +539,7 @@ export default class Bitrix24Page extends React.Component {
       </div>
       <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:30px;`)}>
         <div style={s(`display:flex; align-items:center; gap:12px;`)}>
-          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:12px; color:#1F8A5B; flex-shrink:0;`)}>www</span>
+          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:var(--mock-12); color:#1F8A5B; flex-shrink:0;`)}>www</span>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t18); margin:0; color:var(--ink);`)}>Сайт и формы</h3>
         </div>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:14px 0 0;`)}>Заявки с сайта попадают в CRM с источником и UTM-метками — ни одна не теряется в почте менеджера.</p>
@@ -553,14 +553,14 @@ export default class Bitrix24Page extends React.Component {
       </div>
       <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:30px;`)}>
         <div style={s(`display:flex; align-items:center; gap:12px;`)}>
-          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(184,134,11,0.08); border:1px solid rgba(184,134,11,0.2); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:12px; color:#B8860B; flex-shrink:0;`)}>@</span>
+          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(184,134,11,0.08); border:1px solid rgba(184,134,11,0.2); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:var(--mock-12); color:#B8860B; flex-shrink:0;`)}>@</span>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t18); margin:0; color:var(--ink);`)}>Почта</h3>
         </div>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:14px 0 0;`)}>Двусторонняя синхронизация: письма автоматически прикрепляются к сделкам и контактам, история переписки — в одном месте.</p>
       </div>
       <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:20px; padding:30px;`)}>
         <div style={s(`display:flex; align-items:center; gap:12px;`)}>
-          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(20,23,28,0.05); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:11px; color:var(--ink-soft); flex-shrink:0;`)}>API</span>
+          <span style={s(`width:38px; height:38px; border-radius:11px; background:rgba(20,23,28,0.05); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-family:monospace; font-weight:700; font-size:var(--mock-11); color:var(--ink-soft); flex-shrink:0;`)}>API</span>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t18); margin:0; color:var(--ink);`)}>Нестандартные системы</h3>
         </div>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:14px 0 0;`)}>Интегрируем через REST API и вебхуки: учётные системы, личные кабинеты, службы доставки, платёжные сервисы.</p>
@@ -596,7 +596,7 @@ export default class Bitrix24Page extends React.Component {
       </div>
 
       <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Что переносим</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Что переносим</div>
         <div style={s(`display:flex; flex-direction:column; gap:13px; margin-top:20px;`)}>
           <div style={s(`display:flex; align-items:center; gap:11px;`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:var(--blue); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t155); color:var(--ink);`)}>Контакты и компании</span></div>
           <div style={s(`display:flex; align-items:center; gap:11px;`)}><span style={s(`width:6px; height:6px; border-radius:50%; background:var(--blue); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t155); color:var(--ink);`)}>Сделки со стадиями и суммами</span></div>
@@ -607,7 +607,7 @@ export default class Bitrix24Page extends React.Component {
 
         <div style={s(`height:1px; background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px); margin:26px 0;`)}></div>
 
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Откуда переезжают чаще всего</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Откуда переезжают чаще всего</div>
         <div style={s(`display:flex; flex-wrap:wrap; gap:10px; margin-top:18px;`)}>
           <span style={s(`font-size:var(--t135); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 16px;`)}>amoCRM</span>
           <span style={s(`font-size:var(--t135); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 16px;`)}>Excel / Google Таблицы</span>
@@ -644,13 +644,13 @@ export default class Bitrix24Page extends React.Component {
             <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--violet); flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:rgba(255,255,255,0.85);`)}>Контроль обновлений Битрикс24</span></div>
           </div>
           <div style={s(`margin-top:auto; padding-top:26px;`)}>
-            <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
+            <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; color:#fff; margin-top:6px;`)}>до 1 рабочего дня</div>
           </div>
         </div>
 
         <div style={s(`position:relative; display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(21,94,239,0.22), rgba(18,165,224,0.08)); backdrop-filter:blur(20px) saturate(160%); -webkit-backdrop-filter:blur(20px) saturate(160%); border:1px solid rgba(94,159,255,0.45); border-radius:22px; padding:34px 32px; box-shadow:0 24px 60px -20px rgba(21,94,239,0.35), inset 0 1px 1px rgba(255,255,255,0.25);`)}>
-          <span style={s(`position:absolute; top:-13px; left:32px; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#fff; background:var(--grad); border-radius:999px; padding:6px 14px; box-shadow:0 6px 16px -4px rgba(21,94,239,0.55);`)}>Чаще всего</span>
+          <span style={s(`position:absolute; top:-13px; left:32px; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#fff; background:var(--grad); border-radius:999px; padding:6px 14px; box-shadow:0 6px 16px -4px rgba(21,94,239,0.55);`)}>Чаще всего</span>
           <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; margin:0; color:#fff;`)}>Расширенный</h3>
           <p style={s(`font-size:var(--t14); line-height:1.55; color:rgba(255,255,255,0.55); margin:8px 0 0;`)}>Для растущих команд, которым нужны доработки</p>
           <div style={s(`display:flex; flex-direction:column; gap:12px; margin-top:24px;`)}>
@@ -660,7 +660,7 @@ export default class Bitrix24Page extends React.Component {
             <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:#5E9FFF; flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:rgba(255,255,255,0.85);`)}>Ежемесячный мини-аудит использования</span></div>
           </div>
           <div style={s(`margin-top:auto; padding-top:26px;`)}>
-            <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
+            <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; color:#fff; margin-top:6px;`)}>до 4 часов</div>
           </div>
         </div>
@@ -674,7 +674,7 @@ export default class Bitrix24Page extends React.Component {
             <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--violet); flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:rgba(255,255,255,0.85);`)}>Регулярные аудиты и план развития</span></div>
           </div>
           <div style={s(`margin-top:auto; padding-top:26px;`)}>
-            <div style={s(`font-family:monospace; font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
+            <div style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:rgba(255,255,255,0.4);`)}>Реакция</div>
             <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:19px; color:#fff; margin-top:6px;`)}>до 1 часа</div>
           </div>
         </div>
@@ -696,7 +696,7 @@ export default class Bitrix24Page extends React.Component {
 
     <div data-reveal-children="120" style={s(`display:grid; grid-template-columns:${v.cols3}; gap:24px; margin-top:56px; align-items:stretch;`)}>
       <div style={s(`display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--line); border-radius:24px; padding:38px 34px;`)}>
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Старт</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Старт</div>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:23px; letter-spacing:-0.01em; margin:12px 0 0; color:var(--ink);`)}>Быстрый запуск CRM</h3>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Для небольшой команды, которой нужно начать вести клиентов в системе.</p>
         <div style={s(`display:flex; flex-direction:column; gap:12px; margin-top:24px;`)}>
@@ -705,14 +705,14 @@ export default class Bitrix24Page extends React.Component {
           <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>Обучение команды — стартовая сессия</span></div>
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
-          <div style={s(`font-family:monospace; font-size:12px; color:var(--ink-faint);`)}>Срок: от 2 недель</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: от 2 недель</div>
           <button className="b24fx11" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
 
       <div style={s(`position:relative; display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,255,255,0.6)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(21,94,239,0.4); border-radius:24px; padding:38px 34px; box-shadow:0 30px 60px -24px rgba(21,94,239,0.3), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`position:absolute; top:-13px; left:34px; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#fff; background:var(--grad); border-radius:999px; padding:6px 14px; box-shadow:0 6px 16px -4px rgba(21,94,239,0.55);`)}>Оптимальный</span>
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--blue);`)}>Бизнес</div>
+        <span style={s(`position:absolute; top:-13px; left:34px; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#fff; background:var(--grad); border-radius:999px; padding:6px 14px; box-shadow:0 6px 16px -4px rgba(21,94,239,0.55);`)}>Оптимальный</span>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--blue);`)}>Бизнес</div>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:23px; letter-spacing:-0.01em; margin:12px 0 0; color:var(--ink);`)}>Внедрение под процессы</h3>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Полный цикл: от аудита до обучения — CRM собрана под то, как вы реально продаёте.</p>
         <div style={s(`display:flex; flex-direction:column; gap:12px; margin-top:24px;`)}>
@@ -722,13 +722,13 @@ export default class Bitrix24Page extends React.Component {
           <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>Обучение по ролям + регламенты</span></div>
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
-          <div style={s(`font-family:monospace; font-size:12px; color:var(--ink-faint);`)}>Срок: 4–8 недель</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: 4–8 недель</div>
           <button className="b24fx12" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border:none; padding:14px 24px; border-radius:12px; cursor:pointer; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--line); border-radius:24px; padding:38px 34px;`)}>
-        <div style={s(`font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Энтерпрайз</div>
+        <div style={s(`font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Энтерпрайз</div>
         <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:23px; letter-spacing:-0.01em; margin:12px 0 0; color:var(--ink);`)}>Сложные процессы</h3>
         <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Для компаний с нестандартной логикой, доработками и высокими требованиями.</p>
         <div style={s(`display:flex; flex-direction:column; gap:12px; margin-top:24px;`)}>
@@ -738,7 +738,7 @@ export default class Bitrix24Page extends React.Component {
           <div style={s(`display:flex; align-items:baseline; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0; transform:translateY(-2px);`)}></span><span style={s(`font-size:var(--t145); color:var(--ink);`)}>Выделенная команда проекта</span></div>
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
-          <div style={s(`font-family:monospace; font-size:12px; color:var(--ink-faint);`)}>Срок: от 8 недель</div>
+          <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: от 8 недель</div>
           <button className="b24fx13" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
@@ -834,7 +834,7 @@ export default class Bitrix24Page extends React.Component {
     <a className="b24fx15" data-reveal href="/ai" style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
       <span style={s(`position:absolute; top:-120px; right:-80px; width:340px; height:340px; border-radius:50%; background:var(--grad); opacity:0.25; filter:blur(90px); pointer-events:none;`)}></span>
       <span style={s(`position:relative; z-index:1; display:block;`)}>
-        <span style={s(`display:block; font-family:monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>
+        <span style={s(`display:block; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>
         <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(20px,2.4vw,26px); letter-spacing:-0.01em; color:#fff; margin-top:10px;`)}>ИИ-автоматизация для вашего бизнеса</span>
         <span style={s(`display:block; font-size:var(--t15); color:rgba(255,255,255,0.6); margin-top:8px; max-width:calc(520px * var(--t-scale));`)}>Обработка заявок 24/7, карточки товаров с SEO-текстами, аналитика — на отдельной странице.</span>
       </span>
