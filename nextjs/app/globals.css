@@ -743,6 +743,10 @@ button:focus-visible {
 }
 .mobile-bar > a:active { transform: scale(0.98); }
 
+/* Баннер согласия рендерится сервером всем; тем, кто уже нажал «Принять» или
+   «Отклонить», его прячет атрибут, который ставит скрипт в <head>. */
+html[data-metrika-consent] .cookie-notice { display: none !important; }
+
 /* Панель перекрывала бы конец страницы и баннер о cookie — резервируем место. */
 @media (max-width: 1179px) {
   body { padding-bottom: 70px; }
