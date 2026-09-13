@@ -1,6 +1,6 @@
-import Script from 'next/script';
 import { Inter, Manrope } from 'next/font/google';
 import CookieNotice from '../components/CookieNotice';
+import { CONSENT_HEAD_SCRIPT } from '../components/consent';
 import MobileActionBar from '../components/MobileActionBar';
 import './globals.css';
 
@@ -125,12 +125,15 @@ const speculationRules = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ru" className={`${inter.variable} ${manrope.variable}`}>
+    // suppressHydrationWarning: атрибут согласия на <html> ставит скрипт ниже до гидрации.
+    <html lang="ru" className={`${inter.variable} ${manrope.variable}`} suppressHydrationWarning>
       <head>
-        {/* Метрика — сторонний домен на 271 КБ; ранний коннект экономит
-            DNS + TLS, когда скрипт всё-таки начнёт грузиться. */}
-        <link rel="preconnect" href="https://mc.yandex.ru" />
-        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
+        {/* Уже выбравшим (Принять/Отклонить) баннер скрывается до первой отрисовки.
+            preconnect к mc.yandex.ru убран намеренно: до согласия браузер не должен
+            соединяться с Метрикой (152-ФЗ). */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_HEAD_SCRIPT }} />
+        {/* Без JS Метрика не загрузится вовсе — спрашивать не о чем. */}
+        <noscript dangerouslySetInnerHTML={{ __html: '<style>.cookie-notice{display:none!important}</style>' }} />
         <script type="speculationrules" dangerouslySetInnerHTML={{ __html: JSON.stringify(speculationRules) }} />
       </head>
       <body>
@@ -138,20 +141,8 @@ export default function RootLayout({ children }) {
         <CookieNotice />
         <MobileActionBar />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-
-        {/* Yandex.Metrika counter — lazyOnload: счётчик не конкурирует
-            с отрисовкой и не портит INP на слабых телефонах. */}
-        <Script id="yandex-metrika" strategy="lazyOnload" dangerouslySetInnerHTML={{ __html: `
-          (function(m,e,t,r,i,k,a){
-              m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-              m[i].l=1*new Date();
-              for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-              k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-          })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=110919394', 'ym');
-          ym(110919394, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
-        ` }} />
-        <noscript><div><img src="https://mc.yandex.ru/watch/110919394" style={{ position: 'absolute', left: '-9999px' }} alt="" /></div></noscript>
-        {/* /Yandex.Metrika counter */}
+        {/* Яндекс Метрика подключается в CookieNotice — только после «Принять».
+            Noscript-пиксель не ставим: он собирал бы данные без согласия. */}
       </body>
     </html>
   );
