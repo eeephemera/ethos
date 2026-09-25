@@ -289,6 +289,10 @@ export default class AiPage extends React.Component {
       heroPlayState: (true) ? 'running' : 'paused',
       tgHref: 'https://t.me/Terraiib24',
       waHref: 'https://wa.me/79285288598',
+      // Продукт из секции #content живёт отдельным сайтом. UTM несёт источник
+      // перехода на сторону продукта: цель Метрики здесь срабатывает только
+      // после согласия на cookie.
+      kartochkiHref: 'https://kartochki-ai-lab.ru/?utm_source=aiethos&utm_medium=referral&utm_campaign=ai_content',
 
       entranceBadge: this.entrance(0),
       entranceH1: this.entrance(0.08),
@@ -822,6 +826,13 @@ export default class AiPage extends React.Component {
             <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--violet); flex-shrink:0; width:24px;`)}>4.</span>
             <div><span style={s(`font-size:var(--t155); font-weight:600; color:var(--ink);`)}>Выгружаем куда нужно.</span> <span style={s(`font-size:var(--t155); color:var(--ink-soft);`)}>Сайт на Битрикс, интернет-магазин, маркетплейсы — сразу в нужном формате.</span></div>
           </div>
+        </div>
+
+        {/* Секция — короткий вход из ETHOS, сам продукт на своём сайте.
+            Кнопка того же вида, что «Получить оценку проекта» в #cost. */}
+        <div style={s(`display:flex; align-items:center; gap:12px 18px; flex-wrap:wrap; margin-top:30px;`)}>
+          <a className="aifx11" href={v.kartochkiHref} onClick={() => ymGoal('open_kartochki')} style={s(`display:inline-flex; align-items:center; gap:8px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); padding:15px 30px; border-radius:14px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Открыть продукт <span aria-hidden="true">→</span></a>
+          <span style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>«Карточки·AI Лаб» — отдельный сайт продукта</span>
         </div>
       </div>
 
