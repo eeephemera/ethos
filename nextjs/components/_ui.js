@@ -76,6 +76,65 @@ export function setupHeaderAutoHide(getHeader, isMenuOpen) {
   return () => window.removeEventListener('scroll', onScroll);
 }
 
+/**
+ * Появление блоков при листании ([data-reveal], [data-reveal-children]).
+ *
+ * Раньше каждая страница на каждом скролл-эвенте опрашивала
+ * getBoundingClientRect() у всех ещё не показанных блоков — принудительная
+ * раскладка в кадре прокрутки. IntersectionObserver делает то же без работы
+ * в кадре: блок показывается, когда его верх поднялся выше 86 % высоты окна
+ * (тот же порог), или если он уже выше окна (переход по якорю).
+ *
+ * Страховка прежняя: через 10 с показываем всё, что не успело появиться.
+ */
+export function setupReveal() {
+  if (typeof window === 'undefined') return () => {};
+  const targets = [].slice.call(document.querySelectorAll('[data-reveal], [data-reveal-children]'));
+  const show = (el) => el.setAttribute('data-shown', '');
+  if (!('IntersectionObserver' in window)) {
+    targets.forEach(show);
+    return () => {};
+  }
+  try { document.documentElement.setAttribute('data-reveal-ready', ''); } catch (e) {}
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting || e.boundingClientRect.top < 0) {
+        show(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -14% 0px' });
+  targets.forEach((el) => io.observe(el));
+
+  const failsafe = setTimeout(() => { targets.forEach(show); io.disconnect(); }, 10000);
+  return () => { clearTimeout(failsafe); io.disconnect(); };
+}
+
+/**
+ * Полоса прогресса чтения: раз в кадр и через transform: scaleX, а не width —
+ * width на каждом скролл-эвенте заставлял пересчитывать раскладку.
+ */
+export function setupScrollProgress(getBar) {
+  if (typeof window === 'undefined') return () => {};
+  let ticking = false;
+  const apply = () => {
+    ticking = false;
+    const el = getBar();
+    if (!el) return;
+    const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
+    el.style.transform = 'scaleX(' + Math.max(0, Math.min(1, (window.scrollY || 0) / max)) + ')';
+  };
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(apply);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  apply();
+  return () => window.removeEventListener('scroll', onScroll);
+}
+
 export function s(css) {
   const style = {};
   if (!css) return style;

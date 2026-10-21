@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, observeInView } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, observeInView, setupReveal } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
 
@@ -199,13 +199,8 @@ export default class MainPage extends React.Component {
 
     this.startProductCycle();
 
-    this.setupScrollReveal();
-
-    this._onScroll = () => {
-      if (this._checkReveal) this._checkReveal();
-    };
-    window.addEventListener('scroll', this._onScroll, { passive: true });
-    this._onScroll();
+    // Появление блоков — без работы на каждом скролл-эвенте.
+    this._offReveal = setupReveal();
 
     this.startMetricTimer();
 
@@ -267,30 +262,6 @@ export default class MainPage extends React.Component {
     card.addEventListener('animationstart', cycle);
     card.addEventListener('animationiteration', cycle);
     cycle();
-  }
-
-  setupScrollReveal() {
-    if (typeof window === 'undefined') return;
-    try { document.documentElement.setAttribute('data-reveal-ready', ''); } catch (e) {}
-    this._revealTimer = setTimeout(() => {
-      this._revealTargets = [].slice.call(document.querySelectorAll('[data-reveal], [data-reveal-children]'));
-      this._checkReveal();
-    }, 50);
-    this._revealFailsafe = setTimeout(() => {
-      (this._revealTargets || []).forEach((el) => el.setAttribute('data-shown', ''));
-      this._revealTargets = [];
-    }, 10000);
-  }
-
-  _checkReveal() {
-    if (!this._revealTargets || !this._revealTargets.length) return;
-    const vh = window.innerHeight || 800;
-    const remaining = [];
-    this._revealTargets.forEach((el) => {
-      if (el.getBoundingClientRect().top < vh * 0.86) el.setAttribute('data-shown', '');
-      else remaining.push(el);
-    });
-    this._revealTargets = remaining;
   }
 
   // ---- Ручное листание сцены ИИ-агента в первом экране ----------------------
@@ -519,10 +490,7 @@ export default class MainPage extends React.Component {
     clearTimeout(this._pcSearch); clearTimeout(this._pcNext); clearInterval(this._pcType);
     clearTimeout(this.mountTimer);
     (this.phaseTimers || []).forEach(clearTimeout);
-    clearTimeout(this._revealTimer);
-    clearTimeout(this._revealFailsafe);
-    if (this._revealIO) this._revealIO.disconnect();
-    window.removeEventListener('scroll', this._onScroll);
+    if (this._offReveal) this._offReveal();
   }
 
   // Content is ALWAYS opacity:1 (fully readable) — only a small translateY slide

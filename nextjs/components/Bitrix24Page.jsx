@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress } from './_ui';
 import { R } from './_responsive';
 
 const FXCSS = ".b24fx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx5:hover{background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.b24fx7:hover{color:var(--ink) !important}\n.b24fx8:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.b24fx9:hover{border-color:var(--ink) !important}\n.b24fx10:hover{transform:translateY(-2px) !important}\n.b24fx11:hover{border-color:var(--ink) !important}\n.b24fx12:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.b24fx13:hover{border-color:var(--ink) !important}\n.b24fx14:hover{border-color:var(--ink) !important}\n.b24fx15:hover{transform:translateY(-3px) !important}\n.b24fx16:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.b24fx17:hover{border-color:var(--ink) !important}";
@@ -30,41 +30,11 @@ export default class Bitrix24Page extends React.Component {
 
     this.mountTimer = setTimeout(() => this.setState({ mounted: true }), 40);
 
-    // Скролл-прогресс + reveal
-    this._onScroll = () => {
-      const y = window.scrollY || document.documentElement.scrollTop || 0;
-      if (this.progressRef.current) {
-        const max = (document.documentElement.scrollHeight - window.innerHeight) || 1;
-        this.progressRef.current.style.width = Math.max(0, Math.min(1, y / max)) * 100 + '%';
-      }
-      if (this._checkReveal) this._checkReveal();
-    };
-    window.addEventListener('scroll', this._onScroll, { passive: true });
-
-    try { document.documentElement.setAttribute('data-reveal-ready', ''); } catch (e) {}
-    this._revealTimer = setTimeout(() => {
-      this._revealTargets = [].slice.call(document.querySelectorAll('[data-reveal], [data-reveal-children]'));
-      this._checkReveal();
-    }, 50);
-    this._revealFailsafe = setTimeout(() => {
-      (this._revealTargets || []).forEach((el) => el.setAttribute('data-shown', ''));
-      this._revealTargets = [];
-    }, 10000);
-
-    this._onScroll();
+    // Полоса прогресса и появление блоков — без работы на каждом скролл-эвенте.
+    this._offProgress = setupScrollProgress(() => this.progressRef.current);
+    this._offReveal = setupReveal();
 
     this.setupKanbanDrag();
-  }
-
-  _checkReveal() {
-    if (!this._revealTargets || !this._revealTargets.length) return;
-    const vh = window.innerHeight || 800;
-    const remaining = [];
-    this._revealTargets.forEach((el) => {
-      if (el.getBoundingClientRect().top < vh * 0.86) el.setAttribute('data-shown', '');
-      else remaining.push(el);
-    });
-    this._revealTargets = remaining;
   }
 
   // Синхронизация счётчиков канбана с CSS-анимацией переноса сделки
@@ -101,10 +71,9 @@ export default class Bitrix24Page extends React.Component {
   componentWillUnmount() {
     if (this._offHeader) this._offHeader();
     if (this._desktopMq) this._desktopMq.removeEventListener('change', this._onMqChange);
-    window.removeEventListener('scroll', this._onScroll);
+    if (this._offProgress) this._offProgress();
+    if (this._offReveal) this._offReveal();
     clearTimeout(this.mountTimer);
-    clearTimeout(this._revealTimer);
-    clearTimeout(this._revealFailsafe);
     (this._dragTimers || []).forEach(clearTimeout);
   }
 
@@ -178,7 +147,7 @@ export default class Bitrix24Page extends React.Component {
 
 <div style={s(`--bg:#FAFAF8; --paper:#FFFFFF; --ink:#14171C; --ink-soft:#3F4650; --ink-faint:#6B7280; --line:#E7E6E2; --blue:#155EEF; --violet:#12A5E0; --grad:linear-gradient(135deg, var(--blue), var(--violet)); font-family:var(--font-inter),sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; position:relative; isolation:isolate; overflow-x:clip;`)}>
 
-  <div ref={v.progressRef} style={s(`position:fixed; top:0; left:0; height:3px; width:0; z-index:70; background:linear-gradient(90deg, var(--blue), var(--violet)); box-shadow:0 0 14px rgba(21,94,239,0.55); pointer-events:none;`)}></div>
+  <div ref={v.progressRef} style={s(`position:fixed; top:0; left:0; height:3px; width:100%; transform:scaleX(0); transform-origin:0 50%; z-index:70; background:linear-gradient(90deg, var(--blue), var(--violet)); box-shadow:0 0 14px rgba(21,94,239,0.55); pointer-events:none;`)}></div>
 
   <div aria-hidden="true" className="aurora" style={s(`position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;`)}>
     <div className="aurora-blob" style={s(`position:absolute; top:-12%; left:-8%; width:55vw; height:55vw; border-radius:50%; background:radial-gradient(circle at 50% 50%, rgba(21,94,239,0.5), transparent 68%); filter:blur(80px); animation:driftBlobA 22s ease-in-out infinite alternate;`)}></div>
