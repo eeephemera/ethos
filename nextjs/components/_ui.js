@@ -6,10 +6,44 @@ export const YM_ID = 110919394;
 
 // Fire a Metrika goal (conversion). No-op during SSR or if the counter
 // hasn't loaded yet, so it's always safe to call from a click handler.
-export function ymGoal(name) {
+//
+// Параметры цели: page (путь страницы, ставится сам) и place — место кнопки
+// (header, hero_form, contact, footer…). Раньше цель telegram срабатывала и от
+// формы, и от любой ссылки, а cta_contact не знала, какая кнопка нажата, —
+// вклад отдельного места было не выделить. В Метрике параметры видны в отчёте
+// «Параметры визитов» без заведения новых целей.
+export function ymGoal(name, params) {
   if (typeof window !== 'undefined' && typeof window.ym === 'function') {
-    window.ym(YM_ID, 'reachGoal', name);
+    window.ym(YM_ID, 'reachGoal', name, Object.assign({ page: window.location.pathname }, params));
   }
+}
+
+// Мессенджеры. Ссылка несёт готовый текст: человек открывает чат с набранным
+// сообщением, а мы видим, с какой страницы и про что он пишет. Раньше со
+// страниц приходило голое «Здравствуйте» без задачи и источника.
+// Telegram подставляет ?text= в поле ввода (core.telegram.org/api/links,
+// «Public username links»), WhatsApp — wa.me/<номер>?text=.
+export const TG_USERNAME = 'Terraiib24';
+export const WA_PHONE = '79285288598';
+
+// where — «страница «Битрикс24»», topic — сценарий кнопки («пакет «Бизнес»»).
+// Хвост «Задача: » оставлен открытым — человек дописывает своё.
+export function leadText(where, topic) {
+  return 'Здравствуйте! Пишу с сайта aiethos.ru, ' + where + (topic ? ' — ' + topic : '') + '. Задача: ';
+}
+
+export function tgHref(text) {
+  return 'https://t.me/' + TG_USERNAME + (text ? '?text=' + encodeURIComponent(text) : '');
+}
+
+export function waHref(text) {
+  return 'https://wa.me/' + WA_PHONE + (text ? '?text=' + encodeURIComponent(text) : '');
+}
+
+// prefers-reduced-motion для JS-автоплея (CSS-анимации гасятся в globals.css).
+export function prefersReducedMotion() {
+  return typeof window !== 'undefined' && !!window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /**
@@ -182,4 +216,19 @@ export function observeInView(el, onChange, { rootMargin = '150px' } = {}) {
   const io = new IntersectionObserver(([entry]) => apply(entry.isIntersecting), { rootMargin });
   io.observe(el);
   return () => io.disconnect();
+}
+
+/**
+ * Та же пауза для всех секций страницы разом.
+ *
+ * Пауза вне кадра была только у двух сцен главной. На /bitrix24 канбан и
+ * чат первого экрана, на /ai — чат, SQL, голосовой ассистент и вики крутились
+ * всю дорогу, пока человек читал футер. Здесь data-run ставится каждой
+ * <section>, а CSS (section[data-run='0'] в globals.css) останавливает в ней
+ * все CSS-анимации.
+ */
+export function pauseSectionsOffscreen(root = document) {
+  if (typeof window === 'undefined' || !root) return () => {};
+  const offs = [].slice.call(root.querySelectorAll('section')).map((el) => observeInView(el));
+  return () => offs.forEach((off) => off());
 }

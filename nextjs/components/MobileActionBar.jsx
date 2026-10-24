@@ -1,6 +1,17 @@
 'use client';
 
-import { ymGoal } from './_ui';
+import { usePathname } from 'next/navigation';
+import { ymGoal, leadText, tgHref } from './_ui';
+
+// Какая страница открыта — уходит в текст сообщения: панель живёт в layout,
+// и без этого из любой страницы приходило одинаковое «Здравствуйте».
+const PAGE_NAMES = {
+  '/': 'главная страница',
+  '/bitrix24': 'страница «Битрикс24»',
+  '/ai': 'страница «ИИ-решения»',
+  '/contacts': 'страница «Контакты»',
+  '/privacy': 'страница «Политика конфиденциальности»',
+};
 
 /**
  * Нижняя панель действий на телефоне.
@@ -18,9 +29,11 @@ import { ymGoal } from './_ui';
  * можно одинаково, и отступ снизу у body всегда совпадает с высотой панели.
  */
 export default function MobileActionBar() {
+  const pathname = usePathname() || '/';
+  const where = PAGE_NAMES[pathname] || 'страница ' + pathname;
   return (
     <nav className="mobile-bar" aria-label="Быстрая связь">
-      <a className="mb-call" href="tel:+79256777027" onClick={() => ymGoal('phone')}>
+      <a className="mb-call" href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'mobile_bar' })}>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
             d="M6.6 3.5h2.2l1.5 3.7-1.8 1.3a12 12 0 006.9 6.9l1.3-1.8 3.7 1.5v2.2a2 2 0 01-2.2 2A17.5 17.5 0 014.6 5.7a2 2 0 012-2.2z"
@@ -31,10 +44,10 @@ export default function MobileActionBar() {
       </a>
       <a
         className="mb-tg"
-        href="https://t.me/Terraiib24"
+        href={tgHref(leadText(where))}
         target="_blank"
         rel="noopener"
-        onClick={() => ymGoal('telegram')}
+        onClick={() => ymGoal('telegram', { place: 'mobile_bar' })}
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M21 4.5L2.8 11.4l4.9 1.6L19 6.3l-9.1 8.6.3 5 2.7-3.6 4.6 3.4L21 4.5z" fill="currentColor" />

@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, prefersReducedMotion, leadText, tgHref, waHref } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
 import { IP_AI } from '../lib/requisites';
@@ -107,13 +107,16 @@ export default class AiPage extends React.Component {
     // Анимация «ИИ собирает карточку»: подбор фото → посимвольный ввод → готово
     prodIdx: 0,
     prodPhase: 'search',
-    prodTyped: 0,
+    // Сценарий кнопки, по которой человек пришёл к контактам: уходит в текст
+    // сообщения и в параметры цели («голосовой ассистент», «оценка проекта»).
+    contactTopic: null,
   };
 
   progressRef = React.createRef();
   headerRef = React.createRef();
   contentRef = React.createRef();
   memRef = React.createRef();
+  prodDescRef = React.createRef();
 
   componentDidMount() {
     this._offHeader = setupHeaderAutoHide(() => this.headerRef.current, () => this.state.mobileMenuOpen);
@@ -128,6 +131,10 @@ export default class AiPage extends React.Component {
     // Полоса прогресса и появление блоков — без работы на каждом скролл-эвенте.
     this._offProgress = setupScrollProgress(() => this.progressRef.current);
     this._offReveal = setupReveal();
+    // CSS-анимации каждой секции стоят, пока секция вне кадра: чат первого
+    // экрана, SQL, ассистент и вики раньше крутились всю дорогу.
+    this._offSections = pauseSectionsOffscreen();
+    this._reducedMotion = prefersReducedMotion();
 
     // Анимация карточки крутится только пока секция на экране: посимвольный
     // ввод — это setState каждые 28 мс, гонять его на всю длинную страницу
@@ -166,6 +173,10 @@ export default class AiPage extends React.Component {
   }
 
   // ---- Демо «ИИ собирает карточку» ----------------------------------------
+  writeProdDesc(text) {
+    if (this.prodDescRef.current) this.prodDescRef.current.textContent = text;
+  }
+
   startProductCycle = () => {
     if (this._prodRunning) return;
     this._prodRunning = true;
@@ -181,16 +192,27 @@ export default class AiPage extends React.Component {
 
   runProductStep() {
     clearTimeout(this._prodSearch); clearTimeout(this._prodNext); clearInterval(this._prodType);
-    this.setState({ prodPhase: 'search', prodTyped: 0 });
+    // Описание печатается в DOM через ref, без setState каждые 28 мс: раньше
+    // это перерисовывало всю страницу /ai ~35 раз в секунду, пока блок в кадре.
+    const descOf = () => DEMO_PRODUCTS[this.state.prodIdx % DEMO_PRODUCTS.length].desc;
+    if (this._reducedMotion) {
+      this.setState({ prodPhase: 'done' });
+      this.writeProdDesc(descOf());
+      return;
+    }
+    this.setState({ prodPhase: 'search' });
+    this.writeProdDesc('');
 
     this._prodSearch = setTimeout(() => {
+      // Индекс товара читаем здесь, а не выше: смена товара (setState) к этому
+      // моменту уже применена.
+      const full = descOf();
+      let typed = 0;
       this.setState({ prodPhase: 'type' });
       this._prodType = setInterval(() => {
-        this.setState((st) => {
-          const full = DEMO_PRODUCTS[st.prodIdx % DEMO_PRODUCTS.length].desc;
-          if (st.prodTyped >= full.length) { clearInterval(this._prodType); return { prodPhase: 'done' }; }
-          return { prodTyped: Math.min(st.prodTyped + 3, full.length) };
-        });
+        typed = Math.min(typed + 3, full.length);
+        this.writeProdDesc(typed ? full.slice(0, typed) : '');
+        if (typed >= full.length) { clearInterval(this._prodType); this.setState({ prodPhase: 'done' }); }
       }, 28);
     }, 1400);
 
@@ -210,6 +232,7 @@ export default class AiPage extends React.Component {
     this.stopProductCycle();
     if (this._offProgress) this._offProgress();
     if (this._offReveal) this._offReveal();
+    if (this._offSections) this._offSections();
     clearTimeout(this.mountTimer);
   }
 
@@ -223,7 +246,7 @@ export default class AiPage extends React.Component {
   closeMobileMenu = () => this.setState({ mobileMenuOpen: false });
 
   renderVals() {
-    const { mobileMenuOpen, openFaq, prodIdx, prodPhase, prodTyped } = this.state;
+    const { mobileMenuOpen, openFaq, prodIdx, prodPhase, contactTopic } = this.state;
 
     const prod = DEMO_PRODUCTS[prodIdx % DEMO_PRODUCTS.length];
     const prodBlur = (this.props.productBlur || {})[prod.imgId] || {};
@@ -236,7 +259,7 @@ export default class AiPage extends React.Component {
       prodKey,
       prodSearching,
       prodDone: prodPhase === 'done',
-      prodTypedText: prodSearching ? '' : prod.desc.slice(0, prodTyped),
+      prodDescRef: this.prodDescRef,
       prodCaret: prodPhase === 'type' ? 'inline-block' : 'none',
       prodStatus: prodPhase === 'search' ? 'ИИ подбирает фото…' : prodPhase === 'type' ? 'ИИ пишет SEO-описание…' : 'Карточка готова — можно выгружать',
       prodStatusColor: prodPhase === 'done' ? '#1F8A5B' : 'var(--violet)',
@@ -257,8 +280,9 @@ export default class AiPage extends React.Component {
       closeMobileMenu: this.closeMobileMenu,
 
       heroPlayState: (true) ? 'running' : 'paused',
-      tgHref: 'https://t.me/Terraiib24',
-      waHref: 'https://wa.me/79285288598',
+      tgHref: tgHref(leadText('страница «ИИ-решения»', contactTopic)),
+      waHref: waHref(leadText('страница «ИИ-решения»', contactTopic)),
+      contactTopic,
       // Продукт из секции #content живёт отдельным сайтом. UTM несёт источник
       // перехода на сторону продукта: цель Метрики здесь срабатывает только
       // после согласия на cookie.
@@ -272,13 +296,16 @@ export default class AiPage extends React.Component {
 
       progressRef: this.progressRef,
 
-      scrollToContact: () => {
-        ymGoal('cta_contact'); const el = document.getElementById('contact');
+      // Кнопка «к контактам»: место — в цель, сценарий — в текст сообщения.
+      contactCta: (place, topic) => () => {
+        ymGoal('cta_contact', { place, topic: topic || 'none' });
+        if (topic) this.setState({ contactTopic: topic });
+        const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
       scrollToContactMobile: () => {
         this.closeMobileMenu();
-        ymGoal('cta_contact'); const el = document.getElementById('contact');
+        ymGoal('cta_contact', { place: 'mobile_menu' }); const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       }
     };
@@ -328,7 +355,7 @@ export default class AiPage extends React.Component {
       <a className="aifx4" href="#faq" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>FAQ</a>
       <a className="aifx5" href="/bitrix24" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Битрикс24</a>
       <a href="/ai" aria-current="page" style={s(`font-size:var(--t15); font-weight:600; color:var(--blue); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--blue),var(--blue)); background-repeat:no-repeat; background-position:0 100%; background-size:100% 1.5px; padding-bottom:3px;`)}>ИИ-решения</a>
-      <button className="aifx6" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
+      <button className="aifx6" onClick={v.contactCta('header')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
     </div>
 
     <button onClick={v.toggleMobileMenu} aria-label="Меню" aria-expanded={v.mobileMenuOpen} aria-controls="ai-mobile-menu" style={s(`display:${v.hamburgerDisplay}; width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--paper); flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer;`)}>
@@ -386,7 +413,7 @@ export default class AiPage extends React.Component {
         </p>
 
         <div style={s(`display:flex; align-items:center; gap:18px; margin-top:34px; flex-wrap:wrap; ${v.entranceCta}`)}>
-          <button className="aifx8" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 30px; border-radius:16px; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Решить мою боль</button>
+          <button className="aifx8" onClick={v.contactCta('hero')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 30px; border-radius:16px; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Решить мою боль</button>
           <a className="aifx9" href="#agents" style={s(`font-size:var(--t16); font-weight:600; color:var(--ink); display:inline-flex; align-items:center; gap:8px; padding:16px 2px; text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.25s ease;`)}>Что автоматизируем ↓</a>
         </div>
 
@@ -559,7 +586,7 @@ export default class AiPage extends React.Component {
 
           <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:24px;`)}>
             <p style={s(`font-size:var(--t145); line-height:1.6; color:rgba(255,255,255,0.55); margin:0; max-width:calc(520px * var(--t-scale));`)}>Границы задаёте вы: что ассистент делает сам, а что — только после подтверждения. Каждое действие подписано его именем, откат в один клик.</p>
-            <button className="aifx10" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Хочу такого ассистента</button>
+            <button className="aifx10" onClick={v.contactCta('assistant', 'голосовой ассистент')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Хочу такого ассистента</button>
           </div>
         </div>
       </div>
@@ -777,7 +804,7 @@ export default class AiPage extends React.Component {
         <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);`)}>Контент на автопилоте</div>
         <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Карточки товаров и SEO-тексты — без контент-менеджера на потоке</h2>
         <p style={s(`font-size:var(--t18); line-height:1.6; color:var(--ink-soft); margin:20px 0 0; max-width:calc(560px * var(--t-scale));`)}>Каталог на тысячи позиций месяцами стоит без описаний — и не находится в поиске. ИИ заполняет карточки по прайсу и фото, человек только проверяет.</p>
-        <p style={s(`font-size:var(--t16); line-height:1.6; color:var(--ink-soft); margin:14px 0 0; max-width:calc(560px * var(--t-scale));`)}>На нашем боевом проекте — интернет-магазине стройматериалов — за июль прошло <b style={s(`color:var(--ink); font-weight:600;`)}>19 763 карточки</b>: пиковая скорость 1 557 штук в час, устойчивая — около 1 100. <b style={s(`color:var(--ink); font-weight:600;`)}>98,6%</b> ушли в публикацию без ручных правок, остальные ИИ сам пометил «на проверку», когда не был уверен в фото. Каталог на 20 000 позиций закрывается за пару рабочих дней, а не за год.</p>
+        <p style={s(`font-size:var(--t16); line-height:1.6; color:var(--ink-soft); margin:14px 0 0; max-width:calc(560px * var(--t-scale));`)}>На нашем боевом проекте — интернет-магазине стройматериалов — за 36 дней (5 июля — 9 августа 2026) прошло <b style={s(`color:var(--ink); font-weight:600;`)}>19 767 карточек</b>: в пиковый час — 1 391, в среднем 29 секунд на карточку. <b style={s(`color:var(--ink); font-weight:600;`)}>98,6%</b> ушли в публикацию без ручных правок, остальные ИИ сам пометил «на проверку», когда не был уверен в фото. Каталог на 20 000 позиций закрывается за пару рабочих дней, а не за год.</p>
 
         <div style={s(`display:flex; flex-direction:column; gap:0; margin-top:36px; max-width:calc(560px * var(--t-scale));`)}>
           <div style={s(`display:flex; gap:16px; padding:18px 0; border-top:1px solid var(--line);`)}>
@@ -801,7 +828,7 @@ export default class AiPage extends React.Component {
         {/* Секция — короткий вход из ETHOS, сам продукт на своём сайте.
             Кнопка того же вида, что «Получить оценку проекта» в #cost. */}
         <div style={s(`display:flex; align-items:center; gap:12px 18px; flex-wrap:wrap; margin-top:30px;`)}>
-          <a className="aifx11" href={v.kartochkiHref} onClick={() => ymGoal('open_kartochki')} style={s(`display:inline-flex; align-items:center; gap:8px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); padding:15px 30px; border-radius:14px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Открыть продукт <span aria-hidden="true">→</span></a>
+          <a className="aifx11" href={v.kartochkiHref} onClick={() => ymGoal('open_kartochki', { place: 'content' })} style={s(`display:inline-flex; align-items:center; gap:8px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); padding:15px 30px; border-radius:14px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Открыть продукт <span aria-hidden="true">→</span></a>
           <span style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>«Карточки·AI Лаб» — отдельный сайт продукта</span>
         </div>
       </div>
@@ -861,7 +888,7 @@ export default class AiPage extends React.Component {
                 </span>
               </div>
               <div style={s(`font-size:var(--mock-12); line-height:1.6; color:var(--ink-soft); margin-top:8px;`)}>
-                {v.prodTypedText}
+                <span ref={v.prodDescRef}></span>
                 <span style={s(`display:${v.prodCaret}; width:6px; height:12px; background:var(--violet); vertical-align:-1px; margin-left:1px; animation:genCursor 1s step-end infinite;`)}></span>
               </div>
             </div>
@@ -892,9 +919,9 @@ export default class AiPage extends React.Component {
 
           <div style={s(`display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;`)}>
             {/* Цифры — не маркетинг, а замер на нашем боевом проекте
-                (интернет-магазин стройматериалов, 19 763 карточки за июль):
-                пик 1557 карточек/час, устойчивый темп ~1 100/час,
-                98,6% ушли в публикацию без ручных правок. */}
+                (интернет-магазин стройматериалов, протокол № 01 сайта
+                «Карточки·AI»: 19 767 карточек за 5 июля — 9 августа 2026,
+                пик 1 391 карточка/час, 98,6% ушли в публикацию без правок). */}
             <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>1000+ карточек в час</span>
             <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>98,6% без правок</span>
             <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>Заполнение характеристик</span>
@@ -1027,7 +1054,7 @@ export default class AiPage extends React.Component {
 
       <div data-reveal style={s(`display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-top:36px;`)}>
         <p style={s(`font-size:var(--t15); color:rgba(255,255,255,0.55); margin:0; max-width:calc(560px * var(--t-scale));`)}>Отчёты собираем под ваши процессы: что измерять, как часто и куда присылать — решаем на диагностике.</p>
-        <button className="aifx10" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Обсудить свои отчёты</button>
+        <button className="aifx10" onClick={v.contactCta('reports', 'ИИ-отчёты по 1С и CRM')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Обсудить свои отчёты</button>
       </div>
     </div>
   </section>
@@ -1094,9 +1121,9 @@ export default class AiPage extends React.Component {
               </div>
 
               <div style={s(`margin-top:12px; font-family:'SFMono-Regular',ui-monospace,Menlo,Consolas,monospace; font-size:var(--sql-size); line-height:1.75; overflow-x:auto;`)}>
-                <div style={s(`overflow:hidden; white-space:pre; width:0; animation:sqlLine1 14s steps(34,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}>SELECT</span><span style={s(`color:#D6E3F5;`)}> sku, stock, warehouse</span></div>
-                <div style={s(`overflow:hidden; white-space:pre; width:0; animation:sqlLine2 14s steps(34,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}>  FROM</span><span style={s(`color:#9CDCFE;`)}> balances</span></div>
-                <div style={s(`overflow:hidden; white-space:pre; width:0; animation:sqlLine3 14s steps(40,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}> WHERE</span><span style={s(`color:#9CDCFE;`)}> sku</span><span style={s(`color:#D6E3F5;`)}> = </span><span style={s(`color:#F09A76;`)}>&apos;VVG-3x2.5&apos;</span><span style={s(`color:#D6E3F5;`)}> AND city = </span><span style={s(`color:#F09A76;`)}>&apos;Ростов&apos;</span><span style={s(`color:#D6E3F5;`)}>;</span><span style={s(`display:inline-block; width:7px; height:13px; margin-left:2px; background:#4FC1FF; vertical-align:-2px; animation:sqlCaret 14s steps(1,end) infinite;`)}></span></div>
+                <div style={s(`overflow:hidden; white-space:pre; clip-path:inset(0 100% 0 0); animation:sqlLine1 14s steps(34,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}>SELECT</span><span style={s(`color:#D6E3F5;`)}> sku, stock, warehouse</span></div>
+                <div style={s(`overflow:hidden; white-space:pre; clip-path:inset(0 100% 0 0); animation:sqlLine2 14s steps(34,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}>  FROM</span><span style={s(`color:#9CDCFE;`)}> balances</span></div>
+                <div style={s(`overflow:hidden; white-space:pre; clip-path:inset(0 100% 0 0); animation:sqlLine3 14s steps(40,end) infinite;`)}><span style={s(`color:#4FC1FF; font-weight:600;`)}> WHERE</span><span style={s(`color:#9CDCFE;`)}> sku</span><span style={s(`color:#D6E3F5;`)}> = </span><span style={s(`color:#F09A76;`)}>&apos;VVG-3x2.5&apos;</span><span style={s(`color:#D6E3F5;`)}> AND city = </span><span style={s(`color:#F09A76;`)}>&apos;Ростов&apos;</span><span style={s(`color:#D6E3F5;`)}>;</span><span style={s(`display:inline-block; width:7px; height:13px; margin-left:2px; background:#4FC1FF; vertical-align:-2px; animation:sqlCaret 14s steps(1,end) infinite;`)}></span></div>
               </div>
 
               <div style={s(`margin-top:12px; border:1px solid #1E2A3C; border-radius:8px; overflow:hidden;`)}>
@@ -1226,61 +1253,53 @@ export default class AiPage extends React.Component {
   <section id="cases" data-screen-label="Кейсы и результаты" style={s(`padding:${v.secPad}; max-width:var(--wrap); margin:0 auto;`)}>
     <div data-reveal style={s(`max-width:calc(720px * var(--t-scale));`)}>
       <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);`)}>Результаты</div>
-      <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Типовые сценарии — и что они дают</h2>
-      <p style={s(`font-size:var(--t18); line-height:1.6; color:var(--ink-soft); margin:20px 0 0;`)}>Три частые ситуации из проектов внедрения. Ваши цифры зависят от данных и процессов — честную оценку даём после диагностики.</p>
+      <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Боевой кейс и сценарии для пилота</h2>
+      <p style={s(`font-size:var(--t18); line-height:1.6; color:var(--ink-soft); margin:20px 0 0;`)}>Цифры — только там, где мы их замерили. Для остальных сценариев результат меряем в пилоте на ваших данных и показываем «до» и «после».</p>
     </div>
 
     <div data-reveal-children="120" style={s(`display:grid; grid-template-columns:${v.cols3}; gap:24px; margin-top:56px; align-items:stretch;`)}>
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--blue); background:rgba(21,94,239,0.08); border:1px solid rgba(21,94,239,0.18); border-radius:999px; padding:6px 13px;`)}>Оптовая торговля</span>
-        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Каталог из 4 800 позиций описан за месяц</h3>
-        <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Контент-менеджер тратил 30–40 минут на карточку — каталог не был бы готов и за год. ИИ собирает карточки по прайсу поставщика, человек выборочно проверяет.</p>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--blue); background:rgba(21,94,239,0.08); border:1px solid rgba(21,94,239,0.18); border-radius:999px; padding:6px 13px;`)}>Боевой проект</span>
+        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Интернет-магазин стройматериалов: 19 767 карточек за 36 дней</h3>
+        <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Каталог стоял без описаний. ИИ собрал карточки из 1С: описание и фото с проверкой ИИ-зрением. Где не был уверен в фото — сам пометил «на проверку», таких 1,4 %.</p>
         <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>×12</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>быстрее на карточку</div>
+            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>98,6%</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>без ручных правок</div>
           </div>
           <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>100%</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>каталога в поиске</div>
+            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>29 с</div>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>в среднем на карточку</div>
           </div>
         </div>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--violet); background:rgba(18,165,224,0.08); border:1px solid rgba(18,165,224,0.2); border-radius:999px; padding:6px 13px;`)}>B2B-услуги</span>
-        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Заявки перестали «остывать» за ночь</h3>
-        <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Вечерние и ночные заявки ждали утра — часть клиентов уходила к тем, кто ответил первым. ИИ отвечает за минуту, квалифицирует и бронирует время звонка.</p>
-        <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
-          <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>2 ч → 1 мин</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>время первого ответа</div>
-          </div>
-          <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>+31%</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>заявок доходит до встречи</div>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--violet); background:rgba(18,165,224,0.08); border:1px solid rgba(18,165,224,0.2); border-radius:999px; padding:6px 13px;`)}>Сценарий · B2B-услуги</span>
+        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Чтобы заявки не «остывали» за ночь</h3>
+        <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Вечерние и ночные заявки ждали утра — часть клиентов уходила к тем, кто ответил первым. ИИ отвечает сразу, квалифицирует и бронирует время звонка.</p>
+        <div style={s(`margin-top:auto; padding-top:24px;`)}>
+          <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint);`)}>Что мерим в пилоте</div>
+            <div style={s(`font-size:var(--t14); font-weight:600; line-height:1.45; color:var(--ink); margin-top:4px;`)}>время первого ответа и долю заявок, дошедших до встречи</div>
           </div>
         </div>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:22px; padding:32px; box-shadow:0 18px 40px -22px rgba(20,23,28,0.2), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#1F8A5B; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); border-radius:999px; padding:6px 13px;`)}>Интернет-магазин</span>
-        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Поддержка перестала тонуть в «где заказ?»</h3>
+        <span style={s(`align-self:flex-start; font-size:var(--mock-11); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#1F8A5B; background:rgba(31,138,91,0.08); border:1px solid rgba(31,138,91,0.2); border-radius:999px; padding:6px 13px;`)}>Сценарий · интернет-магазин</span>
+        <h3 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; letter-spacing:-0.01em; line-height:1.3; margin:18px 0 0; color:var(--ink);`)}>Чтобы поддержка не тонула в «где заказ?»</h3>
         <p style={s(`font-size:var(--t145); line-height:1.6; color:var(--ink-soft); margin:12px 0 0;`)}>Операторы разгребали однотипные вопросы по статусам и доставке. ИИ отвечает по данным заказа сам, людям остаются возвраты и спорные случаи.</p>
-        <div style={s(`display:flex; gap:12px; margin-top:auto; padding-top:24px;`)}>
-          <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>7 из 10</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>обращений закрывает ИИ</div>
-          </div>
-          <div style={s(`flex:1; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:20px; color:var(--ink);`)}>24/7</div>
-            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint); margin-top:2px;`)}>без смен и очередей</div>
+        <div style={s(`margin-top:auto; padding-top:24px;`)}>
+          <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:13px 15px;`)}>
+            <div style={s(`font-size:var(--mock-11); color:var(--ink-faint);`)}>Что мерим в пилоте</div>
+            <div style={s(`font-size:var(--t14); font-weight:600; line-height:1.45; color:var(--ink); margin-top:4px;`)}>долю обращений, закрытых без оператора, и время ответа</div>
           </div>
         </div>
       </div>
     </div>
 
-    <p data-reveal style={s(`font-size:var(--t14); color:var(--ink-faint); margin:26px 0 0;`)}>Сценарии обобщены по типовым проектам, без названий клиентов. Оценку эффекта для вашей компании даём на бесплатной диагностике.</p>
+    <p data-reveal style={s(`font-size:var(--t14); color:var(--ink-faint); margin:26px 0 0;`)}>Цифры кейса — боевой прогон каталога, 5 июля — 9 августа 2026. Для сценариев оценку даём на бесплатной диагностике, результат — после пилота.</p>
   </section>
 
   <section id="cost" data-screen-label="Стоимость внедрения ИИ" style={s(`padding:${v.secPad}; max-width:var(--wrap); margin:0 auto;`)}>
@@ -1290,7 +1309,7 @@ export default class AiPage extends React.Component {
         <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Сколько стоит внедрение ИИ</h2>
         <p style={s(`font-size:var(--t18); line-height:1.6; color:var(--ink-soft); margin:20px 0 0; max-width:calc(560px * var(--t-scale));`)}>У ИИ-проектов нет честного прайса «для всех»: цена зависит от сценариев и данных, а не от тарифа. Поэтому мы начинаем с бесплатной диагностики — и только после неё фиксируем состав работ, сроки и смету в договоре.</p>
         <p style={s(`font-size:var(--t16); line-height:1.6; color:var(--ink-soft); margin:16px 0 0; max-width:calc(560px * var(--t-scale));`)}>Начать можно с малого: пилот на одном сценарии показывает эффект цифрами до того, как вы вкладываетесь в масштабирование.</p>
-        <button className="aifx11" onClick={v.scrollToContact} style={s(`margin-top:30px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border:none; padding:15px 30px; border-radius:14px; cursor:pointer; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить оценку проекта</button>
+        <button className="aifx11" onClick={v.contactCta('cost', 'оценка проекта')} style={s(`margin-top:30px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border:none; padding:15px 30px; border-radius:14px; cursor:pointer; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить оценку проекта</button>
       </div>
 
       <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
@@ -1328,7 +1347,7 @@ export default class AiPage extends React.Component {
         <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);`)}>FAQ</div>
         <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Частые вопросы о внедрении ИИ</h2>
         <p style={s(`font-size:var(--t17); line-height:1.6; color:var(--ink-soft); margin:20px 0 0; max-width:calc(420px * var(--t-scale));`)}>Не нашли свой вопрос — напишите нам, отвечаем в течение рабочего дня.</p>
-        <button className="aifx12" onClick={v.scrollToContact} style={s(`margin-top:26px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:13px 26px; border-radius:999px; cursor:pointer; transition:border-color 0.2s ease;`)}>Задать вопрос</button>
+        <button className="aifx12" onClick={v.contactCta('faq')} style={s(`margin-top:26px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:13px 26px; border-radius:999px; cursor:pointer; transition:border-color 0.2s ease;`)}>Задать вопрос</button>
       </div>
 
       <div data-reveal-children="80" style={s(`display:flex; flex-direction:column; gap:14px;`)}>
@@ -1443,8 +1462,8 @@ export default class AiPage extends React.Component {
 
       <div style={s(`position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:24px; min-height:260px;`)}>
         <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
-          <a className="aifx14" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal("telegram")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="aifx15" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal("whatsapp")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
+          <a className="aifx14" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
+          <a className="aifx15" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
         </div>
         <div style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня</div>
       </div>
@@ -1466,7 +1485,7 @@ export default class AiPage extends React.Component {
       <a href="#process" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Внедрение</a>
       <a href="#faq" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_AI.shortName} · ИНН {IP_AI.inn} · ОГРНИП {IP_AI.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
+    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_AI.shortName} · ИНН {IP_AI.inn} · ОГРНИП {IP_AI.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
   </footer>
 
 </div>

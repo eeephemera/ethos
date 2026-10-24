@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, observeInView, setupReveal } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, observeInView, setupReveal, pauseSectionsOffscreen, prefersReducedMotion, leadText, tgHref, waHref } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
 import { PROVIDERS } from '../lib/requisites';
@@ -79,16 +79,12 @@ export default class MainPage extends React.Component {
     cranePhase: 'grab',
     carryColor: 'var(--blue)',
     buildingBlocks: [],
-    metricLeads: 482,
-    metricHours: 36.4,
-    metricAccuracy: 97,
     pulseStage: 'idle',
     pulseTarget: 'b24',
     flashTarget: null,
     sliderIdx: 0,
     productIdx: 0,
     prodPhase: 'search',
-    typed: 0,
     // Форма-сделка на первом экране
     heroTask: '',
     heroSize: null,       // 's' | 'm' | 'l'
@@ -114,6 +110,11 @@ export default class MainPage extends React.Component {
   auroraRef = React.createRef();
   heroTrackRef = React.createRef();
   sliderTrackRef = React.createRef();
+  prodDescRef = React.createRef();
+
+  writeProdDesc(text) {
+    if (this.prodDescRef.current) this.prodDescRef.current.textContent = text;
+  }
 
   // Обработчики свайпа создаются РОВНО ОДИН РАЗ.
   //
@@ -153,12 +154,19 @@ export default class MainPage extends React.Component {
     // isn't visible/focused at load time (animation timelines can stall then).
     this.mountTimer = setTimeout(() => this.setState({ mounted: true }), 40);
 
+    // «Уменьшить движение» в системе: сцены не листаются сами, описание товара
+    // показывается целиком. Ручное листание остаётся.
+    this._reducedMotion = prefersReducedMotion();
+
     // Crane state machine: grab a block -> lift -> move across the arm -> lower
     // it onto the building -> release (joins the stack) -> return for the next
     // one. After release, a data pulse travels down the connector tree into the
     // destination chip (cause -> effect: task done -> result delivered). Timers
     // are chained (not setInterval); the full cycle takes 4.6s, then loops.
     this.runCycle = () => {
+      // Наблюдатель вызывает runCycle при каждом входе сцены в кадр — старые
+      // таймеры гасим, иначе два цикла шли бы внахлёст.
+      (this.phaseTimers || []).forEach(clearTimeout);
       const color = this.state.activeRole % 2 === 0 ? 'var(--blue)' : 'var(--violet)';
       this.setState({ cranePhase: 'grab', carryColor: color, pulseStage: 'idle' });
 
@@ -186,7 +194,7 @@ export default class MainPage extends React.Component {
         at(4600, () => this.runCycle())
       ];
     };
-    this.runCycle();
+    if (!this._reducedMotion) this.runCycle();
 
     this.loadVoices();
     this._onVoicesChanged = () => this.loadVoices();
@@ -194,7 +202,7 @@ export default class MainPage extends React.Component {
       window.speechSynthesis.addEventListener('voiceschanged', this._onVoicesChanged);
     }
 
-    this.startSliderTimer();
+    if (!this._reducedMotion) this.startSliderTimer();
 
     this.setupKanbanDrag();
 
@@ -203,29 +211,19 @@ export default class MainPage extends React.Component {
     // Появление блоков — без работы на каждом скролл-эвенте.
     this._offReveal = setupReveal();
 
-    this.startMetricTimer();
+    // CSS-анимации каждой секции стоят, пока секция вне кадра.
+    this._offSections = pauseSectionsOffscreen();
 
     // Демо живут только пока они в кадре: за пределами вьюпорта и CSS-таймлайны,
     // и React-таймеры выключены. Раньше всё это крутилось всю дорогу.
     this._offHeroView = observeInView(this.heroSceneRef.current, (inView) => {
-      if (inView) { this.runCycle(); this.startMetricTimer(); }
-      else { (this.phaseTimers || []).forEach(clearTimeout); clearInterval(this.metricTimer); }
+      if (inView) { if (!this._reducedMotion) this.runCycle(); }
+      else { (this.phaseTimers || []).forEach(clearTimeout); }
     });
     this._offPlatformView = observeInView(this.platformRef.current, (inView) => {
-      if (inView) { this.startSliderTimer(); this.startProductCycle(); }
+      if (inView) { if (!this._reducedMotion) this.startSliderTimer(); this.startProductCycle(); }
       else { clearInterval(this.sliderTimer); this.stopProductCycle(); }
     });
-  }
-
-  startMetricTimer() {
-    clearInterval(this.metricTimer);
-    this.metricTimer = setInterval(() => {
-      this.setState(s => ({
-        metricLeads: s.metricLeads + Math.floor(Math.random() * 3) + 1,
-        metricHours: Math.round((s.metricHours + Math.random() * 0.3) * 10) / 10,
-        metricAccuracy: 95 + Math.round(Math.random() * 4)
-      }));
-    }, 1500);
   }
 
   stopProductCycle() {
@@ -376,17 +374,28 @@ export default class MainPage extends React.Component {
   }
 
   // Карточка товара: фаза поиска фото -> посимвольный стриминг описания -> готово -> следующий товар
+  //
+  // Описание печатается прямо в DOM через ref, без setState: раньше каждые
+  // 26 мс перерисовывался весь компонент главной (2 тыс. строк разметки) —
+  // около 38 рендеров в секунду, пока блок в кадре. Теперь state меняется
+  // только на смене фазы (поиск → печать → готово), три раза за товар.
   startProductCycle() {
     clearTimeout(this._pcSearch); clearTimeout(this._pcNext); clearInterval(this._pcType);
-    this.setState({ prodPhase: 'search', typed: 0 });
+    if (this._reducedMotion) {
+      this.setState({ prodPhase: 'done' });
+      this.writeProdDesc(PRODUCTS[this.state.productIdx % PRODUCTS.length].desc);
+      return;
+    }
+    this.setState({ prodPhase: 'search' });
+    this.writeProdDesc('');
     this._pcSearch = setTimeout(() => {
+      const full = PRODUCTS[this.state.productIdx % PRODUCTS.length].desc;
+      let typed = 0;
       this.setState({ prodPhase: 'type' });
       this._pcType = setInterval(() => {
-        this.setState(s => {
-          const full = PRODUCTS[s.productIdx % PRODUCTS.length].desc;
-          if (s.typed >= full.length) { clearInterval(this._pcType); return { prodPhase: 'done' }; }
-          return { typed: Math.min(s.typed + 2, full.length) };
-        });
+        typed = Math.min(typed + 2, full.length);
+        this.writeProdDesc(full.slice(0, typed));
+        if (typed >= full.length) { clearInterval(this._pcType); this.setState({ prodPhase: 'done' }); }
       }, 26);
     }, 1200);
     this._pcNext = setTimeout(() => {
@@ -487,11 +496,11 @@ export default class MainPage extends React.Component {
     try { window.speechSynthesis.cancel(); } catch (e) {}
     try { window.speechSynthesis.removeEventListener('voiceschanged', this._onVoicesChanged); } catch (e) {}
     if (this._desktopMq) this._desktopMq.removeEventListener('change', this._onMqChange);
-    clearInterval(this.metricTimer);
     clearTimeout(this._pcSearch); clearTimeout(this._pcNext); clearInterval(this._pcType);
     clearTimeout(this.mountTimer);
     (this.phaseTimers || []).forEach(clearTimeout);
     if (this._offReveal) this._offReveal();
+    if (this._offSections) this._offSections();
   }
 
   // Content is ALWAYS opacity:1 (fully readable) — only a small translateY slide
@@ -513,13 +522,13 @@ export default class MainPage extends React.Component {
     // Цель «начал заполнять» — один раз за сессию просмотра, не на каждый символ.
     if (!this._heroStartSent && val.trim()) {
       this._heroStartSent = true;
-      ymGoal('hero_form_start');
+      ymGoal('hero_form_start', { place: 'hero_form' });
     }
     this.setState({ heroTask: val });
   };
 
   pickHeroSize = (key) => {
-    if (this.state.heroSize !== key) ymGoal('hero_form_size');
+    if (this.state.heroSize !== key) ymGoal('hero_form_size', { place: 'hero_form', size: key });
     this.setState({ heroSize: key });
   };
 
@@ -533,8 +542,8 @@ export default class MainPage extends React.Component {
     return lines.join('\n');
   }
 
-  // Telegram не умеет предзаполнять личный чат текстом — поэтому буфер обмена
-  // (в WhatsApp текст подставляется прямо в ссылку wa.me).
+  // Telegram подставляет текст из ?text= (см. tgHref), но старые клиенты его
+  // игнорируют — поэтому текст заявки ещё и в буфере обмена, как запасной путь.
   copyHeroText(text) {
     const fallback = () => {
       try {
@@ -581,15 +590,21 @@ export default class MainPage extends React.Component {
       }).catch(() => {});
     } catch (e) {}
 
-    ymGoal('hero_lead');
+    // hero_tg / hero_wa — новые цели: вклад формы отдельно от прочих ссылок на
+    // мессенджеры (их завести в Метрике). telegram / whatsapp остаются для
+    // сравнения с прошлыми данными, место видно по параметру place.
+    const goal = { place: 'hero_form', size: heroSize || 'none' };
+    ymGoal('hero_lead', Object.assign({ channel: heroChannel }, goal));
     // window.open — синхронно в обработчике клика, иначе Safari решит, что попап.
     if (heroChannel === 'wa') {
-      ymGoal('whatsapp');
-      window.open('https://wa.me/79285288598?text=' + encodeURIComponent(text), '_blank', 'noopener');
+      ymGoal('hero_wa', goal);
+      ymGoal('whatsapp', goal);
+      window.open(waHref(text), '_blank', 'noopener');
     } else {
-      ymGoal('telegram');
+      ymGoal('hero_tg', goal);
+      ymGoal('telegram', goal);
       this.copyHeroText(text);
-      window.open('https://t.me/Terraiib24', '_blank', 'noopener');
+      window.open(tgHref(text), '_blank', 'noopener');
     }
     this.setState({ heroSent: true });
   };
@@ -605,7 +620,7 @@ export default class MainPage extends React.Component {
 
 
   renderVals() {
-    const { mobileMenuOpen, activeRole, cranePhase, carryColor, buildingBlocks, metricLeads, metricHours, metricAccuracy, pulseStage, pulseTarget, flashTarget } = this.state;
+    const { mobileMenuOpen, activeRole, cranePhase, carryColor, buildingBlocks, pulseStage, pulseTarget, flashTarget } = this.state;
 
     // Data pulse: once a block lands (task completed), a dot runs down the
     // static connector tree into the matching destination chip — blue results
@@ -664,12 +679,14 @@ export default class MainPage extends React.Component {
       { key: 'tg', label: 'Telegram' },
       { key: 'wa', label: 'WhatsApp' },
     ].map((b) => ({ ...b, active: heroChannel === b.key, onClick: () => this.pickHeroChannel(b.key) }));
+    // Заявка приходит владельцу уведомлением в Telegram (/api/lead), в CRM она
+    // сама не попадает — поэтому никаких «сделка уйдёт в Битрикс24».
     const heroFootnote = heroHasTask && heroSize
-      ? 'Сделка уйдёт в Битрикс24 с этими полями — переписывать нечего.'
+      ? 'Задача придёт к нам сразу — переписывать её в чате не нужно.'
       : 'Опишите задачу и отметьте размер команды — карточка заполнится сама.';
     const heroSuccessText = heroChannel === 'wa'
       ? 'Открываем WhatsApp — текст заявки уже подставлен в сообщение. Отправьте его, и план на 30 дней придёт в течение рабочего дня.'
-      : 'Открываем Telegram — текст заявки уже в буфере обмена. Вставьте его в чат, и план на 30 дней придёт в течение рабочего дня.';
+      : 'Открываем Telegram — текст заявки подставлен в сообщение. Если поле пустое, вставьте текст: он уже скопирован. Отправьте его, и план на 30 дней придёт в течение рабочего дня.';
 
     // Platform slider
     const sliderIdx = this.state.sliderIdx;
@@ -690,7 +707,7 @@ export default class MainPage extends React.Component {
         progress: active && sliderAuto
           ? React.createElement('span', {
               key: 'p' + i,
-              style: { position: 'absolute', left: 0, bottom: 0, height: '3px', background: 'rgba(255,255,255,0.55)', animation: 'sliderProgress 9s linear forwards' }
+              style: { position: 'absolute', left: 0, bottom: 0, width: '100%', height: '3px', transformOrigin: 'left', background: 'rgba(255,255,255,0.55)', animation: 'sliderProgress 9s linear forwards' }
             })
           : null
       };
@@ -730,7 +747,6 @@ export default class MainPage extends React.Component {
     const product = PRODUCTS[this.state.productIdx % PRODUCTS.length];
     const pKey = 'p' + this.state.productIdx;
     const phase = this.state.prodPhase;
-    const typed = this.state.typed;
     const searching = phase === 'search';
     const fadeStyle = { animation: 'sliderItemIn 0.4s ease both' };
 
@@ -758,7 +774,6 @@ export default class MainPage extends React.Component {
     const productCatEl = searching ? null : React.createElement('div', { key: pKey + '-cat', style: Object.assign({ fontSize: 'var(--mock-xs)', fontWeight: 700, letterSpacing: '0.04em', textTransform: 'uppercase', color: product.hue }, fadeStyle) }, product.cat);
     const productNameEl = searching ? null : React.createElement('div', { key: pKey + '-name', style: Object.assign({ fontFamily: "var(--font-manrope),sans-serif", fontWeight: 800, fontSize: '15px', lineHeight: 1.25, color: 'var(--ink)' }, fadeStyle) }, product.name);
     const productPriceEl = searching ? null : React.createElement('div', { key: pKey + '-price', style: Object.assign({ fontFamily: 'monospace', fontSize: '16px', fontWeight: 800, color: 'var(--ink)' }, fadeStyle) }, '₽' + product.price);
-    const productDescTyped = searching ? '' : product.desc.slice(0, typed);
     const productCaretDisplay = phase === 'type' ? 'inline' : 'none';
     const productStatus = phase === 'search' ? 'ИИ подбирает фото…' : phase === 'type' ? 'ИИ пишет SEO-описание…' : 'Карточка готова';
     const productBadgesDisplay = phase === 'done' ? 'flex' : 'none';
@@ -864,9 +879,6 @@ export default class MainPage extends React.Component {
       chipExtBorder,
       chipExtStatus,
       chipExtStatusColor,
-      metricLeads: metricLeads.toLocaleString('ru-RU'),
-      metricHours: metricHours.toFixed(1) + ' ч',
-      metricAccuracy: metricAccuracy + '%',
       entranceBadge: this.entrance(0),
       entranceH1: this.entrance(0.08),
       entranceP: this.entrance(0.16),
@@ -894,8 +906,11 @@ export default class MainPage extends React.Component {
       // Final CTA
       contactColumns: R.cols2,
       contactPadding: 'var(--contact-pad)',
-      scrollToContact: () => {
-        ymGoal('cta_contact'); const el = document.getElementById('contact');
+      // Кнопка «к контактам» с местом: cta_contact знает, какая кнопка нажата.
+      tgContactHref: tgHref(leadText('главная страница')),
+      waContactHref: waHref(leadText('главная страница')),
+      contactCta: (place) => () => {
+        ymGoal('cta_contact', { place }); const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
       sliderChips,
@@ -911,7 +926,7 @@ export default class MainPage extends React.Component {
       productCatEl,
       productNameEl,
       productPriceEl,
-      productDescTyped,
+      prodDescRef: this.prodDescRef,
       productCaretDisplay,
       productStatus,
       productBadgesDisplay,
@@ -993,7 +1008,7 @@ export default class MainPage extends React.Component {
   <header ref={this.headerRef} className="site-header" style={s(`position:sticky; top:14px; z-index:50; margin:14px ${v.padX} 0; display:flex; align-items:center; justify-content:space-between; padding:12px 14px 12px 20px; background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.34)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.7); border-radius:22px; box-shadow:0 16px 40px -16px rgba(20,23,28,0.32), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
 
     <div style={s(`display:flex; align-items:center; gap:12px;`)}>
-      <svg width="36" height="36" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
+      <svg className="sprout" width="36" height="36" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
           <linearGradient id="tgHV" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#3BC5EC"></stop></linearGradient>
@@ -1027,8 +1042,8 @@ export default class MainPage extends React.Component {
       <a className="mnfx1" href="/ai" style={s(NAV_LINK)}>ИИ-решения</a>
       <a className="mnfx2" href="#process" style={s(NAV_LINK)}>Процесс</a>
       <a className="mnfx3" href="/contacts" style={s(NAV_LINK)}>Контакты</a>
-      <a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`font-size:var(--t15); font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap;`)}>+7 925 677-70-27</a>
-      <button className="mnfx6" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
+      <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'header' })} style={s(`font-size:var(--t15); font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap;`)}>+7 925 677-70-27</a>
+      <button className="mnfx6" onClick={v.contactCta('header')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
       {/* Голосовой гид: фича остаётся, но больше не занимает низ экрана —
           самое доступное место на телефоне. На мобильном контейнер меню
           скрыт целиком, поэтому там гида нет вовсе. */}
@@ -1056,8 +1071,8 @@ export default class MainPage extends React.Component {
         <a href="/ai" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>ИИ-решения</a>
         <a href="#process" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Процесс</a>
         <a href="/contacts" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Контакты</a>
-        <a href="tel:+79256777027" onClick={() => { ymGoal('phone'); v.closeMobileMenu(); }} style={s(`display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none; border-top:1px solid var(--line); margin-top:6px; padding-top:6px;`)}>+7 925 677-70-27</a>
-        <button onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; min-height:48px; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
+        <a href="tel:+79256777027" onClick={() => { ymGoal('phone', { place: 'mobile_menu' }); v.closeMobileMenu(); }} style={s(`display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none; border-top:1px solid var(--line); margin-top:6px; padding-top:6px;`)}>+7 925 677-70-27</a>
+        <button onClick={v.contactCta('mobile_menu')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; min-height:48px; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
      </div>
     </div>
@@ -1102,7 +1117,7 @@ export default class MainPage extends React.Component {
         </h1>
 
         <p style={s(`font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:calc(620px * var(--t-scale)); margin:var(--hero-p-mt) 0 0; ${v.entranceP}`)}>
-          Сертифицированный интегратор Битрикс24: <a href="/bitrix24" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>внедряем Битрикс24 под ключ</a>, дорабатываем и поддерживаем систему — и строим <a href="/ai" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>ИИ-агентов для бизнеса</a>, которые снимают рутину с ваших команд.
+          Сертифицированный интегратор Битрикс24: <a href="/bitrix24" onClick={() => ymGoal('nav', { to: '/bitrix24', place: 'hero_text' })} style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>внедряем Битрикс24 под ключ</a>, дорабатываем и поддерживаем систему — и строим <a href="/ai" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>ИИ-агентов для бизнеса</a>, которые снимают рутину с ваших команд.
         </p>
 
         <div style={s(`margin-top:var(--hero-accent-mt); padding:14px 18px; border-left:2px solid var(--blue); background:var(--paper); font-size:var(--t15); line-height:1.55; color:var(--ink); max-width:calc(560px * var(--t-scale)); ${v.entranceCta}`)}>
@@ -1135,7 +1150,7 @@ export default class MainPage extends React.Component {
             <div style={s(`width:46px; height:46px; border-radius:12px; background:var(--grad); margin:0 auto; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(21,94,239,0.5);`)}>
               <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg>
             </div>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin-top:18px;`)}>Сделка создана</div>
+            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin-top:18px;`)}>Заявка у нас</div>
             <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px auto 0; max-width:360px;`)}>{v.heroSuccessText}</p>
           </div>
         ) : (
@@ -1248,7 +1263,7 @@ export default class MainPage extends React.Component {
     <div data-reveal style={s(`margin-top:28px; background:linear-gradient(160deg, rgba(255,255,255,0.7), rgba(255,255,255,0.46)); backdrop-filter:blur(26px) saturate(180%); -webkit-backdrop-filter:blur(26px) saturate(180%); border:1px solid rgba(255,255,255,0.72); border-radius:24px; box-shadow:0 30px 60px -30px rgba(20,23,28,0.28), inset 0 1px 1px rgba(255,255,255,0.9); padding:${v.platformCardPad}; display:grid; grid-template-columns:${v.platformColumns}; gap:${v.platformGap}; align-items:start;`)}>
       <div style={s(`display:flex; flex-direction:column; gap:20px; min-width:0;`)}>
         {v.sliderList}
-        <button className="mnfx9" onClick={v.scrollToContact} style={s(`align-self:flex-start; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:var(--blue); border:none; padding:12px 26px; border-radius:999px; cursor:pointer; transition:background 0.2s ease;`)}>Обсудить внедрение</button>
+        <button className="mnfx9" onClick={v.contactCta('ai_section')} style={s(`align-self:flex-start; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:var(--blue); border:none; padding:12px 26px; border-radius:999px; cursor:pointer; transition:background 0.2s ease;`)}>Обсудить внедрение</button>
       </div>
       {/* Слайды лежат в горизонтальном треке: свайп пальцем тянет его в
           реальном времени, стрелки и точки переключают, автопоказ
@@ -1475,7 +1490,7 @@ export default class MainPage extends React.Component {
                 {/* Описание жёстко ограничено по строкам: на телефоне карточка
                     фиксированной высоты, и без этого хвост текста обрезался
                     прямо посреди буквы. */}
-                <div style={s(`flex:1; min-height:0; overflow:hidden; font-size:var(--mock-11); line-height:1.55; color:var(--ink-soft); display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:var(--card-desc-lines); box-orient:vertical;`)}>{v.productDescTyped}<span style={s(`display:${v.productCaretDisplay}; color:#1F8A5B; font-weight:800; animation:mkBlink 1s step-end infinite;`)}>▋</span></div>
+                <div style={s(`flex:1; min-height:0; overflow:hidden; font-size:var(--mock-11); line-height:1.55; color:var(--ink-soft); display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:var(--card-desc-lines); box-orient:vertical;`)}><span ref={v.prodDescRef}></span><span style={s(`display:${v.productCaretDisplay}; color:#1F8A5B; font-weight:800; animation:mkBlink 1s step-end infinite;`)}>▋</span></div>
                 <div style={s(`display:${v.productBadgesDisplay}; flex-wrap:wrap; gap:6px; flex-shrink:0;`)}><span style={s(`font-size:var(--mock-sm); font-weight:600; color:#1F8A5B; background:#EBF7F0; border-radius:6px; padding:4px 8px;`)}>SEO-текст ✓</span><span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>alt-теги ✓</span><span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>характеристики ✓</span></div>
               </div>
             </div>
@@ -1635,7 +1650,7 @@ export default class MainPage extends React.Component {
           <div style={s(`display:flex; align-items:center; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t14); color:var(--ink);`)}>Интеграции с сайтом, телефонией, сервисами</span></div>
           <div style={s(`display:flex; align-items:center; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--blue); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t14); color:var(--ink);`)}>Перенос данных и обучение команды</span></div>
         </div>
-        <a href="/bitrix24" style={s(`margin-top:auto; padding-top:28px; display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:var(--ink); text-decoration:none;`)}><span style={s(`border-bottom:1px solid var(--ink); padding-bottom:2px;`)}>Подробнее о внедрении →</span></a>
+        <a href="/bitrix24" onClick={() => ymGoal('nav', { to: '/bitrix24', place: 'services_b24' })} style={s(`margin-top:auto; padding-top:28px; display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:var(--ink); text-decoration:none;`)}><span style={s(`border-bottom:1px solid var(--ink); padding-bottom:2px;`)}>Подробнее о внедрении →</span></a>
       </div>
 
       <div style={s(`display:flex; flex-direction:column; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(26px) saturate(180%); -webkit-backdrop-filter:blur(26px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:48px; box-shadow:0 24px 48px -20px rgba(20,23,28,0.22), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
@@ -1647,7 +1662,7 @@ export default class MainPage extends React.Component {
           <div style={s(`display:flex; align-items:center; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--violet); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t14); color:var(--ink);`)}>Доработки и нестандартные сценарии</span></div>
           <div style={s(`display:flex; align-items:center; gap:10px;`)}><span style={s(`width:5px; height:5px; border-radius:50%; background:var(--violet); flex-shrink:0;`)}></span><span style={s(`font-size:var(--t14); color:var(--ink);`)}>Аудит и оптимизация текущей настройки</span></div>
         </div>
-        <a href="/bitrix24#sla" style={s(`margin-top:auto; padding-top:28px; display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:var(--ink); text-decoration:none;`)}><span style={s(`border-bottom:1px solid var(--ink); padding-bottom:2px;`)}>Поддержка и SLA →</span></a>
+        <a href="/bitrix24#sla" onClick={() => ymGoal('nav', { to: '/bitrix24', place: 'services_sla' })} style={s(`margin-top:auto; padding-top:28px; display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:var(--ink); text-decoration:none;`)}><span style={s(`border-bottom:1px solid var(--ink); padding-bottom:2px;`)}>Поддержка и SLA →</span></a>
       </div>
     </div>
   </section>
@@ -1687,7 +1702,7 @@ export default class MainPage extends React.Component {
 
       <div data-reveal style={s(`display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-top:36px;`)}>
         <p style={s(`font-size:var(--t15); color:rgba(255,255,255,0.55); margin:0; max-width:calc(560px * var(--t-scale));`)}>Сценарии по ролям, кейсы и ответы на частые вопросы — на отдельной странице об ИИ-решениях.</p>
-        <a className="mnfx10" href="/ai" style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; text-decoration:none; white-space:nowrap; transition:transform 0.2s ease;`)}>Все сценарии ИИ →</a>
+        <a className="mnfx10" href="/ai" onClick={() => ymGoal('nav', { to: '/ai', place: 'ai_section' })} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; text-decoration:none; white-space:nowrap; transition:transform 0.2s ease;`)}>Все сценарии ИИ →</a>
       </div>
 
       {/* Живая сцена работы агента. Раньше стояла на первом экране; по ТЗ
@@ -1769,20 +1784,6 @@ export default class MainPage extends React.Component {
                   ))}
                 </div>
 
-                <div style={s(`display:flex; gap:10px;`)}>
-                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Заявок обработано</div>
-                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricLeads}</div>
-                  </div>
-                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Часов сэкономлено</div>
-                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricHours}</div>
-                  </div>
-                  <div style={s(`flex:1; background:#F7F7F5; border-radius:12px; padding:12px 12px;`)}>
-                    <div style={s(`font-family:monospace; font-size:var(--mock-xs); letter-spacing:0.04em; color:var(--ink-faint); text-transform:uppercase;`)}>Точность</div>
-                    <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:700; font-size:var(--t18); margin-top:4px; color:var(--ink);`)}>{v.metricAccuracy}</div>
-                  </div>
-                </div>
 
                 <div>
                   <div style={s(`position:relative; height:30px;`)}>
@@ -1851,7 +1852,7 @@ export default class MainPage extends React.Component {
       Ссылка пока ведёт на разбор с цифрами внутри /ai — как появится своя
       страница, здесь меняется один href. Битой ссылки в индексе не будет. */}
   <section data-screen-label="Продукт — генератор карточек" style={s(`padding:0 ${v.padX}; max-width:var(--wrap); margin:0 auto;`)}>
-    <a className="mnfx10" data-reveal href="/ai#content" style={s(`display:grid; grid-template-columns:${v.cols2}; gap:28px; align-items:center; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.48)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; text-decoration:none; position:relative; overflow:hidden; box-shadow:0 30px 60px -34px rgba(20,23,28,0.26), inset 0 1px 1px rgba(255,255,255,0.9); transition:transform 0.25s ease;`)}>
+    <a className="mnfx10" data-reveal href="/ai#content" onClick={() => ymGoal('nav', { to: '/ai', place: 'product_card' })} style={s(`display:grid; grid-template-columns:${v.cols2}; gap:28px; align-items:center; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.48)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; text-decoration:none; position:relative; overflow:hidden; box-shadow:0 30px 60px -34px rgba(20,23,28,0.26), inset 0 1px 1px rgba(255,255,255,0.9); transition:transform 0.25s ease;`)}>
       <span aria-hidden="true" style={s(`position:absolute; top:-140px; right:-100px; width:360px; height:360px; border-radius:50%; background:var(--grad); opacity:0.12; filter:blur(90px); pointer-events:none;`)}></span>
 
       <span style={s(`position:relative; z-index:1; display:block; min-width:0;`)}>
@@ -1865,10 +1866,12 @@ export default class MainPage extends React.Component {
       <span style={s(`position:relative; z-index:1; display:block; min-width:0;`)}>
         <span style={s(`display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px;`)}>
           {[
-            ['19 763', 'карточки за месяц'],
-            ['1 557/ч', 'пиковая скорость'],
+            // Цифры — протокол № 01 сайта «Карточки·AI» (боевой прогон каталога,
+            // 5 июля — 9 августа 2026): на обоих сайтах они должны совпадать.
+            ['19 767', 'карточек за 36 дней'],
+            ['1 391/ч', 'в пиковый час'],
             ['98,6%', 'без ручных правок'],
-            ['~25 с', 'на одну карточку'],
+            ['29 с', 'в среднем на карточку'],
           ].map(([n, l]) => (
             <span key={l} style={s(`display:block; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px;`)}>
               <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; color:var(--ink);`)}>{n}</span>
@@ -2029,12 +2032,12 @@ export default class MainPage extends React.Component {
         <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
           {/* CTA звал «Позвоните», а телефона на сайте не было вовсе.
               Теперь номер кликабельный и стоит первым. */}
-          <a href="tel:+79256777027" onClick={() => ymGoal("phone")} style={s(`display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--font-manrope),sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.01em; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px 28px; text-decoration:none;`)}>
+          <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--font-manrope),sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.01em; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px 28px; text-decoration:none;`)}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0;`)} aria-hidden="true"><path d="M6.6 3h3l1.5 4-2 1.4a13 13 0 006.5 6.5l1.4-2 4 1.5v3A2 2 0 0119 19.5 16.5 16.5 0 014.5 5 2 2 0 016.6 3z" fill="var(--blue)"></path></svg>
             +7 925 677-70-27
           </a>
-          <a className="mnfx11" href="https://t.me/Terraiib24" target="_blank" rel="noopener" onClick={() => ymGoal("telegram")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="mnfx12" href="https://wa.me/79285288598" target="_blank" rel="noopener" onClick={() => ymGoal("whatsapp")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
+          <a className="mnfx11" href={v.tgContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
+          <a className="mnfx12" href={v.waContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
         </div>
         <div style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня · <a href="/contacts" style={s(`color:var(--ink-soft); text-decoration:none; border-bottom:1px solid var(--line);`)}>почта и реквизиты</a></div>
       </div>
@@ -2051,7 +2054,7 @@ export default class MainPage extends React.Component {
 
       <div>
         <div style={s(`display:flex; align-items:center; gap:10px;`)}>
-      <svg width="28" height="28" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
+      <svg className="sprout" width="28" height="28" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
           <linearGradient id="tgFV" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#3BC5EC"></stop></linearGradient>
@@ -2097,9 +2100,9 @@ export default class MainPage extends React.Component {
       <div>
         <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink); margin-bottom:14px;`)}>Контакты</div>
         <div style={s(`display:flex; flex-direction:column; gap:10px;`)}>
-          <a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`font-size:var(--t16); font-weight:700; color:var(--ink); text-decoration:none;`)}>+7 925 677-70-27</a>
+          <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`font-size:var(--t16); font-weight:700; color:var(--ink); text-decoration:none;`)}>+7 925 677-70-27</a>
           <a href="mailto:magomedov_zak_05@mail.ru" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a>
-          <a href="https://t.me/Terraiib24" target="_blank" rel="noopener" onClick={() => ymGoal('telegram')} style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Telegram</a>
+          <a href={v.tgContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'footer' })} style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Telegram</a>
           <a href="/contacts" style={s(`font-size:var(--t14); color:var(--blue); text-decoration:none;`)}>Все контакты и реквизиты</a>
         </div>
       </div>

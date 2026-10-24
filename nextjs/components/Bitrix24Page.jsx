@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, leadText, tgHref, waHref } from './_ui';
 import { R } from './_responsive';
 import { IP_B24 } from '../lib/requisites';
 
@@ -10,7 +10,10 @@ export default class Bitrix24Page extends React.Component {
   state = {
     mobileMenuOpen: false,
     mounted: false,
-    openFaq: 0
+    openFaq: 0,
+    // Сценарий кнопки, по которой человек пришёл к контактам (пакет, SLA):
+    // уходит в текст сообщения и в параметры цели.
+    contactTopic: null
   };
 
   progressRef = React.createRef();
@@ -34,6 +37,9 @@ export default class Bitrix24Page extends React.Component {
     // Полоса прогресса и появление блоков — без работы на каждом скролл-эвенте.
     this._offProgress = setupScrollProgress(() => this.progressRef.current);
     this._offReveal = setupReveal();
+    // Канбан и чат первого экрана крутились всегда (heroPlayState был
+    // зашит в running) — теперь CSS-анимации секции стоят вне кадра.
+    this._offSections = pauseSectionsOffscreen();
 
     this.setupKanbanDrag();
   }
@@ -74,6 +80,7 @@ export default class Bitrix24Page extends React.Component {
     if (this._desktopMq) this._desktopMq.removeEventListener('change', this._onMqChange);
     if (this._offProgress) this._offProgress();
     if (this._offReveal) this._offReveal();
+    if (this._offSections) this._offSections();
     clearTimeout(this.mountTimer);
     (this._dragTimers || []).forEach(clearTimeout);
   }
@@ -102,8 +109,9 @@ export default class Bitrix24Page extends React.Component {
       closeMobileMenu: this.closeMobileMenu,
 
       heroPlayState: (true) ? 'running' : 'paused',
-      tgHref: 'https://t.me/Terraiib24',
-      waHref: 'https://wa.me/79285288598',
+      tgHref: tgHref(leadText('страница «Битрикс24»', this.state.contactTopic)),
+      waHref: waHref(leadText('страница «Битрикс24»', this.state.contactTopic)),
+      contactTopic: this.state.contactTopic,
 
       entranceBadge: this.entrance(0),
       entranceH1: this.entrance(0.08),
@@ -118,13 +126,16 @@ export default class Bitrix24Page extends React.Component {
       succCountRef: this.succCountRef,
       succSumRef: this.succSumRef,
 
-      scrollToContact: () => {
-        ymGoal('cta_contact'); const el = document.getElementById('contact');
+      // Кнопка «к контактам»: место — в цель, сценарий — в текст сообщения.
+      contactCta: (place, topic) => () => {
+        ymGoal('cta_contact', { place, topic: topic || 'none' });
+        if (topic) this.setState({ contactTopic: topic });
+        const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
       scrollToContactMobile: () => {
         this.closeMobileMenu();
-        ymGoal('cta_contact'); const el = document.getElementById('contact');
+        ymGoal('cta_contact', { place: 'mobile_menu' }); const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       }
     };
@@ -159,7 +170,7 @@ export default class Bitrix24Page extends React.Component {
   <header ref={this.headerRef} className="site-header" style={s(`position:sticky; top:14px; z-index:50; margin:14px ${v.padX} 0; display:flex; align-items:center; justify-content:space-between; padding:12px 14px 12px 20px; background:linear-gradient(135deg, rgba(255,255,255,0.62), rgba(255,255,255,0.34)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.7); border-radius:22px; box-shadow:0 16px 40px -16px rgba(20,23,28,0.32), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
 
     <a href="/" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; gap:12px; text-decoration:none;`)}>
-      <svg width="36" height="36" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
+      <svg className="sprout" width="36" height="36" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgH" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
           <linearGradient id="tgHV" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#3BC5EC"></stop></linearGradient>
@@ -199,7 +210,7 @@ export default class Bitrix24Page extends React.Component {
       <a className="b24fx4" href="#faq" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>FAQ</a>
       <a href="/bitrix24" aria-current="page" style={s(`font-size:var(--t15); font-weight:600; color:var(--blue); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--blue),var(--blue)); background-repeat:no-repeat; background-position:0 100%; background-size:100% 1.5px; padding-bottom:3px;`)}>Битрикс24</a>
       <a className="b24fx5" href="/ai" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>ИИ-решения</a>
-      <button className="b24fx6" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
+      <button className="b24fx6" onClick={v.contactCta('header')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
     </div>
 
     <button onClick={v.toggleMobileMenu} aria-label="Меню" aria-expanded={v.mobileMenuOpen} aria-controls="b24-mobile-menu" style={s(`display:${v.hamburgerDisplay}; width:42px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--paper); flex-direction:column; align-items:center; justify-content:center; gap:4px; cursor:pointer;`)}>
@@ -251,7 +262,7 @@ export default class Bitrix24Page extends React.Component {
         </p>
 
         <div style={s(`display:flex; align-items:center; gap:22px; margin-top:34px; flex-wrap:wrap; ${v.entranceCta}`)}>
-          <button className="b24fx8" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 32px; border-radius:16px; white-space:nowrap; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить консультацию</button>
+          <button className="b24fx8" onClick={v.contactCta('hero')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:16px 32px; border-radius:16px; white-space:nowrap; cursor:pointer; box-shadow:0 12px 28px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.6); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить консультацию</button>
           <a className="b24fx9" href="#steps" style={s(`font-size:var(--t16); font-weight:600; color:var(--ink); display:inline-flex; align-items:center; gap:8px; padding:16px 2px; text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.25s ease;`)}>Этапы внедрения ↓</a>
         </div>
 
@@ -652,7 +663,7 @@ export default class Bitrix24Page extends React.Component {
 
       <div data-reveal style={s(`display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-top:36px;`)}>
         <p style={s(`font-size:var(--t15); color:rgba(255,255,255,0.55); margin:0; max-width:calc(560px * var(--t-scale));`)}>Объём часов и условия зависят от вашей системы — подберём формат на консультации.</p>
-        <button className="b24fx10" onClick={v.scrollToContact} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Подобрать пакет поддержки</button>
+        <button className="b24fx10" onClick={v.contactCta('sla', 'пакет поддержки')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:#fff; border:none; padding:13px 28px; border-radius:999px; cursor:pointer; transition:transform 0.2s ease;`)}>Подобрать пакет поддержки</button>
       </div>
     </div>
   </section>
@@ -676,7 +687,7 @@ export default class Bitrix24Page extends React.Component {
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
           <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: от 2 недель</div>
-          <button className="b24fx11" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
+          <button className="b24fx11" onClick={v.contactCta('pkg_start', 'пакет «Старт»')} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
 
@@ -693,7 +704,7 @@ export default class Bitrix24Page extends React.Component {
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
           <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: 4–8 недель</div>
-          <button className="b24fx12" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border:none; padding:14px 24px; border-radius:12px; cursor:pointer; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Обсудить проект</button>
+          <button className="b24fx12" onClick={v.contactCta('pkg_business', 'пакет «Бизнес»')} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border:none; padding:14px 24px; border-radius:12px; cursor:pointer; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
 
@@ -709,7 +720,7 @@ export default class Bitrix24Page extends React.Component {
         </div>
         <div style={s(`margin-top:auto; padding-top:28px;`)}>
           <div style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-faint);`)}>Срок: от 8 недель</div>
-          <button className="b24fx13" onClick={v.scrollToContact} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
+          <button className="b24fx13" onClick={v.contactCta('pkg_enterprise', 'пакет «Энтерпрайз»')} style={s(`width:100%; margin-top:14px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:14px 24px; border-radius:12px; cursor:pointer; transition:border-color 0.2s ease;`)}>Обсудить проект</button>
         </div>
       </div>
     </div>
@@ -723,7 +734,7 @@ export default class Bitrix24Page extends React.Component {
         <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);`)}>FAQ</div>
         <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Частые вопросы о внедрении Битрикс24</h2>
         <p style={s(`font-size:var(--t17); line-height:1.6; color:var(--ink-soft); margin:20px 0 0; max-width:calc(420px * var(--t-scale));`)}>Не нашли свой вопрос — напишите нам, отвечаем в течение рабочего дня.</p>
-        <button className="b24fx14" onClick={v.scrollToContact} style={s(`margin-top:26px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:13px 26px; border-radius:999px; cursor:pointer; transition:border-color 0.2s ease;`)}>Задать вопрос</button>
+        <button className="b24fx14" onClick={v.contactCta('faq')} style={s(`margin-top:26px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); padding:13px 26px; border-radius:999px; cursor:pointer; transition:border-color 0.2s ease;`)}>Задать вопрос</button>
       </div>
 
       <div data-reveal-children="80" style={s(`display:flex; flex-direction:column; gap:14px;`)}>
@@ -828,8 +839,8 @@ export default class Bitrix24Page extends React.Component {
 
       <div style={s(`position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:24px; min-height:260px;`)}>
         <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
-          <a className="b24fx16" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal("telegram")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="b24fx17" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal("whatsapp")} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
+          <a className="b24fx16" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
+          <a className="b24fx17" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
         </div>
         <div style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня</div>
       </div>
@@ -838,7 +849,7 @@ export default class Bitrix24Page extends React.Component {
 
   <footer style={s(`padding:0 ${v.padX} 48px; max-width:var(--wrap); margin:0 auto; display:flex; flex-direction:${v.footerDirection}; align-items:${v.footerAlign}; justify-content:space-between; gap:24px; border-top:1px solid var(--line); padding-top:36px;`)}>
     <div style={s(`display:flex; align-items:center; gap:10px;`)}>
-      <svg width="28" height="28" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
+      <svg className="sprout" width="28" height="28" viewBox="0 0 40 40" style={s(`display:block; flex-shrink:0;`)} aria-hidden="true">
         <defs>
           <linearGradient id="tgF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#12A5E0"></stop></linearGradient>
           <linearGradient id="tgFV" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stopColor="#155EEF"></stop><stop offset="1" stopColor="#3BC5EC"></stop></linearGradient>
@@ -874,7 +885,7 @@ export default class Bitrix24Page extends React.Component {
       <a href="#sla" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Поддержка</a>
       <a href="#faq" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_B24.shortName} · ИНН {IP_B24.inn} · ОГРНИП {IP_B24.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
+    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_B24.shortName} · ИНН {IP_B24.inn} · ОГРНИП {IP_B24.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
   </footer>
 
 </div>

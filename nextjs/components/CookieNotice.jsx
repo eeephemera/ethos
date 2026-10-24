@@ -38,16 +38,6 @@ function startMetrika() {
   });
 }
 
-const buttonBase = {
-  flexShrink: 0,
-  fontFamily: "var(--font-inter), sans-serif",
-  fontSize: '14px',
-  fontWeight: 600,
-  padding: '11px 22px',
-  borderRadius: '999px',
-  cursor: 'pointer',
-};
-
 export default function CookieNotice() {
   // Первый рендер (сервер и гидрация) — всегда с баннером, разметка совпадает.
   const [decided, setDecided] = useState(false);
@@ -76,51 +66,25 @@ export default function CookieNotice() {
 
   if (decided) return null;
 
+  // Вид — классами в globals.css (.cookie-notice): на телефоне баннер
+  // сжимается до строки текста с кнопками в ряд. Полный вариант закрывал
+  // вместе с нижней панелью около трети экрана, в том числе кнопку первого
+  // экрана на /bitrix24.
   return (
-    <div
-      role="dialog"
-      className="cookie-notice"
-      aria-label="Согласие на использование cookie"
-      style={{
-        position: 'fixed',
-        left: '16px',
-        right: '16px',
-        bottom: '16px',
-        zIndex: 80,
-        maxWidth: '760px',
-        margin: '0 auto',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        gap: '14px 20px',
-        background: '#FFFFFF',
-        border: '1px solid #E7E6E2',
-        borderRadius: '16px',
-        boxShadow: '0 20px 48px -18px rgba(20,23,28,0.32)',
-        padding: '16px 20px',
-        fontFamily: "var(--font-inter), system-ui, sans-serif",
-      }}
-    >
-      <p style={{ margin: 0, flex: '1 1 320px', fontSize: '14px', lineHeight: 1.55, color: '#535C69' }}>
+    <div role="dialog" className="cookie-notice" aria-label="Согласие на использование cookie">
+      <p className="cookie-text cookie-long">
         Хотим использовать cookie и Яндекс.Метрику, чтобы понимать посещаемость сайта. Метрика
         включится только с вашего согласия. Подробнее — в{' '}
-        <a href="/privacy" style={{ color: '#155EEF', textDecoration: 'none', borderBottom: '1px solid rgba(21,94,239,0.35)' }}>
-          Политике конфиденциальности
-        </a>.
+        <a href="/privacy">Политике конфиденциальности</a>.
       </p>
-      <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
-        <button
-          type="button"
-          onClick={() => choose('denied')}
-          style={{ ...buttonBase, color: '#2C333D', background: '#F2F1ED', border: '1px solid #E7E6E2' }}
-        >
+      <p className="cookie-text cookie-short">
+        Яндекс.Метрика и cookie — только с вашего согласия. <a href="/privacy">Подробнее</a>
+      </p>
+      <div className="cookie-actions">
+        <button type="button" className="cookie-btn cookie-btn-no" onClick={() => choose('denied')}>
           Отклонить
         </button>
-        <button
-          type="button"
-          onClick={() => choose('granted')}
-          style={{ ...buttonBase, color: '#fff', background: 'linear-gradient(135deg, #155EEF, #12A5E0)', border: 'none' }}
-        >
+        <button type="button" className="cookie-btn cookie-btn-yes" onClick={() => choose('granted')}>
           Принять
         </button>
       </div>

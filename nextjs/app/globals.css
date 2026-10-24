@@ -266,9 +266,10 @@ h1, h2, h3, h4, p, li, figcaption, blockquote { overflow-wrap: break-word; }
 img, svg, video, canvas, iframe { max-width: 100%; }
 
 /* ---- animations & scroll-reveal (ported from the design) ---- */
+/* scaleX вместо width: ширина в кадре анимации пересчитывала раскладку. */
 @keyframes sliderProgress {
-      from { width: 0%; }
-      to { width: 100%; }
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
     }
     @keyframes sliderItemIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -396,9 +397,11 @@ img, svg, video, canvas, iframe { max-width: 100%; }
    прогон → строки результата → ответ человеческим языком. Всё на CSS:
    ни одного ре-рендера React на анимацию. */
 @keyframes sqlAsk    { 0%, 1%  { opacity: 0; transform: translateY(6px); } 5%, 93% { opacity: 1; transform: none; } 100% { opacity: 0; } }
-@keyframes sqlLine1  { 0%, 9%  { width: 0; } 14%, 93% { width: 100%; } 100% { width: 0; } }
-@keyframes sqlLine2  { 0%, 15% { width: 0; } 20%, 93% { width: 100%; } 100% { width: 0; } }
-@keyframes sqlLine3  { 0%, 21% { width: 0; } 26%, 93% { width: 100%; } 100% { width: 0; } }
+/* Строки SQL «печатаются» маской clip-path, а не шириной: width в кадре
+   анимации пересчитывал раскладку блока. */
+@keyframes sqlLine1  { 0%, 9%  { clip-path: inset(0 100% 0 0); } 14%, 93% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 100% 0 0); } }
+@keyframes sqlLine2  { 0%, 15% { clip-path: inset(0 100% 0 0); } 20%, 93% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 100% 0 0); } }
+@keyframes sqlLine3  { 0%, 21% { clip-path: inset(0 100% 0 0); } 26%, 93% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 100% 0 0); } }
 @keyframes sqlCaret  { 0%, 8%  { opacity: 0; } 9%, 30% { opacity: 1; } 31%, 100% { opacity: 0; } }
 @keyframes sqlRun    { 0%, 29% { opacity: 0; transform: scale(0.9); } 34%, 93% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
 @keyframes sqlRow    { 0%, 36% { opacity: 0; transform: translateY(4px); } 42%, 93% { opacity: 1; transform: none; } 100% { opacity: 0; } }
@@ -543,9 +546,11 @@ img, svg, video, canvas, iframe { max-width: 100%; }
 @keyframes dashSpin   { 0%, 16% { opacity: 1; transform: rotate(0deg); } 15.9% { transform: rotate(1440deg); } 17%, 100% { opacity: 0; transform: rotate(1440deg); } }
 @keyframes dashCheck  { 0%, 16% { opacity: 0; transform: scale(0.4); } 20%, 100% { opacity: 1; transform: scale(1); } }
 @keyframes dashChip   { 0%, 3% { opacity: 0.3; border-color: #E7EAEE; } 20%, 100% { opacity: 1; border-color: #C7EAD5; } }
-/* Две версии цифры сменяют друг друга — видно, что показатель пересчитался. */
-@keyframes dashValA   { 0%, 20% { opacity: 0; filter: blur(7px); transform: translateY(5px); } 27%, 60% { opacity: 1; filter: blur(0); transform: none; } 66%, 100% { opacity: 0; filter: blur(7px); transform: translateY(-5px); } }
-@keyframes dashValB   { 0%, 65% { opacity: 0; filter: blur(7px); transform: translateY(5px); } 72%, 96% { opacity: 1; filter: blur(0); transform: none; } 100% { opacity: 0; filter: blur(7px); } }
+/* Две версии цифры сменяют друг друга — видно, что показатель пересчитался.
+   Без filter: blur — размытие в кадре анимации нагружает видеокарту (тот же
+   класс проблемы, что проявление блоков с blur, 21.10). */
+@keyframes dashValA   { 0%, 20% { opacity: 0; transform: translateY(5px); } 27%, 60% { opacity: 1; transform: none; } 66%, 100% { opacity: 0; transform: translateY(-5px); } }
+@keyframes dashValB   { 0%, 65% { opacity: 0; transform: translateY(5px); } 72%, 96% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 @keyframes dashStatusA { 0%, 1% { opacity: 1; } 20%, 100% { opacity: 0; } }
 @keyframes dashStatusB { 0%, 19% { opacity: 0; } 24%, 100% { opacity: 1; } }
 @keyframes dashSplit  { 0%, 18% { transform: scaleX(0); } 32%, 62% { transform: scaleX(1); } 68% { transform: scaleX(0.94); } 76%, 100% { transform: scaleX(1); } }
@@ -676,6 +681,21 @@ section [style*="display: grid"] > * { min-width: 0; }
    почему-то не отработал, демо просто крутится как раньше, а не остаётся
    замороженным на нулевом кадре (это выглядит сломанным). */
 .fxpause[data-run='0'] * { animation-play-state: paused !important; }
+/* То же для каждой секции страницы (pauseSectionsOffscreen в _ui.js). */
+section[data-run='0'] * { animation-play-state: paused !important; }
+
+/* Логотип-росток шевелится два цикла после загрузки и замирает в исходной
+   позе, а не вечно: он в липкой шапке со стеклом, и бесконечная анимация
+   заставляла перерисовывать шапку в каждом кадре даже в покое. */
+.sprout g { animation-iteration-count: 2 !important; animation-fill-mode: forwards !important; }
+
+/* «Уменьшить движение»: декоративные циклы — пятна фона, логотип, мигающие
+   точки и курсоры — стоят. Сюжетные демо (чат, SQL, дашборд) пока крутятся
+   только в кадре; статичный кадр для каждого — отдельная задача. */
+@media (prefers-reduced-motion: reduce) {
+  .sprout g, .aurora-blob,
+  [style*="pulseDot"], [style*="mkBlink"], [style*="genCursor"] { animation: none !important; }
+}
 
 /* ---- видимый фокус на всём интерактиве -----------------------------------
    Раньше :focus-visible был описан только у карусели, и человек, идущий по
@@ -752,6 +772,59 @@ button:focus-visible {
 /* Баннер согласия рендерится сервером всем; тем, кто уже нажал «Принять» или
    «Отклонить», его прячет атрибут, который ставит скрипт в <head>. */
 html[data-metrika-consent] .cookie-notice { display: none !important; }
+
+.cookie-notice {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 80;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  background: #FFFFFF;
+  border: 1px solid #E7E6E2;
+  border-radius: 16px;
+  box-shadow: 0 20px 48px -18px rgba(20, 23, 28, 0.32);
+  padding: 16px 20px;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.cookie-text { margin: 0; flex: 1 1 320px; font-size: 14px; line-height: 1.55; color: #535C69; }
+.cookie-text a { color: #155EEF; text-decoration: none; border-bottom: 1px solid rgba(21, 94, 239, 0.35); }
+.cookie-short { display: none; }
+.cookie-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.cookie-btn {
+  flex-shrink: 0;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.cookie-btn-no { color: #2C333D; background: #F2F1ED; border: 1px solid #E7E6E2; }
+.cookie-btn-yes { color: #fff; background: linear-gradient(135deg, #155EEF, #12A5E0); border: none; }
+.cookie-btn:focus-visible { outline: 2px solid #155EEF; outline-offset: 2px; }
+
+/* Телефон: короткий текст и кнопки в одну строку с ним. Полный баннер с
+   нижней панелью закрывал около трети экрана. */
+@media (max-width: 640px) {
+  .cookie-notice {
+    left: 8px;
+    right: 8px;
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 8px 8px 8px 14px;
+    border-radius: 14px;
+  }
+  .cookie-long { display: none; }
+  .cookie-short { display: block; flex: 1 1 auto; font-size: 12.5px; line-height: 1.35; }
+  .cookie-actions { gap: 6px; }
+  .cookie-btn { font-size: 13px; padding: 0 12px; min-height: 40px; }
+}
 
 /* Панель перекрывала бы конец страницы и баннер о cookie — резервируем место. */
 @media (max-width: 1179px) {

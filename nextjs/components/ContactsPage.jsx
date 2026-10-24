@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, leadText, tgHref, waHref } from './_ui';
 import { R } from './_responsive';
 import { PROVIDERS, SITE_OWNER } from '../lib/requisites';
 
@@ -16,8 +16,8 @@ import { PROVIDERS, SITE_OWNER } from '../lib/requisites';
 // направлений, а реквизиты разложены по исполнителям: клиент видит, с кем
 // заключает договор. Отдельно — владелец сайта (149-ФЗ, ст. 10).
 
-const TG = 'https://t.me/Terraiib24';
-const WA = 'https://wa.me/79285288598';
+const TG = tgHref(leadText('страница «Контакты»'));
+const WA = waHref(leadText('страница «Контакты»'));
 const PHONE = '+79256777027';
 const PHONE_HUMAN = '+7 925 677-70-27';
 const EMAIL = 'magomedov_zak_05@mail.ru';
@@ -89,7 +89,7 @@ export default class ContactsPage extends React.Component {
           </p>
 
           <div style={s(`display:grid; grid-template-columns:${v.cols2}; gap:16px; margin-top:40px; ${this.entrance(0.24)}`)}>
-            <a href={'tel:' + PHONE} onClick={() => ymGoal('phone')} style={s(`display:flex; align-items:center; gap:14px; ${GLASS} border-radius:18px; padding:22px 24px; text-decoration:none;`)}>
+            <a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'contacts' })} style={s(`display:flex; align-items:center; gap:14px; ${GLASS} border-radius:18px; padding:22px 24px; text-decoration:none;`)}>
               <span style={s(`width:42px; height:42px; border-radius:12px; background:var(--grad); display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M6.6 3h3l1.5 4-2 1.4a13 13 0 006.5 6.5l1.4-2 4 1.5v3A2 2 0 0119 19.5 16.5 16.5 0 014.5 5 2 2 0 016.6 3z" fill="#fff"></path></svg></span>
               <span style={s(`min-width:0;`)}>
                 <span style={s(`display:block; font-family:monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Телефон</span>
@@ -97,7 +97,7 @@ export default class ContactsPage extends React.Component {
               </span>
             </a>
 
-            <a href={'mailto:' + EMAIL} onClick={() => ymGoal('email')} style={s(`display:flex; align-items:center; gap:14px; ${GLASS} border-radius:18px; padding:22px 24px; text-decoration:none;`)}>
+            <a href={'mailto:' + EMAIL} onClick={() => ymGoal('email', { place: 'contacts' })} style={s(`display:flex; align-items:center; gap:14px; ${GLASS} border-radius:18px; padding:22px 24px; text-decoration:none;`)}>
               <span style={s(`width:42px; height:42px; border-radius:12px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 6.5h18v11H3v-11z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round"></path><path d="M3.5 7l8.5 6 8.5-6" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
               <span style={s(`min-width:0;`)}>
                 <span style={s(`display:block; font-family:monospace; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint);`)}>Почта</span>
@@ -107,8 +107,8 @@ export default class ContactsPage extends React.Component {
           </div>
 
           <div style={s(`display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; ${this.entrance(0.28)}`)}>
-            <a href={TG} target="_blank" rel="noopener" onClick={() => ymGoal('telegram')} style={s(`flex:1; min-width:200px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border-radius:14px; padding:16px 24px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22);`)}>Написать в Telegram</a>
-            <a href={WA} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp')} style={s(`flex:1; min-width:200px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:14px; padding:16px 24px; text-decoration:none;`)}>Написать в WhatsApp</a>
+            <a href={TG} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contacts' })} style={s(`flex:1; min-width:200px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); border-radius:14px; padding:16px 24px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22);`)}>Написать в Telegram</a>
+            <a href={WA} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contacts' })} style={s(`flex:1; min-width:200px; display:flex; align-items:center; justify-content:center; gap:9px; font-size:var(--t15); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:14px; padding:16px 24px; text-decoration:none;`)}>Написать в WhatsApp</a>
           </div>
 
           <div style={s(`display:flex; align-items:center; gap:10px; margin-top:22px; background:rgba(31,138,91,0.07); border:1px solid rgba(31,138,91,0.2); border-radius:12px; padding:14px 16px; ${this.entrance(0.3)}`)}>
