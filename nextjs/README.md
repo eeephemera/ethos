@@ -55,13 +55,12 @@ npm run dev        # http://localhost:3000
 
 ```bash
 npm run build
-npm start          # или деплой на Vercel (настройки по умолчанию)
+npm start
 ```
 
 `npm run build` заодно проверяет типы: `.ts`/`.tsx` (blur-up) типизируются
 строго, `.jsx` — с `checkJs: false`. Пакет `typescript` лежит в
-`devDependencies`, поэтому на сервере ставим зависимости с `--include=dev`
-(так и делает `deploy/deploy.sh`).
+`devDependencies`, поэтому на сервере зависимости ставятся с `--include=dev`.
 
 ## SEO
 
@@ -78,8 +77,6 @@ npm start          # или деплой на Vercel (настройки по у
 - Ссылки Telegram / WhatsApp (`t.me` / `wa.me` в компонентах — проп по умолчанию)
 - OG-изображение (сейчас не задано) в `app/layout.jsx`
 
-## Деплой на сервер (aiethos.ru)
+## Выкатка на сервер (aiethos.ru)
 
-Вариант со статикой (быстрее) описан в корневом `../deploy/DEPLOY.md`.
-Для Next.js на своём сервере: `npm run build`, затем `npm start` под PM2 +
-nginx как reverse-proxy на порт 3000, HTTPS через certbot.
+Выкладываем мы — см. «Выкатка на сервер» в корневом [`../README.md`](../README.md).

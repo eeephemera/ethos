@@ -6,7 +6,7 @@
 
 ```
 nextjs/     — приложение Next.js (App Router). Три страницы: /, /bitrix24, /ai
-deploy/     — всё для деплоя на сервер (systemd, nginx, certbot, скрипт)
+deploy/     — конфиги и скрипты сервера (systemd, nginx) — для справки, не запускать
 ```
 
 ## Локальный запуск
@@ -25,12 +25,10 @@ npm run build
 npm start
 ```
 
-## Деплой на сервер
+## Выкатка на сервер
 
-См. [`deploy/DEPLOY.md`](deploy/DEPLOY.md). Коротко — на сервере:
+Сайт на сервер выкладываем мы, владельцы сайта. Свои правки присылайте
+Pull Request'ом в `main`. Перед отправкой `npm run build` в `nextjs/` должен
+проходить без ошибок.
 
-```bash
-git clone https://github.com/eeephemera/ethos.git /opt/ethos
-cd /opt/ethos && git checkout claude/deploy-ethos-server-nigp2j
-CERTBOT_EMAIL="you@example.com" bash deploy/deploy.sh
-```
+Скрипты из `deploy/` не запускайте и сами на сервер ничего не выкладывайте.
