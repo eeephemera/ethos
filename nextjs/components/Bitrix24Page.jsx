@@ -238,7 +238,7 @@ export default class Bitrix24Page extends React.Component {
 
         <div style={s(`display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg, rgba(255,255,255,0.6), rgba(255,255,255,0.32)); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%); border:1px solid rgba(255,255,255,0.72); border-radius:999px; padding:6px 16px 6px 6px; box-shadow:0 1px 2px rgba(20,23,28,0.05); margin-top:22px; ${v.entranceBadge}`)}>
           <span style={s(`width:26px; height:26px; border-radius:8px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 4px, #F6F6F4 4px, #F6F6F4 8px); border:1px dashed #C9CDD3; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:8px; color:#8A8F99;`)}>Б24</span>
-          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink); min-width:0;`)}>Сертифицированный интегратор Битрикс24</span>
+          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink); min-width:0;`)}>Внедрение, интеграции и поддержка</span>
         </div>
 
         <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.07; letter-spacing:-0.03em; margin:26px 0 0; color:var(--ink); ${v.entranceH1}`)}>
@@ -822,7 +822,7 @@ export default class Bitrix24Page extends React.Component {
 
         <div style={s(`display:flex; align-items:center; gap:10px; margin-top:36px;`)}>
           <div style={s(`width:26px; height:26px; border-radius:8px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 4px, #F6F6F4 4px, #F6F6F4 8px); border:1px dashed #C9CDD3; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:8px; color:#8A8F99; flex-shrink:0;`)}>Б24</div>
-          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink-soft);`)}>Сертифицированный интегратор Битрикс24</span>
+          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink-soft);`)}>Внедрение и поддержка Битрикс24</span>
         </div>
       </div>
 

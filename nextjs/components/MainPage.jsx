@@ -13,10 +13,10 @@ const NAV_LINK = `font-size:var(--t15); font-weight:500; color:var(--ink-soft); 
 const NAV_LINK_M = `display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`;
 
 const VOICE_SCRIPT = [
-  { id: 'hero', label: 'О компании', text: 'ETHOS — сертифицированный интегратор Битрикс24. Мы внедряем, дорабатываем и поддерживаем Битрикс24 — и строим ИИ-агентов, которые снимают рутину с ваших команд.' },
+  { id: 'hero', label: 'О компании', text: 'ETHOS внедряет, дорабатывает и поддерживает Битрикс24 — и строит ИИ-агентов, которые снимают рутину с ваших команд.' },
   { id: 'services', label: 'Услуги', text: 'Работаем в двух направлениях. Если Битрикс24 ещё нет — внедряем систему под ключ: настраиваем процессы и воронки, подключаем интеграции, переносим данные и обучаем команду. Если Битрикс24 уже работает — берём систему на поддержку: техподдержка по SLA, доработки и аудит текущей настройки.' },
   { id: 'ai', label: 'ИИ-решения', text: 'Внедряем ИИ там, где он даёт результат. ИИ-агенты ведут сделки, обрабатывают заявки и отвечают клиентам. Автоматически заполняют карточки товаров на сайте: подбирают фото и пишут SEO-тексты. А ещё автоматизируют аналитику и отчётность.' },
-  { id: 'why', label: 'Почему мы', text: 'Мы работаем как расширение вашей команды, а не подрядчик на разовый проект. Сертифицированный статус энтерпрайз, опыт сложных внедрений, одна команда для CRM и ИИ — и сопровождение результата после запуска.' },
+  { id: 'why', label: 'Почему мы', text: 'Мы работаем как расширение вашей команды, а не подрядчик на разовый проект. Опыт сложных внедрений, одна команда для CRM и ИИ — и сопровождение результата после запуска.' },
   { id: 'process', label: 'Процесс', text: 'Наш процесс — четыре шага: аудит процессов, проектирование решения, внедрение с обучением команды и постоянная поддержка по мере роста бизнеса.' },
   { id: 'contact', label: 'Контакты', text: 'Обсудим ваш проект? Напишите нам в Телеграм или Вотсап — отвечаем в течение рабочего дня.' }
 ];
@@ -1093,7 +1093,7 @@ export default class MainPage extends React.Component {
       <div>
         <div style={s(`display:inline-flex; align-items:center; flex-wrap:${v.badgeWrap}; row-gap:8px; gap:10px; background:var(--paper); border:1px solid var(--line); border-radius:${v.badgeRadius}; box-shadow:0 8px 24px -14px rgba(20,23,28,0.18); padding:6px 16px 6px 6px; ${v.entranceBadge}`)}>
           <div style={s(`width:26px; height:26px; border-radius:8px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 4px, #F6F6F4 4px, #F6F6F4 8px); border:1px dashed #C9CDD3; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:8px; color:#8A8F99;`)}>Б24</div>
-          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink); min-width:0;`)}>Сертифицированный интегратор Битрикс24</span>
+          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink); min-width:0;`)}>Внедрение и поддержка Битрикс24</span>
         </div>
 
         <h1 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h1Size}; line-height:1.06; letter-spacing:-0.03em; margin:var(--hero-h1-mt) 0 0; color:var(--ink); ${v.entranceH1}`)}>
@@ -1102,7 +1102,7 @@ export default class MainPage extends React.Component {
         </h1>
 
         <p style={s(`font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:calc(620px * var(--t-scale)); margin:var(--hero-p-mt) 0 0; ${v.entranceP}`)}>
-          Сертифицированный интегратор Битрикс24: <a href="/bitrix24" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>внедряем Битрикс24 под ключ</a>, дорабатываем и поддерживаем систему — и строим <a href="/ai" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>ИИ-агентов для бизнеса</a>, которые снимают рутину с ваших команд.
+          <a href="/bitrix24" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>Внедряем Битрикс24 под ключ</a>, дорабатываем и поддерживаем систему — и строим <a href="/ai" style={s(`color:var(--blue); text-decoration:none; border-bottom:1px solid rgba(21,94,239,0.35);`)}>ИИ-агентов для бизнеса</a>, которые снимают рутину с ваших команд.
         </p>
 
         <div style={s(`margin-top:var(--hero-accent-mt); padding:14px 18px; border-left:2px solid var(--blue); background:var(--paper); font-size:var(--t15); line-height:1.55; color:var(--ink); max-width:calc(560px * var(--t-scale)); ${v.entranceCta}`)}>
@@ -1893,7 +1893,7 @@ export default class MainPage extends React.Component {
       <div style={s(`display:flex; flex-direction:column;`)}>
         <div style={s(`display:flex; gap:24px; padding:26px 0; border-top:1px solid var(--line);`)}>
           <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink-faint); flex-shrink:0; width:26px;`)}>01</div>
-          <div><div style={s(`font-size:var(--t17); font-weight:700; color:var(--ink);`)}>Статус</div><div style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin-top:6px;`)}>Сертифицированный интегратор Битрикс24: внедряем, дорабатываем и поддерживаем систему как основной профиль работы, а не как одну услугу из списка.</div></div>
+          <div><div style={s(`font-size:var(--t17); font-weight:700; color:var(--ink);`)}>Профиль</div><div style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin-top:6px;`)}>Битрикс24 — основной профиль работы: внедряем, дорабатываем и поддерживаем систему, а не держим её одной услугой из списка.</div></div>
         </div>
         <div style={s(`display:flex; gap:24px; padding:26px 0; border-top:1px solid var(--line);`)}>
           <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink-faint); flex-shrink:0; width:26px;`)}>02</div>
@@ -2021,7 +2021,7 @@ export default class MainPage extends React.Component {
 
         <div style={s(`display:flex; align-items:center; gap:10px; margin-top:36px;`)}>
           <div style={s(`width:26px; height:26px; border-radius:8px; background:repeating-linear-gradient(45deg, #ECEBE7, #ECEBE7 4px, #F6F6F4 4px, #F6F6F4 8px); border:1px dashed #C9CDD3; display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:8px; color:#8A8F99; flex-shrink:0;`)}>Б24</div>
-          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink-soft);`)}>Сертифицированный интегратор Битрикс24</span>
+          <span style={s(`font-size:var(--t14); font-weight:600; color:var(--ink-soft);`)}>Внедрение и поддержка Битрикс24</span>
         </div>
       </div>
 
@@ -2080,7 +2080,7 @@ export default class MainPage extends React.Component {
           <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t17); color:var(--ink);`)}>ETHOS</span>
         </div>
         <p style={s(`font-size:var(--t14); line-height:1.6; color:var(--ink-soft); margin:12px 0 0; max-width:260px;`)}>
-          Сертифицированный интегратор Битрикс24 и разработчик ИИ-агентов для бизнеса.
+          Внедрение и поддержка Битрикс24, разработка ИИ-агентов для бизнеса.
         </p>
       </div>
 

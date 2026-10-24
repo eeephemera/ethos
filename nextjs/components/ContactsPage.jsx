@@ -152,7 +152,7 @@ export default class ContactsPage extends React.Component {
             </div>
 
             <p style={s(`font-size:var(--t135); line-height:1.6; color:var(--ink-faint); margin:18px 0 0;`)}>
-              Сертификаты и подтверждающие документы предоставляем по запросу.{' '}
+              Выписку из реестра ФНС и другие документы предоставляем по запросу.{' '}
               <a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a>
             </p>
           </section>
