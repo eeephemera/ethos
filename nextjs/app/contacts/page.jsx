@@ -1,4 +1,5 @@
 import ContactsPage from '../../components/ContactsPage';
+import { PROVIDERS, providerJsonLd } from '../../lib/requisites';
 
 export const metadata = {
   title: 'Контакты и реквизиты — ETHOS, интегратор ИИ и Битрикс24',
@@ -24,22 +25,10 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': 'https://aiethos.ru/#organization',
       name: 'ETHOS',
-      legalName: 'Индивидуальный предприниматель Магомедов Закир Асланович',
       url: 'https://aiethos.ru',
       email: 'magomedov_zak_05@mail.ru',
       telephone: '+7-925-677-70-27',
-      taxID: '054210247290',
-      vatID: '054210247290',
-      identifier: [
-        { '@type': 'PropertyValue', propertyID: 'ИНН', value: '054210247290' },
-        { '@type': 'PropertyValue', propertyID: 'ОГРНИП', value: '326050000095170' },
-      ],
-      address: {
-        '@type': 'PostalAddress',
-        addressCountry: 'RU',
-        addressRegion: 'Республика Дагестан',
-        addressLocality: 'Дербент',
-      },
+      subOrganization: PROVIDERS.map(providerJsonLd),
       areaServed: 'RU',
       contactPoint: [
         {

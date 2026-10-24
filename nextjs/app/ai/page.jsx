@@ -1,5 +1,6 @@
 import AiPage from '../../components/AiPage';
 import { getAiProductBlurMap } from '../../lib/productImages';
+import { IP_AI, providerJsonLd } from '../../lib/requisites';
 
 export const metadata = {
   title: "Внедрение ИИ в бизнес: ИИ-агенты и автоматизация | ETHOS",
@@ -20,7 +21,8 @@ const jsonLd = {
       {
         "@type": "Service",
         "name": "Внедрение ИИ и автоматизация бизнес-процессов",
-        "provider": { "@type": "Organization", "name": "ETHOS" },
+        "provider": providerJsonLd(IP_AI),
+        "brand": { "@type": "Brand", "name": "ETHOS" },
         "areaServed": "RU",
         "serviceType": "Автоматизация бизнес-процессов с помощью ИИ: ИИ-агенты для продаж и поддержки клиентов, генерация карточек товаров и SEO-текстов, ИИ-аналитика и отчёты, интеграция с Битрикс24, 1С и базами данных (PostgreSQL, MySQL, MS SQL, Oracle, ClickHouse, MongoDB)"
       },

@@ -3,6 +3,7 @@ import React from 'react';
 import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
+import { IP_AI } from '../lib/requisites';
 
 // Боли по ролям. Порядок = приоритет показа: сверху то, с чем приходят чаще
 // и что быстрее окупается. Менять очерёдность — переставить элементы массива,
@@ -1465,7 +1466,7 @@ export default class AiPage extends React.Component {
       <a href="#process" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Внедрение</a>
       <a href="#faq" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>ИП Магомедов З. А. · ИНН 054210247290 · ОГРНИП 326050000095170</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
+    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone')} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_AI.shortName} · ИНН {IP_AI.inn} · ОГРНИП {IP_AI.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
   </footer>
 
 </div>

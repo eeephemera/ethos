@@ -2,6 +2,7 @@ import { Inter, Manrope } from 'next/font/google';
 import CookieNotice from '../components/CookieNotice';
 import { CONSENT_HEAD_SCRIPT } from '../components/consent';
 import MobileActionBar from '../components/MobileActionBar';
+import { PROVIDERS, providerJsonLd } from '../lib/requisites';
 import './globals.css';
 
 // Шрифты через next/font: Next скачивает их на этапе сборки и раздаёт со своего
@@ -52,8 +53,8 @@ export const viewport = {
 
 // Organization + WebSite: базовые сущности бренда. Без них «ETHOS» ни с чем не
 // связан за пределами домена — а брендовую выдачу ещё и делит с американской
-// AIEthos. Реквизиты ИП здесь же: для B2B это сигнал доверия, для 152-ФЗ —
-// обязательное указание оператора персональных данных.
+// AIEthos. ETHOS — бренд, а не юрлицо: реквизиты двух ИП-исполнителей вложены
+// как subOrganization (lib/requisites.js). Для B2B это сигнал доверия.
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -61,23 +62,12 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': 'https://aiethos.ru/#organization',
       name: 'ETHOS',
-      legalName: 'Индивидуальный предприниматель Магомедов Закир Асланович',
       url: 'https://aiethos.ru',
       logo: 'https://aiethos.ru/icon.png',
       image: 'https://aiethos.ru/opengraph-image',
       email: 'magomedov_zak_05@mail.ru',
       telephone: '+7-925-677-70-27',
-      taxID: '054210247290',
-      identifier: [
-        { '@type': 'PropertyValue', propertyID: 'ИНН', value: '054210247290' },
-        { '@type': 'PropertyValue', propertyID: 'ОГРНИП', value: '326050000095170' },
-      ],
-      address: {
-        '@type': 'PostalAddress',
-        addressCountry: 'RU',
-        addressRegion: 'Республика Дагестан',
-        addressLocality: 'Дербент',
-      },
+      subOrganization: PROVIDERS.map(providerJsonLd),
       areaServed: 'RU',
       description:
         'Интегратор ИИ и Битрикс24: внедрение, поддержка и доработка Битрикс24, разработка ИИ-агентов для продаж, маркетинга, аналитики и поддержки клиентов, автозаполнение карточек товаров и SEO-текстов.',

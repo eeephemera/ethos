@@ -1,4 +1,5 @@
 import Bitrix24Page from '../../components/Bitrix24Page';
+import { IP_B24, providerJsonLd } from '../../lib/requisites';
 
 export const metadata = {
   title: "Внедрение Битрикс24 под ключ — настройка CRM и интеграции | ETHOS",
@@ -17,7 +18,8 @@ const jsonLd = {
       {
         "@type": "Service",
         "name": "Внедрение и поддержка Битрикс24",
-        "provider": { "@type": "Organization", "name": "ETHOS" },
+        "provider": providerJsonLd(IP_B24),
+        "brand": { "@type": "Brand", "name": "ETHOS" },
         "areaServed": "RU",
         "serviceType": "Внедрение CRM Битрикс24 под ключ, интеграция с 1С и телефонией, миграция с amoCRM, техподдержка по SLA"
       },
