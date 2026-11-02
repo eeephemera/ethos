@@ -1,8 +1,11 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, prefersReducedMotion, leadText, tgHref, waHref } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, PHONE, PHONE_HUMAN } from './_ui';
 import { R } from './_responsive';
-import BlurImage from './BlurImage';
+import LeadForm from './LeadForm';
+import { FlowSteps } from './kartochki/FlowSteps';
+import DashboardsSection from './DashboardsSection';
+import AutomationsSection from './AutomationsSection';
 import { IP_AI } from '../lib/requisites';
 
 // Боли по ролям. Порядок = приоритет показа: сверху то, с чем приходят чаще
@@ -53,48 +56,7 @@ const ROLE_CASES = [
   },
 ];
 
-// Демо-каталог для анимации «ИИ собирает карточку». Товары другие, чем на
-// главной: страницы стоят рядом в навигации, и повтор читался бы как копипаста.
-const DEMO_PRODUCTS = [
-  {
-    imgId: 'ai0',
-    img: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=520&q=80',
-    cat: 'Инструмент',
-    hue: '#D9480F',
-    sku: 'арт. DCD-778 · «шурупов. деволт 18в 2акб»',
-    name: 'Дрель-шуруповёрт аккумуляторный DeWalt, 18 В, 2 АКБ',
-    price: '12 900',
-    priceNote: '',
-    specs: ['момент до 65 Н·м', 'патрон 13 мм', '2 АКБ 2,0 А·ч'],
-    desc: 'Аккумуляторная дрель-шуруповёрт на платформе 18 В: крутящий момент до 65 Н·м и две механические скорости — 0–600 об/мин для закручивания и 0–2000 об/мин для сверления. Быстрозажимной патрон 13 мм, 15 ступеней регулировки момента, подсветка рабочей зоны. В комплекте два аккумулятора 2,0 А·ч и зарядное устройство — смена идёт без простоев.',
-  },
-  {
-    imgId: 'ai1',
-    img: 'https://images.unsplash.com/photo-1671022442106-c787685d9fed?auto=format&fit=crop&w=520&q=80',
-    cat: 'Металлопрокат',
-    hue: '#5A626E',
-    sku: 'арт. 20Б1-С245 · «балка двутавр 20 12м»',
-    name: 'Балка двутавровая 20Б1, сталь С245, длина 12 м',
-    price: '1 490',
-    priceNote: 'за м. п.',
-    specs: ['высота 200 мм', '21,3 кг/м', 'ГОСТ Р 57837-2017'],
-    desc: 'Горячекатаный двутавр с параллельными гранями полок: высота профиля 200 мм, ширина полки 100 мм, масса погонного метра 21,3 кг. Сталь С245 по ГОСТ 27772 сваривается без ограничений и сохраняет вязкость при отрицательных температурах. Стандартная длина 12 м, режем в размер под проект. Отгрузка со склада, сертификат качества на каждую партию.',
-  },
-  {
-    imgId: 'ai2',
-    img: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=520&q=80',
-    cat: 'Компьютеры',
-    hue: '#155EEF',
-    sku: 'арт. PC-GX770 · «комп игровой ryzen 7 4070»',
-    name: 'Системный блок игровой, Ryzen 7 7700X / RTX 4070 / 32 ГБ',
-    price: '174 900',
-    priceNote: '',
-    specs: ['Ryzen 7 7700X, 8 ядер', 'RTX 4070 12 ГБ', '32 ГБ DDR5 · SSD 1 ТБ'],
-    desc: 'Процессор AMD Ryzen 7 7700X: 8 ядер, 16 потоков, частота до 5,4 ГГц. Видеокарта GeForce RTX 4070 с 12 ГБ GDDR6X тянет современные игры в разрешении 2K на высоких настройках. Оперативная память 32 ГБ DDR5-5600 двумя модулями, накопитель NVMe SSD 1 ТБ со скоростью чтения до 7000 МБ/с. Блок питания 750 Вт с сертификатом 80 PLUS Gold, корпус с закалённым стеклом и шестью вентиляторами. Гарантия 3 года.',
-  },
-];
-
-const FXCSS = ".aifx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx5:hover{background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.aifx7:hover{color:var(--ink) !important}\n.aifx8:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.aifx9:hover{border-color:var(--ink) !important}\n.aifx10:hover{transform:translateY(-2px) !important}\n.aifx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.aifx12:hover{border-color:var(--ink) !important}\n.aifx13:hover{transform:translateY(-3px) !important}\n.aifx14:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.aifx15:hover{border-color:var(--ink) !important}";
+const FXCSS = ".aifx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx5:hover{background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.aifx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.aifx7:hover{color:var(--ink) !important}\n.aifx8:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.aifx9:hover{border-color:var(--ink) !important}\n.aifx10:hover{transform:translateY(-2px) !important}\n.aifx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.aifx12:hover{border-color:var(--ink) !important}\n.aifx13:hover{transform:translateY(-3px) !important}\n.aifx14:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.aifx15:hover{border-color:var(--ink) !important}\n.aifx16:hover{border-color:rgba(255,255,255,0.6) !important; background:rgba(255,255,255,0.06) !important}";
 
 export default class AiPage extends React.Component {
   // В state больше нет `isMobile`: вся раскладка переехала в CSS-переменные
@@ -104,19 +66,11 @@ export default class AiPage extends React.Component {
     mobileMenuOpen: false,
     mounted: false,
     openFaq: 0,
-    // Анимация «ИИ собирает карточку»: подбор фото → посимвольный ввод → готово
-    prodIdx: 0,
-    prodPhase: 'search',
-    // Сценарий кнопки, по которой человек пришёл к контактам: уходит в текст
-    // сообщения и в параметры цели («голосовой ассистент», «оценка проекта»).
-    contactTopic: null,
   };
 
   progressRef = React.createRef();
   headerRef = React.createRef();
-  contentRef = React.createRef();
   memRef = React.createRef();
-  prodDescRef = React.createRef();
 
   componentDidMount() {
     this._offHeader = setupHeaderAutoHide(() => this.headerRef.current, () => this.state.mobileMenuOpen);
@@ -134,11 +88,7 @@ export default class AiPage extends React.Component {
     // CSS-анимации каждой секции стоят, пока секция вне кадра: чат первого
     // экрана, SQL, ассистент и вики раньше крутились всю дорогу.
     this._offSections = pauseSectionsOffscreen();
-    this._reducedMotion = prefersReducedMotion();
 
-    // Анимация карточки крутится только пока секция на экране: посимвольный
-    // ввод — это setState каждые 28 мс, гонять его на всю длинную страницу
-    // впустую незачем (батарея на телефоне и лишние рендеры).
     // Ролик «Лента знаний» стартует с нулевого кадра при появлении на экране.
     // Иначе таймлайн крутится с загрузки страницы, и человек, долиставший до
     // секции позже, попадает в случайную точку — в том числе в первые 2,6 с,
@@ -160,76 +110,13 @@ export default class AiPage extends React.Component {
     this._memFailsafe = setTimeout(() => {
       if (this.memRef.current) this.memRef.current.setAttribute('data-run', '1');
     }, 10000);
-
-    if ('IntersectionObserver' in window && this.contentRef.current) {
-      this._contentIO = new IntersectionObserver(
-        ([entry]) => (entry.isIntersecting ? this.startProductCycle() : this.stopProductCycle()),
-        { rootMargin: '120px' },
-      );
-      this._contentIO.observe(this.contentRef.current);
-    } else {
-      this.startProductCycle();
-    }
-  }
-
-  // ---- Демо «ИИ собирает карточку» ----------------------------------------
-  writeProdDesc(text) {
-    if (this.prodDescRef.current) this.prodDescRef.current.textContent = text;
-  }
-
-  startProductCycle = () => {
-    if (this._prodRunning) return;
-    this._prodRunning = true;
-    this.runProductStep();
-  };
-
-  stopProductCycle = () => {
-    this._prodRunning = false;
-    clearTimeout(this._prodSearch);
-    clearTimeout(this._prodNext);
-    clearInterval(this._prodType);
-  };
-
-  runProductStep() {
-    clearTimeout(this._prodSearch); clearTimeout(this._prodNext); clearInterval(this._prodType);
-    // Описание печатается в DOM через ref, без setState каждые 28 мс: раньше
-    // это перерисовывало всю страницу /ai ~35 раз в секунду, пока блок в кадре.
-    const descOf = () => DEMO_PRODUCTS[this.state.prodIdx % DEMO_PRODUCTS.length].desc;
-    if (this._reducedMotion) {
-      this.setState({ prodPhase: 'done' });
-      this.writeProdDesc(descOf());
-      return;
-    }
-    this.setState({ prodPhase: 'search' });
-    this.writeProdDesc('');
-
-    this._prodSearch = setTimeout(() => {
-      // Индекс товара читаем здесь, а не выше: смена товара (setState) к этому
-      // моменту уже применена.
-      const full = descOf();
-      let typed = 0;
-      this.setState({ prodPhase: 'type' });
-      this._prodType = setInterval(() => {
-        typed = Math.min(typed + 3, full.length);
-        this.writeProdDesc(typed ? full.slice(0, typed) : '');
-        if (typed >= full.length) { clearInterval(this._prodType); this.setState({ prodPhase: 'done' }); }
-      }, 28);
-    }, 1400);
-
-    this._prodNext = setTimeout(() => {
-      if (!this._prodRunning) return;
-      this.setState((st) => ({ prodIdx: st.prodIdx + 1 }));
-      this.runProductStep();
-    }, 11000);
   }
 
   componentWillUnmount() {
     if (this._offHeader) this._offHeader();
     if (this._desktopMq) this._desktopMq.removeEventListener('change', this._onMqChange);
-    if (this._contentIO) this._contentIO.disconnect();
     if (this._memIO) this._memIO.disconnect();
     clearTimeout(this._memFailsafe);
-    this.stopProductCycle();
     if (this._offProgress) this._offProgress();
     if (this._offReveal) this._offReveal();
     if (this._offSections) this._offSections();
@@ -246,27 +133,9 @@ export default class AiPage extends React.Component {
   closeMobileMenu = () => this.setState({ mobileMenuOpen: false });
 
   renderVals() {
-    const { mobileMenuOpen, openFaq, prodIdx, prodPhase, contactTopic } = this.state;
-
-    const prod = DEMO_PRODUCTS[prodIdx % DEMO_PRODUCTS.length];
-    const prodBlur = (this.props.productBlur || {})[prod.imgId] || {};
-    const prodSearching = prodPhase === 'search';
-    const prodKey = 'demo' + prodIdx;
+    const { mobileMenuOpen, openFaq } = this.state;
 
     const vals = {
-      prod,
-      prodBlur,
-      prodKey,
-      prodSearching,
-      prodDone: prodPhase === 'done',
-      prodDescRef: this.prodDescRef,
-      prodCaret: prodPhase === 'type' ? 'inline-block' : 'none',
-      prodStatus: prodPhase === 'search' ? 'ИИ подбирает фото…' : prodPhase === 'type' ? 'ИИ пишет SEO-описание…' : 'Карточка готова — можно выгружать',
-      prodStatusColor: prodPhase === 'done' ? '#1F8A5B' : 'var(--violet)',
-      prodBadges: prodPhase === 'done' ? 'flex' : 'none',
-      prodStep: (prodIdx % DEMO_PRODUCTS.length) + 1,
-      prodTotal: DEMO_PRODUCTS.length,
-      contentRef: this.contentRef,
       memRef: this.memRef,
       // Раскладка целиком приходит из CSS-переменных — значения одинаковы
       // при SSR и на клиенте, поэтому гидратация ничего не ломает.
@@ -280,9 +149,6 @@ export default class AiPage extends React.Component {
       closeMobileMenu: this.closeMobileMenu,
 
       heroPlayState: (true) ? 'running' : 'paused',
-      tgHref: tgHref(leadText('страница «ИИ-решения»', contactTopic)),
-      waHref: waHref(leadText('страница «ИИ-решения»', contactTopic)),
-      contactTopic,
       // Продукт из секции #content живёт отдельным сайтом. UTM несёт источник
       // перехода на сторону продукта: цель Метрики здесь срабатывает только
       // после согласия на cookie.
@@ -297,9 +163,11 @@ export default class AiPage extends React.Component {
       progressRef: this.progressRef,
 
       // Кнопка «к контактам»: место — в цель, сценарий — в текст сообщения.
-      contactCta: (place, topic) => () => {
+      contactCta: (place, topic, key) => () => {
         ymGoal('cta_contact', { place, topic: topic || 'none' });
-        if (topic) this.setState({ contactTopic: topic });
+        if (topic) {
+          window.dispatchEvent(new CustomEvent('ethos:lead', { detail: { task: 'Интересует: ' + topic, topic: key } }));
+        }
         const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
@@ -350,7 +218,7 @@ export default class AiPage extends React.Component {
     <div style={s(`display:${v.navDisplay}; align-items:center; gap:24px;`)}>
       <a className="aifx0" href="#agents" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Сценарии</a>
       <a className="aifx1" href="#assistant" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>ИИ-ассистент</a>
-      <a className="aifx2" href="#data" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Ваши данные</a>
+      <a className="aifx2" href="#dashboards" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Дашборды</a>
       <a className="aifx3" href="#process" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Внедрение</a>
       <a className="aifx4" href="#faq" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>FAQ</a>
       <a className="aifx5" href="/bitrix24" style={s(`font-size:var(--t15); font-weight:500; color:var(--ink-soft); text-decoration:none; white-space:nowrap; background-image:linear-gradient(var(--ink),var(--ink)); background-repeat:no-repeat; background-position:0 100%; background-size:0% 1.5px; padding-bottom:3px; transition:background-size 0.3s cubic-bezier(.16,1,.3,1), color 0.2s ease, transform 0.25s cubic-bezier(.16,1,.3,1);`)}>Битрикс24</a>
@@ -372,6 +240,8 @@ export default class AiPage extends React.Component {
         <a href="#assistant" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>ИИ-ассистент</a>
         <a href="#content" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Карточки товаров</a>
         <a href="#analytics" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Аналитика</a>
+        <a href="#dashboards" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Дашборды</a>
+        <a href="#more" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Что ещё автоматизируем</a>
         <a href="#data" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Ваши данные</a>
         <a href="#process" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>Внедрение</a>
         <a href="#faq" onClick={v.closeMobileMenu} style={s(`display:flex; align-items:center; min-height:44px; font-size:var(--t16); font-weight:600; color:var(--ink); text-decoration:none;`)}>FAQ</a>
@@ -798,140 +668,63 @@ export default class AiPage extends React.Component {
     </div>
   </section>
 
+  {/* Карточки товаров — в стилистике продукта «Карточки·AI Лаб» (02.11, владелец): тёмная
+      панель, знак продукта, анимация «Как это работает» с его сайта (kartochki/FlowSteps).
+      Цифры — протокол № 01 сайта «Карточки·AI» (боевой каталог стройматериалов,
+      5 июля — 9 августа 2026): на обоих сайтах они должны совпадать. */}
   <section id="content" data-screen-label="Карточки товаров и SEO-тексты" style={s(`padding:${v.secPad}; max-width:var(--wrap); margin:0 auto;`)}>
-    <div data-reveal-children="150" style={s(`display:grid; grid-template-columns:${v.migCols}; gap:${v.migGap}; align-items:center;`)}>
-      <div>
-        <div style={s(`font-family:monospace; font-size:var(--t13); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--violet);`)}>Контент на автопилоте</div>
-        <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:${v.h2Size}; line-height:1.12; letter-spacing:-0.02em; margin:16px 0 0; color:var(--ink);`)}>Карточки товаров и SEO-тексты — без контент-менеджера на потоке</h2>
-        <p style={s(`font-size:var(--t18); line-height:1.6; color:var(--ink-soft); margin:20px 0 0; max-width:calc(560px * var(--t-scale));`)}>Каталог на тысячи позиций месяцами стоит без описаний — и не находится в поиске. ИИ заполняет карточки по прайсу и фото, человек только проверяет.</p>
-        <p style={s(`font-size:var(--t16); line-height:1.6; color:var(--ink-soft); margin:14px 0 0; max-width:calc(560px * var(--t-scale));`)}>На нашем боевом проекте — интернет-магазине стройматериалов — за 36 дней (5 июля — 9 августа 2026) прошло <b style={s(`color:var(--ink); font-weight:600;`)}>19 767 карточек</b>: в пиковый час — 1 391, в среднем 29 секунд на карточку. <b style={s(`color:var(--ink); font-weight:600;`)}>98,6%</b> ушли в публикацию без ручных правок, остальные ИИ сам пометил «на проверку», когда не был уверен в фото. Каталог на 20 000 позиций закрывается за пару рабочих дней, а не за год.</p>
+    <div data-reveal style={s(`position:relative; overflow:hidden; isolation:isolate; border-radius:28px; background:#0B111B; color:#F7F8F4; padding:clamp(22px,4.4vw,56px); box-shadow:0 50px 90px -50px rgba(11,17,27,0.6);`)}>
+      <div aria-hidden="true" style={s(`position:absolute; inset:0; z-index:-1; background-image:linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size:44px 44px; -webkit-mask-image:radial-gradient(120% 90% at 0% 0%, #000 30%, transparent 75%); mask-image:radial-gradient(120% 90% at 0% 0%, #000 30%, transparent 75%);`)}></div>
+      <div aria-hidden="true" style={s(`position:absolute; z-index:-1; top:-200px; right:-140px; width:560px; height:560px; border-radius:50%; background:#155EEF; opacity:0.2; filter:blur(120px); pointer-events:none;`)}></div>
 
-        <div style={s(`display:flex; flex-direction:column; gap:0; margin-top:36px; max-width:calc(560px * var(--t-scale));`)}>
-          <div style={s(`display:flex; gap:16px; padding:18px 0; border-top:1px solid var(--line);`)}>
-            <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--violet); flex-shrink:0; width:24px;`)}>1.</span>
-            <div><span style={s(`font-size:var(--t155); font-weight:600; color:var(--ink);`)}>Загружаете исходники.</span> <span style={s(`font-size:var(--t155); color:var(--ink-soft);`)}>Прайс, фото, артикулы — хватит даже названия и характеристик от поставщика.</span></div>
+      <div style={s(`display:grid; grid-template-columns:${v.migCols}; gap:${v.migGap}; align-items:center;`)}>
+        <div style={s(`min-width:0;`)}>
+          <div style={s(`display:flex; align-items:center; gap:10px; flex-wrap:wrap;`)}>
+            <svg width="30" height="30" viewBox="0 0 10 10" aria-hidden="true" style={s(`flex-shrink:0; display:block;`)}>
+              <rect width="10" height="10" rx="2.4" fill="#155EEF"></rect>
+              <rect x="1.9" y="1.9" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+              <rect x="5.5" y="1.9" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+              <rect x="1.9" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+              <rect x="5.5" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#35C978"></rect>
+            </svg>
+            <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t15); letter-spacing:0.04em; text-transform:uppercase;`)}>Карточки·AI</span>
+            <span style={s(`font-family:monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8290A6;`)}>готовый продукт ETHOS</span>
           </div>
-          <div style={s(`display:flex; gap:16px; padding:18px 0; border-top:1px solid var(--line);`)}>
-            <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--violet); flex-shrink:0; width:24px;`)}>2.</span>
-            <div><span style={s(`font-size:var(--t155); font-weight:600; color:var(--ink);`)}>ИИ собирает карточку.</span> <span style={s(`font-size:var(--t155); color:var(--ink-soft);`)}>Название, заполненная таблица характеристик, продающее описание и SEO-текст под поисковые запросы — всё в едином стиле бренда. Чего нет в прайсе, ИИ достаёт из открытых источников и помечает, если не уверен.</span></div>
+
+          <h2 style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(28px,3.6vw,44px); line-height:1.1; letter-spacing:-0.02em; margin:22px 0 0; color:#fff;`)}>
+            Карточки товаров и SEO‑тексты — <span style={s(`color:#4F83FF;`)}>без контент‑менеджера</span>
+          </h2>
+          <p style={s(`font-size:var(--t17); line-height:1.6; color:rgba(247,248,244,0.72); margin:18px 0 0; max-width:calc(540px * var(--t-scale));`)}>Каталог на тысячи позиций месяцами стоит без описаний и фото — и не находится в поиске. ИИ сам заполняет карточку: пишет описание и SEO-текст, находит фото и сверяет характеристики с сайтами производителей. Человек только проверяет то, в чём ИИ не уверен.</p>
+
+          <div style={s(`display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:28px; max-width:calc(540px * var(--t-scale));`)}>
+            {[
+              ['19 767', 'карточек за 36 дней'],
+              ['1 391', 'карточек в пиковый час'],
+              ['98,6%', 'ушли без ручных правок'],
+              ['29 с', 'в среднем на карточку'],
+            ].map(([n, l]) => (
+              <div key={l} style={s(`background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:14px 16px;`)}>
+                <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(20px,2.2vw,26px); letter-spacing:-0.01em; color:#fff;`)}>{n}</div>
+                <div style={s(`font-family:monospace; font-size:12px; color:#8290A6; margin-top:4px;`)}>{l}</div>
+              </div>
+            ))}
           </div>
-          <div style={s(`display:flex; gap:16px; padding:18px 0; border-top:1px solid var(--line);`)}>
-            <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--violet); flex-shrink:0; width:24px;`)}>3.</span>
-            <div><span style={s(`font-size:var(--t155); font-weight:600; color:var(--ink);`)}>Человек проверяет.</span> <span style={s(`font-size:var(--t155); color:var(--ink-soft);`)}>Выборочная вычитка вместо написания с нуля — в разы быстрее.</span></div>
-          </div>
-          <div style={s(`display:flex; gap:16px; padding:18px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line);`)}>
-            <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--violet); flex-shrink:0; width:24px;`)}>4.</span>
-            <div><span style={s(`font-size:var(--t155); font-weight:600; color:var(--ink);`)}>Выгружаем куда нужно.</span> <span style={s(`font-size:var(--t155); color:var(--ink-soft);`)}>Сайт на Битрикс, интернет-магазин, маркетплейсы — сразу в нужном формате.</span></div>
+          <div style={s(`font-size:var(--t13); line-height:1.55; color:rgba(247,248,244,0.5); margin-top:12px; max-width:calc(540px * var(--t-scale));`)}>Боевой проект — интернет-магазин стройматериалов, 5 июля — 9 августа 2026. Работает с 1С, Битриксом, Excel и маркетплейсами.</div>
+
+          <div style={s(`display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:28px;`)}>
+            <a className="aifx11" href={v.kartochkiHref} onClick={() => ymGoal('open_kartochki', { place: 'content' })} style={s(`display:inline-flex; align-items:center; gap:8px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:#155EEF; padding:15px 26px; border-radius:14px; text-decoration:none; box-shadow:0 12px 28px -8px rgba(21,94,239,0.6); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Открыть Карточки·AI <span aria-hidden="true">↗</span></a>
+            <button type="button" className="aifx16" onClick={v.contactCta('content', 'карточки товаров', 'cards')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#F7F8F4; background:transparent; border:1px solid rgba(255,255,255,0.22); padding:14px 24px; border-radius:14px; cursor:pointer; transition:border-color 0.2s ease, background 0.2s ease;`)}>Обсудить мой каталог</button>
           </div>
         </div>
 
-        {/* Секция — короткий вход из ETHOS, сам продукт на своём сайте.
-            Кнопка того же вида, что «Получить оценку проекта» в #cost. */}
-        <div style={s(`display:flex; align-items:center; gap:12px 18px; flex-wrap:wrap; margin-top:30px;`)}>
-          <a className="aifx11" href={v.kartochkiHref} onClick={() => ymGoal('open_kartochki', { place: 'content' })} style={s(`display:inline-flex; align-items:center; gap:8px; font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--grad); padding:15px 30px; border-radius:14px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.25); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Открыть продукт <span aria-hidden="true">→</span></a>
-          <span style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>«Карточки·AI Лаб» — отдельный сайт продукта</span>
-        </div>
-      </div>
-
-      <div ref={v.contentRef}>
-        <div style={s(`background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.5)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; box-shadow:0 30px 60px -30px rgba(20,23,28,0.25), inset 0 1px 1px rgba(255,255,255,0.9);`)}>
-          <div style={s(`display:flex; align-items:center; gap:10px;`)}>
-            <span style={s(`font-family:monospace; font-size:var(--mock-11); font-weight:700; color:var(--ink-faint); background:#F1F3F5; border-radius:6px; padding:4px 10px; flex-shrink:0;`)}>Вход</span>
-            <span key={v.prodKey + '-sku'} style={s(`font-family:monospace; font-size:var(--mock-12); color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; animation:sliderItemIn 0.4s ease both;`)}>{v.prod.sku}</span>
-          </div>
-
-          <div style={s(`display:flex; align-items:center; gap:10px; margin:16px 0;`)}>
-            <div style={s(`flex:1; height:1px; background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px);`)}></div>
-            <span style={s(`display:inline-flex; align-items:center; gap:6px; font-family:monospace; font-size:var(--mock-sm); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#fff; background:var(--grad); border-radius:999px; padding:5px 12px; box-shadow:0 6px 14px -4px rgba(21,94,239,0.5); white-space:nowrap;`)}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0;`)}><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" fill="#fff"></path></svg>ИИ генерирует</span>
-            <div style={s(`flex:1; height:1px; background-image:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 11px);`)}></div>
-          </div>
-
-          <div style={s(`background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; overflow:hidden;`)}>
-            <div style={s(`display:flex; gap:14px;`)}>
-              {/* Фото приезжает через blur-up: сначала base64-миниатюра,
-                  посчитанная на сервере, потом кроссфейд в оригинал. */}
-              <div style={s(`width:92px; height:92px; border-radius:10px; overflow:hidden; position:relative; flex-shrink:0; background:#EEF2F6;`)}>
-                <div key={v.prodKey + '-img'} style={s(`position:absolute; inset:0; opacity:${v.prodSearching ? 0 : 1}; transition:opacity .5s ease;`)}>
-                  <BlurImage
-                    src={v.prodBlur.src || v.prod.img}
-                    alt={v.prod.name}
-                    blurDataURL={v.prodBlur.blurDataURL}
-                    fill
-                    sizes="120px"
-                    background="#EEF2F6"
-                  />
-                </div>
-                {v.prodSearching ? (
-                  <div style={s(`position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:#EEF2F6; z-index:3;`)}>
-                    <div style={s(`width:24px; height:24px; border-radius:50%; border:3px solid #CDD5DE; border-top-color:#1F8A5B; animation:spin .8s linear infinite;`)}></div>
-                    <div style={s(`font-size:var(--mock-xs); font-weight:600; color:#5A626E; text-align:center;`)}>подбираю<br />фото…</div>
-                  </div>
-                ) : null}
-              </div>
-              <div style={s(`min-width:0; flex:1;`)}>
-                <div key={v.prodKey + '-cat'} style={s(`font-size:var(--mock-sm); font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:${v.prod.hue}; animation:sliderItemIn 0.4s ease both;`)}>{v.prodSearching ? ' ' : v.prod.cat}</div>
-                <div key={v.prodKey + '-name'} style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t15); color:var(--ink); line-height:1.3; margin-top:3px; animation:sliderItemIn 0.4s ease both;`)}>{v.prodSearching ? '' : v.prod.name}</div>
-                <div style={s(`display:flex; flex-wrap:wrap; gap:6px; margin-top:9px;`)}>
-                  {(v.prodSearching ? [] : v.prod.specs).map((sp, i) => (
-                    <span key={v.prodKey + '-sp' + i} style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:3px 8px; animation:sliderItemIn 0.4s ease both; animation-delay:${0.15 + i * 0.18}s;`)}>{sp}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div style={s(`margin-top:14px; min-height:96px;`)}>
-              <div style={s(`display:flex; align-items:center; gap:8px; flex-wrap:wrap;`)}>
-                <span style={s(`font-family:monospace; font-size:var(--mock-xs); font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:var(--violet);`)}>SEO-описание</span>
-                <span key={v.prodKey + '-price'} style={s(`margin-left:auto; display:flex; align-items:baseline; gap:5px; animation:sliderItemIn 0.4s ease both;`)}>
-                  <span style={s(`font-family:monospace; font-size:var(--t15); font-weight:800; color:var(--ink);`)}>{v.prodSearching ? '' : '₽' + v.prod.price}</span>
-                  {!v.prodSearching && v.prod.priceNote ? <span style={s(`font-size:var(--mock-sm); color:var(--ink-faint); white-space:nowrap;`)}>{v.prod.priceNote}</span> : null}
-                </span>
-              </div>
-              <div style={s(`font-size:var(--mock-12); line-height:1.6; color:var(--ink-soft); margin-top:8px;`)}>
-                <span ref={v.prodDescRef}></span>
-                <span style={s(`display:${v.prodCaret}; width:6px; height:12px; background:var(--violet); vertical-align:-1px; margin-left:1px; animation:genCursor 1s step-end infinite;`)}></span>
-              </div>
-            </div>
-
-            <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:1px solid var(--line);`)}>
-              <span style={s(`display:inline-flex; align-items:center; gap:6px; font-size:var(--mock-11); font-weight:600; color:${v.prodStatusColor};`)}>
-                {v.prodDone
-                  ? <span style={s(`width:14px; height:14px; border-radius:50%; background:#1F8A5B; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width="8" height="8" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3.2" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg></span>
-                  : <span style={s(`width:8px; height:8px; border-radius:50%; background:var(--violet); flex-shrink:0; animation:pulseDot 1.4s ease-in-out infinite;`)}></span>}
-                {v.prodStatus}
-              </span>
-              <span style={s(`display:${v.prodBadges}; gap:6px; flex-wrap:wrap;`)}>
-                <span style={s(`font-size:var(--mock-sm); font-weight:600; color:#1F8A5B; background:#EBF7F0; border-radius:6px; padding:4px 8px;`)}>SEO-текст ✓</span>
-                <span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>alt-теги ✓</span>
-                <span style={s(`font-size:var(--mock-sm); font-weight:600; color:var(--ink-soft); background:#F1F3F5; border-radius:6px; padding:4px 8px;`)}>мета ✓</span>
-              </span>
-            </div>
-          </div>
-
-          <div style={s(`display:flex; align-items:center; gap:8px; margin-top:12px;`)}>
-            <span style={s(`font-family:monospace; font-size:var(--mock-sm); color:var(--ink-faint);`)}>товар {v.prodStep} из {v.prodTotal} · дальше весь каталог</span>
-            <span style={s(`margin-left:auto; display:flex; gap:5px;`)}>
-              {Array.from({ length: v.prodTotal }).map((_, i) => (
-                <span key={i} style={s(`width:${i === v.prodStep - 1 ? '18px' : '6px'}; height:6px; border-radius:3px; background:${i === v.prodStep - 1 ? 'var(--grad)' : '#D6DAE0'}; transition:width .35s cubic-bezier(.16,1,.3,1);`)}></span>
-              ))}
-            </span>
-          </div>
-
-          <div style={s(`display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;`)}>
-            {/* Цифры — не маркетинг, а замер на нашем боевом проекте
-                (интернет-магазин стройматериалов, протокол № 01 сайта
-                «Карточки·AI»: 19 767 карточек за 5 июля — 9 августа 2026,
-                пик 1 391 карточка/час, 98,6% ушли в публикацию без правок). */}
-            <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>1000+ карточек в час</span>
-            <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>98,6% без правок</span>
-            <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>Заполнение характеристик</span>
-            <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>Единый стиль описаний</span>
-            <span style={s(`font-size:var(--t13); font-weight:600; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:999px; padding:8px 15px;`)}>Тексты под SEO-запросы</span>
-          </div>
+        <div style={s(`min-width:0;`)}>
+          <FlowSteps />
         </div>
       </div>
     </div>
   </section>
+
+  <DashboardsSection />
 
   <section id="analytics" data-screen-label="ИИ-аналитика и отчёты" style={s(`position:relative; background:var(--ink); padding:${v.darkPad}; overflow:hidden;`)}>
     <div style={s(`position:absolute; top:-200px; left:50%; transform:translateX(-50%); width:760px; height:760px; border-radius:50%; background:var(--grad); opacity:0.2; filter:blur(130px); pointer-events:none;`)}></div>
@@ -1058,6 +851,8 @@ export default class AiPage extends React.Component {
       </div>
     </div>
   </section>
+
+  <AutomationsSection />
 
   <section id="data" data-screen-label="Подключение к данным и БД" style={s(`padding:${v.secPad}; max-width:var(--wrap); margin:0 auto;`)}>
     <div data-reveal-children="150" style={s(`display:grid; grid-template-columns:${v.migCols}; gap:${v.migGap}; align-items:center;`)}>
@@ -1460,12 +1255,9 @@ export default class AiPage extends React.Component {
         </div>
       </div>
 
-      <div style={s(`position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:24px; min-height:260px;`)}>
-        <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
-          <a className="aifx14" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="aifx15" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
-        </div>
-        <div style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня</div>
+      {/* Заявка вместо двух кнопок мессенджеров (02.11): контакт оставляют здесь, мессенджеры — под кнопкой. */}
+      <div style={s(`position:relative; z-index:1; background:#fff; border:1px solid var(--line); border-radius:20px; padding:clamp(18px,3vw,26px); box-shadow:0 24px 50px -30px rgba(20,23,28,0.25);`)}>
+        <LeadForm source="ai_contact" place="contact" where="страница «ИИ-решения»" defaultTopic="ai" primary />
       </div>
     </div>
   </section>
@@ -1485,7 +1277,7 @@ export default class AiPage extends React.Component {
       <a href="#process" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Внедрение</a>
       <a href="#faq" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_AI.shortName} · ИНН {IP_AI.inn} · ОГРНИП {IP_AI.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
+    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>{PHONE_HUMAN}</a><a href="mailto:magomedov_zak_05@mail.ru" onClick={() => ymGoal('email', { place: 'footer' })} style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_AI.shortName} · ИНН {IP_AI.inn} · ОГРНИП {IP_AI.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
   </footer>
 
 </div>

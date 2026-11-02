@@ -841,41 +841,13 @@ html[data-metrika-consent] .cookie-notice { display: none !important; }
 }
 
 /* ==========================================================================
-   Первый экран: форма-сделка внутри окна «ИИ-агент · активен»
-   --------------------------------------------------------------------------
-   Все размеры, зависящие от брейкпоинта, живут здесь, а не в JS: разметка
-   на сервере и клиенте должна совпадать побайтово (см. блок токенов выше).
-   Мобильные значения — базовые: касания 44px и 16px в поле ввода, чтобы iOS
-   не зумила страницу при фокусе. Десктоп компактнее.
+   Первый экран: окно с формой заявки (стили самой формы — LeadForm.module.css)
    ========================================================================== */
-.hero-input { font-size: 16px; }
-.hero-size-btn { min-height: 44px; }
-.hero-pill { min-height: 44px; }
 /* Акцентная строка: «справа» на десктопе, «ниже» на телефоне — переключение
    текста только через CSS, чтобы SSR-разметка не зависела от ширины окна. */
 .hero-accent-d { display: none; }
 .hero-accent-m { display: inline; }
 @media (min-width: 1180px) {
-  .hero-input { font-size: 15px; }
-  .hero-size-btn { min-height: 40px; }
-  .hero-pill { min-height: 32px; }
   .hero-accent-d { display: inline; }
   .hero-accent-m { display: none; }
-}
-/* Появление заполненного значения в карточке сделки. */
-.hero-fill { animation: sliderItemIn 0.35s ease both; }
-@media (prefers-reduced-motion: reduce) {
-  .hero-fill { animation: none; }
-}
-/* Визуально скрытая подпись для скринридеров. */
-.vh-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
 }

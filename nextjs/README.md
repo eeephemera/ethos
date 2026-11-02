@@ -74,8 +74,20 @@ npm start
 ## Что заменить перед продом
 
 - Плейсхолдер логотипа Битрикс24 («Б24») — на официальный знак партнёра
-- Ссылки Telegram / WhatsApp (`t.me` / `wa.me` в компонентах — проп по умолчанию)
 - OG-изображение (сейчас не задано) в `app/layout.jsx`
+
+## Заявки с формы
+
+Форма — `components/LeadForm.jsx` (главная, /ai, /bitrix24), приём — `app/api/lead/route.ts`.
+Телефон, Telegram и WhatsApp сайта — константы в `components/_ui.js` (`PHONE`, `TG_USERNAME`, `WA_PHONE`).
+
+- Заявка с контактом пишется файлом в `.data/leads/` рядом с приложением (или `LEADS_DIR`),
+  хранится год. В Telegram уходят тема, задача и закрытая ссылка `/api/lead/<id>?k=…` —
+  сам контакт в Telegram не передаём (политика, разделы 7–8).
+- env сервера (`/etc/ethos.env`): `TG_BOT_TOKEN`, `TG_CHAT_ID` — чат ЧЕЛОВЕКА или группы, куда
+  писать (не id самого бота: бот себе не пишет, 403), необязательный `LEAD_VIEW_SECRET` —
+  ключ подписи ссылки (иначе — токен бота).
+- Цели Метрики — в шапке `components/LeadForm.jsx` и `components/ClickGoals.jsx`.
 
 ## Выкатка на сервер (aiethos.ru)
 

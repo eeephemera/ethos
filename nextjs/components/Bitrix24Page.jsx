@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, leadText, tgHref, waHref } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, setupReveal, setupScrollProgress, pauseSectionsOffscreen, PHONE, PHONE_HUMAN } from './_ui';
 import { R } from './_responsive';
+import LeadForm from './LeadForm';
 import { IP_B24 } from '../lib/requisites';
 
 const FXCSS = ".b24fx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx5:hover{background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.b24fx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.b24fx7:hover{color:var(--ink) !important}\n.b24fx8:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.b24fx9:hover{border-color:var(--ink) !important}\n.b24fx10:hover{transform:translateY(-2px) !important}\n.b24fx11:hover{border-color:var(--ink) !important}\n.b24fx12:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.b24fx13:hover{border-color:var(--ink) !important}\n.b24fx14:hover{border-color:var(--ink) !important}\n.b24fx15:hover{transform:translateY(-3px) !important}\n.b24fx16:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.b24fx17:hover{border-color:var(--ink) !important}";
@@ -11,9 +12,6 @@ export default class Bitrix24Page extends React.Component {
     mobileMenuOpen: false,
     mounted: false,
     openFaq: 0,
-    // Сценарий кнопки, по которой человек пришёл к контактам (пакет, SLA):
-    // уходит в текст сообщения и в параметры цели.
-    contactTopic: null
   };
 
   progressRef = React.createRef();
@@ -109,9 +107,6 @@ export default class Bitrix24Page extends React.Component {
       closeMobileMenu: this.closeMobileMenu,
 
       heroPlayState: (true) ? 'running' : 'paused',
-      tgHref: tgHref(leadText('страница «Битрикс24»', this.state.contactTopic)),
-      waHref: waHref(leadText('страница «Битрикс24»', this.state.contactTopic)),
-      contactTopic: this.state.contactTopic,
 
       entranceBadge: this.entrance(0),
       entranceH1: this.entrance(0.08),
@@ -129,7 +124,9 @@ export default class Bitrix24Page extends React.Component {
       // Кнопка «к контактам»: место — в цель, сценарий — в текст сообщения.
       contactCta: (place, topic) => () => {
         ymGoal('cta_contact', { place, topic: topic || 'none' });
-        if (topic) this.setState({ contactTopic: topic });
+        if (topic) {
+          window.dispatchEvent(new CustomEvent('ethos:lead', { detail: { task: 'Интересует: ' + topic } }));
+        }
         const el = document.getElementById('contact');
         if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' });
       },
@@ -837,12 +834,9 @@ export default class Bitrix24Page extends React.Component {
         </div>
       </div>
 
-      <div style={s(`position:relative; z-index:1; display:flex; flex-direction:column; justify-content:center; gap:24px; min-height:260px;`)}>
-        <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
-          <a className="b24fx16" href={v.tgHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
-          <a className="b24fx17" href={v.waHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact', topic: v.contactTopic || 'none' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
-        </div>
-        <div style={s(`font-size:var(--t13); color:var(--ink-faint);`)}>Отвечаем в течение рабочего дня</div>
+      {/* Заявка вместо двух кнопок мессенджеров (02.11): контакт оставляют здесь, мессенджеры — под кнопкой. */}
+      <div style={s(`position:relative; z-index:1; background:#fff; border:1px solid var(--line); border-radius:20px; padding:clamp(18px,3vw,26px); box-shadow:0 24px 50px -30px rgba(20,23,28,0.25);`)}>
+        <LeadForm source="b24_contact" place="contact" where="страница «Битрикс24»" defaultTopic="b24" primary />
       </div>
     </div>
   </section>
@@ -885,7 +879,7 @@ export default class Bitrix24Page extends React.Component {
       <a href="#sla" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Поддержка</a>
       <a href="#faq" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>FAQ</a>
     </div>
-    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>+7 925 677-70-27</a><a href="mailto:magomedov_zak_05@mail.ru" style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_B24.shortName} · ИНН {IP_B24.inn} · ОГРНИП {IP_B24.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
+    <div style={s(`display:flex; flex-direction:column; gap:8px; font-size:var(--t13); color:var(--ink-faint); line-height:1.6;`)}><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`color:var(--ink); font-weight:600; text-decoration:none;`)}>{PHONE_HUMAN}</a><a href="mailto:magomedov_zak_05@mail.ru" onClick={() => ymGoal('email', { place: 'footer' })} style={s(`color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a></div><div>Исполнитель — {IP_B24.shortName} · ИНН {IP_B24.inn} · ОГРНИП {IP_B24.ogrnip}</div><div style={s(`display:flex; gap:14px; flex-wrap:wrap; align-items:center;`)}><a href="/contacts" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Контакты и реквизиты</a><a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>Политика конфиденциальности</a><span>© 2026 ETHOS</span></div></div>
   </footer>
 
 </div>

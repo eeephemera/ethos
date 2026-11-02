@@ -1,0 +1,132 @@
+/* Форма заявки (LeadForm.jsx). Цвета — токены страницы (--ink, --line, --blue…),
+   у каждой страницы они заданы на корневом блоке. Поля — 16px на телефоне:
+   меньший кегль iOS Safari приближает при фокусе. */
+
+.form { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+
+.group { border: 0; margin: 0 0 6px; padding: 0; min-width: 0; }
+
+.label {
+  display: block;
+  padding: 0;
+  margin: 6px 0 0;
+  font-size: var(--t13, 13px);
+  font-weight: 600;
+  color: var(--ink-soft, #3F4650);
+}
+.opt { font-weight: 400; color: var(--ink-faint, #6B7280); }
+.req { color: var(--blue, #155EEF); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #E2E1DC;
+  background: var(--paper, #fff);
+  color: var(--ink-soft, #3F4650);
+  font: 600 var(--t13, 13px) / 1 var(--font-inter), sans-serif;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.chip:hover { border-color: var(--blue, #155EEF); color: var(--ink, #14171C); }
+.chipOn, .chipOn:hover { background: #EEF3FE; border-color: var(--blue, #155EEF); color: var(--blue, #155EEF); }
+
+.input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid #DDDCD6;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink, #14171C);
+  font: 400 16px / 1.45 var(--font-inter), sans-serif;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  resize: vertical;
+}
+textarea.input { min-height: 72px; }
+.input::placeholder { color: #9AA0A9; }
+.input:focus { border-color: var(--blue, #155EEF); box-shadow: 0 0 0 3px rgba(21, 94, 239, 0.14); }
+.bad, .bad:focus { border-color: #D93B3B; box-shadow: 0 0 0 3px rgba(217, 59, 59, 0.12); }
+
+.pair { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-faint, #6B7280);
+  cursor: pointer;
+}
+.check input { width: 18px; height: 18px; margin: 1px 0 0; flex-shrink: 0; accent-color: var(--blue, #155EEF); cursor: pointer; }
+.check a { color: var(--ink-soft, #3F4650); border-bottom: 1px solid var(--line, #E7E6E2); }
+
+.trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.err { margin: 6px 0 0; font-size: 13px; line-height: 1.45; color: #C22F2F; }
+
+.submit {
+  display: block;
+  width: 100%;
+  height: 52px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 14px;
+  background: var(--grad, linear-gradient(135deg, #155EEF, #12A5E0));
+  color: #fff;
+  font: 600 var(--t16, 16px) / 1 var(--font-inter), sans-serif;
+  cursor: pointer;
+  box-shadow: 0 12px 28px -8px rgba(21, 94, 239, 0.5);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+}
+.submit:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -8px rgba(21, 94, 239, 0.55); }
+.submit:disabled { opacity: 0.7; cursor: progress; transform: none; }
+
+.note { margin: 8px 0 0; font-size: 12.5px; line-height: 1.5; color: var(--ink-faint, #6B7280); text-align: center; }
+
+.alt { margin: 2px 0 0; font-size: 13px; line-height: 1.6; color: var(--ink-faint, #6B7280); text-align: center; }
+.alt a { color: var(--ink, #14171C); font-weight: 600; border-bottom: 1px solid var(--line, #E7E6E2); }
+.alt a:hover { color: var(--blue, #155EEF); }
+.nowrap { white-space: nowrap; }
+
+.done { padding: 34px 8px 30px; text-align: center; }
+.doneIcon {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+  border-radius: 12px;
+  background: var(--grad, linear-gradient(135deg, #155EEF, #12A5E0));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 26px -8px rgba(21, 94, 239, 0.5);
+}
+.doneTitle {
+  display: block;
+  margin-top: 16px;
+  font-family: var(--font-manrope), sans-serif;
+  font-weight: 800;
+  font-size: 21px;
+  color: var(--ink, #14171C);
+}
+.doneText { margin: 10px auto 0; max-width: 380px; font-size: var(--t15, 15px); line-height: 1.6; color: var(--ink-soft, #3F4650); }
+.doneText a { color: var(--blue, #155EEF); font-weight: 600; white-space: nowrap; }
+
+@media (min-width: 560px) {
+  .pair { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 12px; }
+}
+
+@media (min-width: 900px) {
+  .input { font-size: 15px; padding: 11px 14px; }
+  .chip { min-height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submit, .chip, .input { transition: none; }
+  .submit:hover { transform: none; }
+}

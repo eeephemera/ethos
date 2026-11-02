@@ -27,14 +27,14 @@ const jsonLd = {
       name: 'ETHOS',
       url: 'https://aiethos.ru',
       email: 'magomedov_zak_05@mail.ru',
-      telephone: '+7-925-677-70-27',
+      telephone: '+7-938-447-69-69',
       subOrganization: PROVIDERS.map(providerJsonLd),
       areaServed: 'RU',
       contactPoint: [
         {
           '@type': 'ContactPoint',
           contactType: 'sales',
-          telephone: '+7-925-677-70-27',
+          telephone: '+7-938-447-69-69',
           email: 'magomedov_zak_05@mail.ru',
           availableLanguage: 'Russian',
         },

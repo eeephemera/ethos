@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { ymGoal, leadText, tgHref } from './_ui';
+import { ymGoal, leadText, tgHref, PHONE } from './_ui';
 
 // Какая страница открыта — уходит в текст сообщения: панель живёт в layout,
 // и без этого из любой страницы приходило одинаковое «Здравствуйте».
@@ -33,7 +33,7 @@ export default function MobileActionBar() {
   const where = PAGE_NAMES[pathname] || 'страница ' + pathname;
   return (
     <nav className="mobile-bar" aria-label="Быстрая связь">
-      <a className="mb-call" href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'mobile_bar' })}>
+      <a className="mb-call" href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'mobile_bar' })}>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
             d="M6.6 3.5h2.2l1.5 3.7-1.8 1.3a12 12 0 006.9 6.9l1.3-1.8 3.7 1.5v2.2a2 2 0 01-2.2 2A17.5 17.5 0 014.6 5.7a2 2 0 012-2.2z"

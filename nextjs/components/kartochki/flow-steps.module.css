@@ -1,0 +1,1271 @@
+/* ─────────────────────────────────────────────────────────────
+   «Как это работает» в первом экране (flow-steps.tsx): большой экран и четыре шага-кнопки.
+   Фазу (data-phase на .flow) ставит flow-steps-play.tsx: 0 — сброс, 1–4 — шаги. Видны экран,
+   подпись и кнопка своего шага; полоса на кнопке — сколько шаг ещё на экране (--hold). Без
+   data-phase (до загрузки скрипта, prefers-reduced-motion) — шаг 2, станция ИИ, в итоговом виде.
+   Вне экрана — data-paused, анимации стоят. Внутри экранов анимируются только transform
+   и opacity HTML-элементов — их ведёт композитор.
+   ───────────────────────────────────────────────────────────── */
+
+.flow {
+  /* Токены сайта «Карточки·AI Лаб» (там — :root в globals.css). В ETHOS блок живёт на тёмной
+     панели раздела /ai#content, поэтому токены — здесь: --paper ETHOS (белый) внутри не нужен. */
+  --paper: #f7f8f4;
+  --data: #8290a6;
+  --line-dark: rgba(255, 255, 255, 0.12);
+  --blue: #155eef;
+  --blue-bright: #4f83ff;
+  --font-body: var(--font-inter);
+  --font-display: var(--font-manrope);
+  --font-data: ui-monospace, "SFMono-Regular", Menlo, Consolas;
+  --hold: 3000ms;
+  display: grid;
+  gap: 12px;
+  /* кнопки шагов — в ряд или два на два, по ширине самого блока */
+  container-type: inline-size;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--font-data), monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--data);
+}
+
+.tap {
+  letter-spacing: 0.1em;
+  color: var(--blue-bright);
+}
+
+/* Экран: четыре станции стопкой, видна одна. Щелчок по экрану — следующий шаг */
+.stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  background: #0e1520;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 1px var(--line-dark);
+  cursor: pointer;
+  transition: box-shadow 0.4s ease;
+}
+
+/* шаг ИИ — экран светится */
+.flow:is(:not([data-phase]), [data-phase="2"]) .stage {
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(79, 131, 255, 0.7),
+    0 0 46px rgba(79, 131, 255, 0.28);
+}
+
+.scr {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.flow:not([data-phase]) [data-scr="2"],
+.flow:is([data-phase="0"], [data-phase="1"]) [data-scr="1"],
+.flow[data-phase="2"] [data-scr="2"],
+.flow[data-phase="3"] [data-scr="3"],
+.flow[data-phase="4"] [data-scr="4"] {
+  opacity: 1;
+}
+
+/* картинка и спрайты — внутри .clip */
+.clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* рамка экрана — линией поверх картинки, размер экрана не меняется. Не outline: контур
+   элемента браузер перерисовывал на каждом кадре движения спрайтов внутри (замер 21.10) */
+.clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--frame);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.onec {
+  --frame: #cfcbbf;
+  background: #f3f2ee;
+}
+
+.service {
+  --frame: rgba(79, 131, 255, 0.42);
+  background: #0e1520;
+}
+
+.site {
+  --frame: #dde0e5;
+  background: #fff;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Подпись шага под экраном: все четыре в одной ячейке — высота не прыгает */
+.captions {
+  display: grid;
+}
+
+.captions p {
+  grid-area: 1 / 1;
+  margin: 0;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 1.45;
+  color: var(--paper);
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+.flow:not([data-phase]) [data-cap="2"],
+.flow:is([data-phase="0"], [data-phase="1"]) [data-cap="1"],
+.flow[data-phase="2"] [data-cap="2"],
+.flow[data-phase="3"] [data-cap="3"],
+.flow[data-phase="4"] [data-cap="4"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Шаги-кнопки */
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  min-height: 58px;
+  padding: 10px 12px;
+  overflow: hidden;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: left;
+  color: rgba(247, 248, 244, 0.72);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line-dark);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.2s ease;
+}
+
+.chip:hover {
+  color: var(--paper);
+  border-color: rgba(79, 131, 255, 0.6);
+  background: rgba(79, 131, 255, 0.1);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--blue-bright);
+  outline-offset: 2px;
+}
+
+/* свой шаг: до скрипта и без движения — шаг 2, дальше — кнопка с aria-current */
+.flow:not([data-phase]) .chip[data-step="2"],
+.chip[aria-current] {
+  color: var(--paper);
+  border-color: var(--blue-bright);
+  background: rgba(79, 131, 255, 0.16);
+}
+
+.num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-family: var(--font-data), monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--paper);
+  border: 1px solid rgba(247, 248, 244, 0.35);
+  border-radius: 50%;
+}
+
+/* шаг ИИ — номер в цветах знака сервиса */
+.chip[data-ai] .num {
+  border-color: transparent;
+  background: linear-gradient(135deg, #4f83ff, #35c978);
+}
+
+.chipText {
+  min-width: 0;
+  text-wrap: balance;
+}
+
+/* сколько шаг ещё на экране: полоса растёт за --hold; на сбросе (фаза 0) стоит */
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--blue-bright);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.flow[data-phase]:not([data-phase="0"]) .chip[aria-current] .bar {
+  animation: chipFill var(--hold) linear both;
+}
+
+@keyframes chipFill {
+  to {
+    transform: none;
+  }
+}
+
+.alt {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--data);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Узкий блок (телефон, первый экран на 1101–1300 px): шаги два на два — в ряд подписи шли в три строки */
+@container (max-width: 660px) {
+  .chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .chip {
+    min-height: 52px;
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .num {
+    width: 24px;
+    height: 24px;
+  }
+
+  .stage {
+    border-radius: 10px;
+  }
+}
+
+/* ── Экраны: SVG-текст и спрайты. Базовое состояние — итог ── */
+
+.onecTitle {
+  font-family: var(--font-body), sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  fill: #3a3a3a;
+}
+
+/* «ИИ» у знака станции */
+.aiLabel {
+  font-family: var(--font-display), sans-serif;
+  font-size: 6.6px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  fill: #f7f8f4;
+}
+
+/* Тексты экранов (с 30.10 вместо серых полос): размер — в единицах экрана 160 × 90 */
+:where(.art, .sprite) text {
+  font-family: var(--font-body), sans-serif;
+}
+
+.onecWindow {
+  font-size: 4.4px;
+  font-weight: 600;
+  fill: #5a5446;
+}
+
+.onecBtn {
+  font-size: 3px;
+  font-weight: 700;
+  fill: #4d3d00;
+}
+
+.onecHead {
+  font-size: 3.1px;
+  font-weight: 700;
+  fill: #8c8571;
+}
+
+.onecName {
+  font-size: 3.5px;
+  font-weight: 500;
+  fill: #57524a;
+}
+
+.onecOurs {
+  font-size: 3.5px;
+  font-weight: 700;
+  fill: #1f1c17;
+}
+
+.onecDesc {
+  font-size: 3px;
+  font-weight: 500;
+  fill: #9a937f;
+}
+
+.onecEmpty {
+  font-size: 3px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  fill: #c9473a;
+}
+
+.onecDone {
+  font-size: 3px;
+  font-weight: 700;
+  fill: #0c7a41;
+}
+
+.rejText {
+  font-size: 2.6px;
+  font-weight: 700;
+  fill: #fff;
+}
+
+.cardTitle {
+  font-size: 4px;
+  font-weight: 700;
+  fill: #11161f;
+}
+
+.cardText {
+  font-size: 3px;
+  font-weight: 500;
+  fill: #4a525e;
+}
+
+.specName {
+  font-size: 3px;
+  font-weight: 500;
+  fill: #7a828e;
+}
+
+.specValue {
+  font-size: 3px;
+  font-weight: 700;
+  fill: #1f2630;
+}
+
+.specNote {
+  font-size: 2.6px;
+  font-weight: 600;
+  fill: #0c7a41;
+}
+
+.okText {
+  font-size: 2.9px;
+  font-weight: 700;
+  fill: #0c7a41;
+}
+
+.okNote {
+  font-size: 2.8px;
+  font-weight: 500;
+  fill: #7a828e;
+}
+
+.siteUrl {
+  font-size: 2.8px;
+  font-weight: 500;
+  fill: #8b93a0;
+}
+
+.siteTitle {
+  font-size: 4.6px;
+  font-weight: 700;
+  fill: #11161f;
+}
+
+.tileName {
+  font-size: 2.8px;
+  font-weight: 600;
+  fill: #1f2630;
+}
+
+.tileBtn {
+  font-size: 2.7px;
+  font-weight: 700;
+  fill: #fff;
+}
+
+/* спрайт — тег <i>: без font-style: normal его курсив наследует текст внутри */
+.sprite {
+  position: absolute;
+  display: block;
+  font-style: normal;
+}
+
+.sprite svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.aiBtn {
+  border: 1px solid #c8a62a;
+  border-radius: 2px;
+  background: #f6d65d;
+}
+
+.rowHi {
+  background: rgba(21, 94, 239, 0.13);
+}
+
+.rowBar {
+  border-radius: 1px;
+  background: var(--blue);
+}
+
+.rowFlash {
+  background: rgba(53, 201, 120, 0.24);
+  opacity: 0;
+}
+
+.dashGone,
+.packetIn,
+.packetOut,
+.scan,
+.flyer,
+.slot,
+.newRing {
+  opacity: 0;
+}
+
+.tileBad {
+  opacity: 0.45;
+}
+
+.scan {
+  border-radius: 99px;
+  background: rgba(79, 131, 255, 0.6);
+}
+
+/* Строки текста карточки: текст неподвижен, шторка цвета карточки уходит вправо — «печатается».
+   Итог (без фазы и после шторки) — шторка за правым краем, его обрезает карточка */
+.card {
+  overflow: hidden;
+}
+
+.cover {
+  position: absolute;
+  display: block;
+  background: #fbfbf8;
+  transform: translateX(101%);
+}
+
+.flyer {
+  transform-origin: 0 0;
+}
+
+.slot {
+  border: 1px dashed #c9ced6;
+  border-radius: 2px;
+  background: #f7f8fa;
+}
+
+.newDot {
+  border-radius: 50%;
+  background: #35c978;
+}
+
+.newRing {
+  border: 1px solid #35c978;
+  border-radius: 50%;
+}
+
+/* то, что фаза 0 гасит, а свой шаг показывает заново; длительность — как у экранов (0,35 с):
+   разные длительности одновременных анимаций держат главный поток до конца самой длинной */
+.rowHi,
+.card,
+.tile,
+.mark,
+.photo,
+.spec,
+.done,
+.dashGone,
+.slot,
+.newTile,
+.newDot {
+  transition: opacity 0.35s ease;
+}
+
+/* ── 0. Сброс: сервис, ответ и витрина пустеют ── */
+
+.flow[data-phase="0"] .rowHi {
+  opacity: 0;
+}
+
+.flow[data-phase="0"] .rowBar {
+  transform: scaleY(0);
+}
+
+.flow:is([data-phase="0"], [data-phase="1"]) :is(.card, .tile, .mark, .photo, .spec) {
+  opacity: 0;
+}
+
+.flow:is([data-phase="0"], [data-phase="1"], [data-phase="2"]) .done {
+  opacity: 0;
+}
+
+.flow:is([data-phase="0"], [data-phase="1"], [data-phase="2"]) .dashGone {
+  opacity: 1;
+}
+
+.flow:is([data-phase="0"], [data-phase="1"], [data-phase="2"], [data-phase="3"]) :is(.newTile, .newDot) {
+  opacity: 0;
+}
+
+.flow:is([data-phase="0"], [data-phase="1"], [data-phase="2"], [data-phase="3"]) .slot {
+  opacity: 1;
+}
+
+/* ── Фазы 1–4: у всех анимаций фазы длительность фазы и нулевая задержка, момент каждого
+   движения — в процентах ключевых кадров (имя: движение, фаза, начало в сотых секунды).
+   Так их ведёт композитор: разные задержки и длительности в одной фазе держали главный поток
+   на пересчёте стиля каждый кадр (замер 21.10). Таблица времени — scripts/flow-steps-keyframes.py ── */
+
+/* gen:flow-steps — не править руками: scripts/flow-steps-keyframes.py */
+
+.flow[data-phase="1"] .aiBtn {
+  animation: press1_005 1.7s linear both;
+}
+
+.flow[data-phase="1"] .rowHi {
+  animation: show1_030 1.7s linear both;
+}
+
+.flow[data-phase="1"] .rowBar {
+  animation: growY1_030 1.7s linear both;
+}
+
+.flow[data-phase="1"] .dashBlink {
+  animation: blink1_060 1.7s linear both;
+}
+
+.flow[data-phase="1"] .packetOut {
+  animation: packetOut1_090 1.7s linear both;
+}
+
+.flow[data-phase="2"] .card {
+  animation: slideIn2_000 2.3s linear both;
+}
+
+.flow[data-phase="2"] .tileA {
+  animation: showDim2_020 2.3s linear both;
+}
+
+.flow[data-phase="2"] .tileB {
+  animation: show2_028 2.3s linear both;
+}
+
+.flow[data-phase="2"] .tileC {
+  animation: showDim2_036 2.3s linear both;
+}
+
+.flow[data-phase="2"] .type1 {
+  animation: wipe2_045 2.3s linear both;
+}
+
+.flow[data-phase="2"] .scan {
+  animation: scan2_050 2.3s linear both;
+}
+
+.flow[data-phase="2"] .type2 {
+  animation: wipe2_056 2.3s linear both;
+}
+
+.flow[data-phase="2"] .type3 {
+  animation: wipe2_068 2.3s linear both;
+}
+
+.flow[data-phase="2"] .type4 {
+  animation: wipe2_080 2.3s linear both;
+}
+
+.flow[data-phase="2"] .type5 {
+  animation: wipe2_092 2.3s linear both;
+}
+
+.flow[data-phase="2"] .rejA {
+  animation: pop2_105 2.3s linear both;
+}
+
+.flow[data-phase="2"] .rejC {
+  animation: pop2_121 2.3s linear both;
+}
+
+.flow[data-phase="2"] .pick {
+  animation: pop2_122 2.3s linear both;
+}
+
+.flow[data-phase="2"] .flyer {
+  animation: fly2_128 2.3s linear both;
+}
+
+.flow[data-phase="2"] .spec1 {
+  animation: slideIn2_145 2.3s linear both;
+}
+
+.flow[data-phase="2"] .spec2 {
+  animation: slideIn2_158 2.3s linear both;
+}
+
+.flow[data-phase="2"] .spec3 {
+  animation: slideIn2_171 2.3s linear both;
+}
+
+.flow[data-phase="2"] .photo {
+  animation: show2_184 2.3s linear both;
+}
+
+.flow[data-phase="2"] .ok {
+  animation: pop2_200 2.3s linear both;
+}
+
+.flow[data-phase="2"] .okMore {
+  animation: show2_205 2.3s linear both;
+}
+
+.flow[data-phase="3"] .packetIn {
+  animation: packetIn3_000 1.7s linear both;
+}
+
+.flow[data-phase="3"] .dashGone {
+  animation: hide3_050 1.7s linear both;
+}
+
+.flow[data-phase="3"] .rowFlash {
+  animation: flash3_050 1.7s linear both;
+}
+
+.flow[data-phase="3"] .doneCheck {
+  animation: pop3_055 1.7s linear both;
+}
+
+.flow[data-phase="3"] .donePhoto {
+  animation: pop3_068 1.7s linear both;
+}
+
+.flow[data-phase="4"] .slot {
+  animation: hide4_030 1.7s linear both;
+}
+
+.flow[data-phase="4"] .newTile {
+  animation: drop4_035 1.7s linear both;
+}
+
+.flow[data-phase="4"] .newDot {
+  animation: pop4_080 1.7s linear both;
+}
+
+.flow[data-phase="4"] .newRing {
+  animation: ping4_090 1.7s linear both;
+}
+
+@keyframes press1_005 {
+  0%,
+  2.94% {
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  11.76% {
+    transform: scale(0.84);
+    animation-timing-function: ease-in-out;
+  }
+  20.59%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes show1_030 {
+  0%,
+  17.65% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  35.29%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes growY1_030 {
+  0%,
+  17.65% {
+    transform: scaleY(0);
+    animation-timing-function: ease;
+  }
+  35.29%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes blink1_060 {
+  0%,
+  35.29% {
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  48.53% {
+    transform: scale(1.6);
+    animation-timing-function: ease-in-out;
+  }
+  61.76%,
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes packetOut1_090 {
+  0%,
+  52.94% {
+    opacity: 0;
+    transform: translateX(-16%) scale(0.8);
+    animation-timing-function: ease-in-out;
+  }
+  60.88% {
+    opacity: 1;
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  84.71% {
+    opacity: 1;
+    transform: translateX(118%);
+    animation-timing-function: ease-in-out;
+  }
+  97.06%,
+  100% {
+    opacity: 0;
+    transform: translateX(168%);
+  }
+}
+
+@keyframes slideIn2_000 {
+  0% {
+    opacity: 0;
+    transform: translateX(-7%);
+    animation-timing-function: ease-out;
+  }
+  15.22%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes showDim2_020 {
+  0%,
+  8.7% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  19.7% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  45.7% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  58.7%,
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes show2_028 {
+  0%,
+  12.17% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  23.04%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes showDim2_036 {
+  0%,
+  15.65% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  26.65% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  52.65% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  65.65%,
+  100% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes wipe2_045 {
+  0%,
+  19.57% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  30.43%,
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes scan2_050 {
+  0%,
+  21.74% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  25.65% {
+    opacity: 1;
+    transform: translateY(225%);
+    animation-timing-function: ease-in-out;
+  }
+  43.91% {
+    opacity: 1;
+    transform: translateY(1275%);
+    animation-timing-function: ease-in-out;
+  }
+  47.83%,
+  100% {
+    opacity: 0;
+    transform: translateY(1500%);
+  }
+}
+
+@keyframes wipe2_056 {
+  0%,
+  24.35% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  35.22%,
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes wipe2_068 {
+  0%,
+  29.57% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  42.61%,
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes wipe2_080 {
+  0%,
+  34.78% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  47.83%,
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes wipe2_092 {
+  0%,
+  40% {
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  53.04%,
+  100% {
+    transform: translateX(101%);
+  }
+}
+
+@keyframes pop2_105 {
+  0%,
+  45.65% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  54.78% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  58.7%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop2_121 {
+  0%,
+  52.61% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  61.74% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  65.65%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop2_122 {
+  0%,
+  53.04% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  62.17% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  66.09%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fly2_128 {
+  0%,
+  55.65% {
+    opacity: 0;
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  58.89% {
+    opacity: 1;
+    transform: none;
+    animation-timing-function: ease-in-out;
+  }
+  79.37% {
+    opacity: 1;
+    transform: translate(225%, -225%) scale(2.07);
+    animation-timing-function: ease-in-out;
+  }
+  82.61%,
+  100% {
+    opacity: 0;
+    transform: translate(225%, -225%) scale(2.07);
+  }
+}
+
+@keyframes slideIn2_145 {
+  0%,
+  63.04% {
+    opacity: 0;
+    transform: translateX(-7%);
+    animation-timing-function: ease-out;
+  }
+  73.91%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slideIn2_158 {
+  0%,
+  68.7% {
+    opacity: 0;
+    transform: translateX(-7%);
+    animation-timing-function: ease-out;
+  }
+  79.57%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slideIn2_171 {
+  0%,
+  74.35% {
+    opacity: 0;
+    transform: translateX(-7%);
+    animation-timing-function: ease-out;
+  }
+  85.22%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes show2_184 {
+  0%,
+  80% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  86.52%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pop2_200 {
+  0%,
+  86.96% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  96.09% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes show2_205 {
+  0%,
+  89.13% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes packetIn3_000 {
+  0% {
+    opacity: 0;
+    transform: translateX(-352%);
+    animation-timing-function: ease-out;
+  }
+  8.41% {
+    opacity: 1;
+    transform: translateX(-250%);
+    animation-timing-function: ease-out;
+  }
+  29.06% {
+    opacity: 1;
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  38.24%,
+  100% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+}
+
+@keyframes hide3_050 {
+  0%,
+  29.41% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  38.24%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes flash3_050 {
+  0%,
+  29.41% {
+    opacity: 0;
+    animation-timing-function: ease;
+  }
+  45.29% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  82.35%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pop3_055 {
+  0%,
+  32.35% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  44.71% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  50%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop3_068 {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  52.35% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  57.65%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hide4_030 {
+  0%,
+  17.65% {
+    opacity: 1;
+    animation-timing-function: ease;
+  }
+  29.41%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes drop4_035 {
+  0%,
+  20.59% {
+    opacity: 0;
+    transform: translateY(-12%);
+    animation-timing-function: ease-out;
+  }
+  44.12%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pop4_080 {
+  0%,
+  47.06% {
+    opacity: 0;
+    transform: scale(0.5);
+    animation-timing-function: ease-out;
+  }
+  59.41% {
+    opacity: 1;
+    transform: scale(1.14);
+    animation-timing-function: ease-out;
+  }
+  64.71%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ping4_090 {
+  0%,
+  52.94% {
+    opacity: 0.9;
+    transform: none;
+    animation-timing-function: ease-out;
+  }
+  94.12%,
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+/* /gen:flow-steps */
+
+/* Блок ушёл с экрана: анимации шага стоят, вернулся — идут дальше */
+.flow[data-paused] * {
+  animation-play-state: paused !important;
+}
+
+/* Без движения: схема из четырёх шагов — итог петли, ничего не мигает */
+@media (prefers-reduced-motion: reduce) {
+  .flow *,
+  .flow *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

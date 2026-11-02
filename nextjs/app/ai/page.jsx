@@ -1,5 +1,4 @@
 import AiPage from '../../components/AiPage';
-import { getAiProductBlurMap } from '../../lib/productImages';
 import { IP_AI, providerJsonLd } from '../../lib/requisites';
 
 export const metadata = {
@@ -50,13 +49,10 @@ const jsonLd = {
     ]
   };
 
-/** Server Component: blur-плейсхолдеры для демо-карточек считаются на сервере. */
-export default async function Page() {
-  const productBlur = await getAiProductBlurMap();
-
+export default function Page() {
   return (
     <>
-      <AiPage productBlur={productBlur} />
+      <AiPage />
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
     </>
   );

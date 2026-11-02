@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, leadText, tgHref, waHref } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, leadText, tgHref, waHref, PHONE, PHONE_HUMAN } from './_ui';
 import { R } from './_responsive';
 import { PROVIDERS, SITE_OWNER } from '../lib/requisites';
 
@@ -18,8 +18,6 @@ import { PROVIDERS, SITE_OWNER } from '../lib/requisites';
 
 const TG = tgHref(leadText('страница «Контакты»'));
 const WA = waHref(leadText('страница «Контакты»'));
-const PHONE = '+79256777027';
-const PHONE_HUMAN = '+7 925 677-70-27';
 const EMAIL = 'magomedov_zak_05@mail.ru';
 
 const TAG_BG = { ai: 'var(--violet)', b24: 'var(--blue)' };

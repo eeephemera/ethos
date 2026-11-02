@@ -1,11 +1,12 @@
 'use client';
 import React from 'react';
-import { s, ymGoal, setupHeaderAutoHide, observeInView, setupReveal, pauseSectionsOffscreen, prefersReducedMotion, leadText, tgHref, waHref } from './_ui';
+import { s, ymGoal, setupHeaderAutoHide, observeInView, setupReveal, pauseSectionsOffscreen, prefersReducedMotion, leadText, tgHref, waHref, PHONE, PHONE_HUMAN } from './_ui';
 import { R } from './_responsive';
 import BlurImage from './BlurImage';
+import LeadForm from './LeadForm';
 import { PROVIDERS } from '../lib/requisites';
 
-const FXCSS = ".mnfx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx5:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.mnfx7:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.mnfx8:hover{border-color:var(--ink) !important}\n.mnfx9:hover{background:#0E4FD1 !important}\n.mnfx10:hover{transform:translateY(-2px) !important}\n.mnfx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.mnfx12:hover{border-color:var(--ink) !important}\n.mnfx13:hover{border-color:var(--ink) !important}\n.mnfx14:hover{transform:scale(1.06) !important}";
+const FXCSS = ".mnfx0:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx1:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx2:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx3:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx4:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx5:hover{color:var(--ink) !important; background-size:100% 1.5px !important; transform:translateY(-2px) !important}\n.mnfx6:hover{transform:translateY(-1px) !important; box-shadow:0 12px 26px -6px rgba(21,94,239,0.55), inset 0 1px 1px rgba(255,255,255,0.55) !important}\n.mnfx7:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.32) !important}\n.mnfx8:hover{border-color:var(--ink) !important}\n.mnfx9:hover{background:#0E4FD1 !important}\n.mnfx10:hover{transform:translateY(-2px) !important}\n.mnfx11:hover{transform:translateY(-2px) !important; box-shadow:0 14px 30px rgba(21,94,239,0.3) !important}\n.mnfx12:hover{border-color:var(--ink) !important}\n.mnfx13:hover{border-color:var(--ink) !important}\n.mnfx14:hover{transform:scale(1.06) !important}\n.mnfx15:hover{border-color:var(--blue) !important; color:var(--blue) !important}";
 
 // Пункт меню. Раньше эта строка была скопирована в каждую ссылку шапки —
 // шесть одинаковых полотен, в которых не видно, чем пункты отличаются.
@@ -54,9 +55,6 @@ const SLIDER_DATA = [
     items: ['Данные из CRM, 1С и сайта', 'Сквозная и unit-аналитика', 'Контроль доходов и расходов', 'Дашборды под роль', 'План-факт и прогноз'] }
 ];
 
-// Размер команды в форме первого экрана: короткие ключи уходят в /api/lead.
-const HERO_SIZES = { s: '2–10 человек', m: '11–50 человек', l: 'больше 50 человек' };
-
 const AI_ROLES = [
   { label: 'Продажи', desc: 'Квалифицирует лиды и ведёт сделки в CRM' },
   { label: 'Маркетинг', desc: 'Сегментирует базу и готовит рассылки' },
@@ -85,11 +83,6 @@ export default class MainPage extends React.Component {
     sliderIdx: 0,
     productIdx: 0,
     prodPhase: 'search',
-    // Форма-сделка на первом экране
-    heroTask: '',
-    heroSize: null,       // 's' | 'm' | 'l'
-    heroChannel: 'tg',    // 'tg' | 'wa'
-    heroSent: false,
     voiceOpen: false,
     voiceStatus: 'idle',
     voiceIndex: 0,
@@ -105,7 +98,6 @@ export default class MainPage extends React.Component {
   succSumRef = React.createRef();
   headerRef = React.createRef();
   heroSceneRef = React.createRef();
-  heroInputRef = React.createRef();
   platformRef = React.createRef();
   auroraRef = React.createRef();
   heroTrackRef = React.createRef();
@@ -513,102 +505,6 @@ export default class MainPage extends React.Component {
       : 'opacity:1; transform:translateY(14px);';
   }
 
-  // ---- Форма-сделка первого экрана -----------------------------------------
-  // Одно поле — только задача. Контакт не спрашиваем: человека опознаёт сам
-  // мессенджер, в который он уходит с текстом заявки. Ре-рендер на каждый
-  // символ допустим — меняется только окно формы.
-  onHeroTaskChange = (e) => {
-    const val = e.target.value;
-    // Цель «начал заполнять» — один раз за сессию просмотра, не на каждый символ.
-    if (!this._heroStartSent && val.trim()) {
-      this._heroStartSent = true;
-      ymGoal('hero_form_start', { place: 'hero_form' });
-    }
-    this.setState({ heroTask: val });
-  };
-
-  pickHeroSize = (key) => {
-    if (this.state.heroSize !== key) ymGoal('hero_form_size', { place: 'hero_form', size: key });
-    this.setState({ heroSize: key });
-  };
-
-  pickHeroChannel = (key) => this.setState({ heroChannel: key });
-
-  heroLeadText() {
-    const task = this.state.heroTask.trim();
-    const lines = ['Заявка с первого экрана aiethos.ru', 'Задача: ' + task];
-    if (this.state.heroSize) lines.push('Команда: ' + HERO_SIZES[this.state.heroSize]);
-    lines.push('Нужен план на 30 дней.');
-    return lines.join('\n');
-  }
-
-  // Telegram подставляет текст из ?text= (см. tgHref), но старые клиенты его
-  // игнорируют — поэтому текст заявки ещё и в буфере обмена, как запасной путь.
-  copyHeroText(text) {
-    const fallback = () => {
-      try {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-      } catch (e) {}
-    };
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).catch(fallback);
-      } else {
-        fallback();
-      }
-    } catch (e) { fallback(); }
-  }
-
-  submitHeroLead = () => {
-    const task = this.state.heroTask.trim();
-    // Кнопку не блокируем: заблокированная кнопка на первом экране читается
-    // как неработающий сайт. Пустой клик возвращает фокус в поле — сноска под
-    // кнопкой уже объясняет, чего не хватает.
-    if (!task) {
-      if (this.heroInputRef.current) this.heroInputRef.current.focus();
-      return;
-    }
-    const { heroSize, heroChannel } = this.state;
-    const text = this.heroLeadText();
-
-    // Регистрация лида — fire-and-forget: интерфейс не ждёт ответа и не
-    // ломается при ошибке сети (keepalive доносит запрос при уходе со страницы).
-    try {
-      fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ task, size: heroSize, channel: heroChannel, source: 'hero' }),
-        keepalive: true,
-      }).catch(() => {});
-    } catch (e) {}
-
-    // hero_tg / hero_wa — новые цели: вклад формы отдельно от прочих ссылок на
-    // мессенджеры (их завести в Метрике). telegram / whatsapp остаются для
-    // сравнения с прошлыми данными, место видно по параметру place.
-    const goal = { place: 'hero_form', size: heroSize || 'none' };
-    ymGoal('hero_lead', Object.assign({ channel: heroChannel }, goal));
-    // window.open — синхронно в обработчике клика, иначе Safari решит, что попап.
-    if (heroChannel === 'wa') {
-      ymGoal('hero_wa', goal);
-      ymGoal('whatsapp', goal);
-      window.open(waHref(text), '_blank', 'noopener');
-    } else {
-      ymGoal('hero_tg', goal);
-      ymGoal('telegram', goal);
-      this.copyHeroText(text);
-      window.open(tgHref(text), '_blank', 'noopener');
-    }
-    this.setState({ heroSent: true });
-  };
-
   toggleMobileMenu = () => {
     this.setState(s => ({ mobileMenuOpen: !s.mobileMenuOpen }));
   };
@@ -644,49 +540,6 @@ export default class MainPage extends React.Component {
     const chipExtBorder = extFlash ? 'rgba(18,165,224,0.55)' : 'rgba(18,165,224,0.22)';
     const chipExtStatus = extFlash ? '✓ ответ отправлен' : 'на сайте и в мессенджерах';
     const chipExtStatusColor = extFlash ? 'var(--violet)' : 'var(--ink-faint)';
-
-    // ---- Форма-сделка первого экрана ----------------------------------------
-    // Все производные считаются здесь и уходят в разметку готовыми строками —
-    // как и у остальных блоков страницы.
-    const heroTask = this.state.heroTask;
-    const heroTrim = heroTask.trim();
-    const heroSize = this.state.heroSize;
-    const heroChannel = this.state.heroChannel;
-    const heroHasTask = heroTrim.length > 0;
-    // Порог квалификации: 14 символов — с этой длины фраза похожа на задачу.
-    const heroQual = heroTrim.length >= 14;
-    const heroRobot = heroQual && !!heroSize;
-    const dealRow = (label, on, value, accent) => ({
-      label,
-      on,
-      value: on ? value : '—',
-      dot: on ? (accent ? '#9DCF00' : 'var(--blue)') : 'var(--line)',
-      color: accent ? '#1F8A5B' : 'var(--ink)',
-    });
-    const heroDealRows = [
-      dealRow('сделка', heroHasTask, heroTrim.length > 46 ? heroTrim.slice(0, 46) + '…' : heroTrim),
-      dealRow('источник', heroHasTask, 'aiethos.ru · первый экран'),
-      dealRow('компания', !!heroSize, heroSize ? HERO_SIZES[heroSize] : ''),
-      dealRow('квалификация ИИ', heroQual, 'тёплый — есть задача и объём', true),
-      dealRow('робот', heroRobot, 'назначен ответственный, готовит план'),
-    ];
-    const heroSizeBtns = [
-      { key: 's', label: '2–10' },
-      { key: 'm', label: '11–50' },
-      { key: 'l', label: '50+' },
-    ].map((b) => ({ ...b, active: heroSize === b.key, onClick: () => this.pickHeroSize(b.key) }));
-    const heroChannelBtns = [
-      { key: 'tg', label: 'Telegram' },
-      { key: 'wa', label: 'WhatsApp' },
-    ].map((b) => ({ ...b, active: heroChannel === b.key, onClick: () => this.pickHeroChannel(b.key) }));
-    // Заявка приходит владельцу уведомлением в Telegram (/api/lead), в CRM она
-    // сама не попадает — поэтому никаких «сделка уйдёт в Битрикс24».
-    const heroFootnote = heroHasTask && heroSize
-      ? 'Задача придёт к нам сразу — переписывать её в чате не нужно.'
-      : 'Опишите задачу и отметьте размер команды — карточка заполнится сама.';
-    const heroSuccessText = heroChannel === 'wa'
-      ? 'Открываем WhatsApp — текст заявки уже подставлен в сообщение. Отправьте его, и план на 30 дней придёт в течение рабочего дня.'
-      : 'Открываем Telegram — текст заявки подставлен в сообщение. Если поле пустое, вставьте текст: он уже скопирован. Отправьте его, и план на 30 дней придёт в течение рабочего дня.';
 
     // Platform slider
     const sliderIdx = this.state.sliderIdx;
@@ -956,16 +809,6 @@ export default class MainPage extends React.Component {
       // Управление сценой ИИ-агента в первом экране
       heroAuto: this.state.heroAuto,
       heroSceneRef: this.heroSceneRef,
-      heroTask,
-      heroInputRef: this.heroInputRef,
-      onHeroTaskChange: this.onHeroTaskChange,
-      submitHeroLead: this.submitHeroLead,
-      heroSent: this.state.heroSent,
-      heroDealRows,
-      heroSizeBtns,
-      heroChannelBtns,
-      heroFootnote,
-      heroSuccessText,
       platformRef: this.platformRef,
       heroSwipe: this.heroSwipe,
       heroPrev: () => this.stepRole(-1),
@@ -1042,7 +885,7 @@ export default class MainPage extends React.Component {
       <a className="mnfx1" href="/ai" style={s(NAV_LINK)}>ИИ-решения</a>
       <a className="mnfx2" href="#process" style={s(NAV_LINK)}>Процесс</a>
       <a className="mnfx3" href="/contacts" style={s(NAV_LINK)}>Контакты</a>
-      <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'header' })} style={s(`font-size:var(--t15); font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap;`)}>+7 925 677-70-27</a>
+      <a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'header' })} style={s(`font-size:var(--t15); font-weight:700; color:var(--ink); text-decoration:none; white-space:nowrap;`)}>{PHONE_HUMAN}</a>
       <button className="mnfx6" onClick={v.contactCta('header')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; color:#fff; background:linear-gradient(135deg, #155EEF, #12A5E0); border:1px solid rgba(255,255,255,0.22); padding:12px 26px; border-radius:999px; cursor:pointer; box-shadow:0 8px 20px -6px rgba(21,94,239,0.45), inset 0 1px 1px rgba(255,255,255,0.55); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Получить консультацию</button>
       {/* Голосовой гид: фича остаётся, но больше не занимает низ экрана —
           самое доступное место на телефоне. На мобильном контейнер меню
@@ -1071,7 +914,7 @@ export default class MainPage extends React.Component {
         <a href="/ai" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>ИИ-решения</a>
         <a href="#process" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Процесс</a>
         <a href="/contacts" onClick={v.closeMobileMenu} style={s(NAV_LINK_M)}>Контакты</a>
-        <a href="tel:+79256777027" onClick={() => { ymGoal('phone', { place: 'mobile_menu' }); v.closeMobileMenu(); }} style={s(`display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none; border-top:1px solid var(--line); margin-top:6px; padding-top:6px;`)}>+7 925 677-70-27</a>
+        <a href={'tel:' + PHONE} onClick={() => { ymGoal('phone', { place: 'mobile_menu' }); v.closeMobileMenu(); }} style={s(`display:flex; align-items:center; min-height:48px; font-size:var(--t16); font-weight:700; color:var(--blue); text-decoration:none; border-top:1px solid var(--line); margin-top:6px; padding-top:6px;`)}>{PHONE_HUMAN}</a>
         <button onClick={v.contactCta('mobile_menu')} style={s(`font-family:var(--font-inter),sans-serif; font-size:var(--t15); font-weight:600; color:#fff; background:var(--blue); border:none; min-height:48px; padding:14px 22px; border-radius:999px; cursor:pointer; margin-top:6px;`)}>Получить консультацию</button>
       </div>
      </div>
@@ -1121,18 +964,18 @@ export default class MainPage extends React.Component {
         </p>
 
         <div style={s(`margin-top:var(--hero-accent-mt); padding:14px 18px; border-left:2px solid var(--blue); background:var(--paper); font-size:var(--t15); line-height:1.55; color:var(--ink); max-width:calc(560px * var(--t-scale)); ${v.entranceCta}`)}>
-          <span className="hero-accent-d">Опишите задачу справа — увидите, как её примет ваш будущий Битрикс24.</span>
-          <span className="hero-accent-m">Опишите задачу ниже — увидите, как её примет ваш будущий Битрикс24.</span>
+          <span className="hero-accent-d">Оставьте заявку справа — свяжемся в течение рабочего дня и пришлём план внедрения.</span>
+          <span className="hero-accent-m">Оставьте заявку ниже — свяжемся в течение рабочего дня и пришлём план внедрения.</span>
         </div>
 
         <div style={s(`display:${v.onlyDesktopFlex}; gap:20px; flex-wrap:wrap; margin-top:26px; font-family:monospace; font-size:12px; color:var(--ink-faint); ${v.entranceCta}`)}>
-          <span>план в течение рабочего дня</span>
-          <span>без звонков</span>
+          <span>ответ в течение рабочего дня</span>
           <span>без ТЗ на входе</span>
+          <span>можно оставить Telegram вместо телефона</span>
         </div>
       </div>
 
-      {/* -------- окно «ИИ-агент · активен»: форма, собирающая сделку -------- */}
+      {/* -------- окно заявки: обычная форма с подписями (02.11, «сделать понятнее») -------- */}
       <div style={s(`background:var(--paper); border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:0 40px 70px -34px rgba(20,23,28,0.3); ${v.entranceCard}`)}>
 
         <div style={s(`display:flex; align-items:center; gap:8px; padding:0 16px; height:44px; border-bottom:1px solid var(--line); background:#FBFBF9;`)}>
@@ -1141,103 +984,23 @@ export default class MainPage extends React.Component {
           <span style={s(`width:8px; height:8px; border-radius:50%; background:#E2E1DC;`)}></span>
           <span style={s(`margin-left:auto; font-size:12px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center; gap:6px;`)}>
             <span style={s(`width:7px; height:7px; border-radius:50%; background:#9DCF00; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>
-            ИИ-агент · активен
+            Заявка · ответим за рабочий день
           </span>
         </div>
 
-        {v.heroSent ? (
-          <div style={s(`padding:44px 28px 48px; text-align:center;`)}>
-            <div style={s(`width:46px; height:46px; border-radius:12px; background:var(--grad); margin:0 auto; display:flex; align-items:center; justify-content:center; box-shadow:0 12px 26px -8px rgba(21,94,239,0.5);`)}>
-              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-            </div>
-            <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; color:var(--ink); margin-top:18px;`)}>Заявка у нас</div>
-            <p style={s(`font-size:var(--t15); line-height:1.6; color:var(--ink-soft); margin:12px auto 0; max-width:360px;`)}>{v.heroSuccessText}</p>
-          </div>
-        ) : (
-          <>
-            <div style={s(`display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid #F0EFEB;`)}>
-              <span aria-hidden="true" style={s(`font-family:monospace; font-size:15px; font-weight:700; color:var(--blue); flex-shrink:0;`)}>&gt;</span>
-              <label className="vh-label" htmlFor="hero-task">Опишите задачу, которую нужно автоматизировать</label>
-              <input
-                id="hero-task"
-                ref={v.heroInputRef}
-                className="hero-input"
-                type="text"
-                value={v.heroTask}
-                onChange={v.onHeroTaskChange}
-                placeholder="Заявки из WhatsApp теряются между менеджерами"
-                autoComplete="off"
-                style={s(`flex:1; min-width:0; border:none; outline:none; background:transparent; font-family:var(--font-inter),sans-serif; color:var(--ink); padding:0;`)}
-              />
-            </div>
-
-            <div aria-live="polite" style={s(`padding:14px 20px 4px;`)}>
-              <div style={s(`font-family:monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);`)}>Карточка сделки собирается</div>
-              <div style={s(`margin-top:4px;`)}>
-                {v.heroDealRows.map((row, i) => (
-                  <div key={row.label} style={s(`display:flex; align-items:baseline; gap:10px; padding:9px 0; border-bottom:${i === 4 ? 'none' : '1px solid #F5F4F1'};`)}>
-                    <span style={s(`width:6px; height:6px; border-radius:50%; background:${row.dot}; flex-shrink:0; align-self:center; transition:background 0.25s ease;`)}></span>
-                    <span style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint); width:118px; flex-shrink:0;`)}>{row.label}</span>
-                    {row.on
-                      ? <span className="hero-fill" style={s(`font-size:13px; font-weight:600; color:${row.color}; min-width:0; overflow-wrap:anywhere;`)}>{row.value}</span>
-                      : <span style={s(`font-size:13px; font-weight:600; color:#B9BCC2;`)}>—</span>}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style={s(`padding:8px 20px 18px;`)} role="radiogroup" aria-label="Размер команды">
-              <div style={s(`font-family:monospace; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--ink-faint);`)}>Размер команды</div>
-              <div style={s(`display:flex; gap:8px; margin-top:10px;`)}>
-                {v.heroSizeBtns.map((b) => (
-                  <button
-                    key={b.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={b.active}
-                    onClick={b.onClick}
-                    className="hero-size-btn"
-                    style={s(`flex:1; border-radius:10px; font-family:var(--font-inter),sans-serif; font-size:var(--t14); font-weight:600; cursor:pointer; background:${b.active ? '#EEF3FE' : 'var(--paper)'}; border:1px solid ${b.active ? 'var(--blue)' : '#E2E1DC'}; color:${b.active ? 'var(--blue)' : 'var(--ink-soft)'}; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;`)}
-                  >{b.label}</button>
-                ))}
-              </div>
-            </div>
-
-            <div style={s(`border-top:1px solid #F0EFEB; background:#FBFBF9; padding:18px 20px 20px;`)}>
-              <div style={s(`display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;`)} role="radiogroup" aria-label="Куда прислать план">
-                <span style={s(`font-family:monospace; font-size:11px; color:var(--ink-faint);`)}>куда прислать план</span>
-                <div style={s(`display:flex; gap:8px;`)}>
-                  {v.heroChannelBtns.map((b) => (
-                    <button
-                      key={b.key}
-                      type="button"
-                      role="radio"
-                      aria-checked={b.active}
-                      onClick={b.onClick}
-                      className="hero-pill"
-                      style={s(`padding:0 16px; border-radius:999px; font-family:var(--font-inter),sans-serif; font-size:var(--t13); font-weight:600; cursor:pointer; background:${b.active ? 'var(--ink)' : 'var(--paper)'}; border:1px solid ${b.active ? 'var(--ink)' : '#E2E1DC'}; color:${b.active ? '#fff' : 'var(--ink-soft)'}; transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;`)}
-                    >{b.label}</button>
-                  ))}
-                </div>
-              </div>
-
-              <button type="button" onClick={v.submitHeroLead} className="mnfx7" style={s(`display:block; width:100%; height:52px; margin-top:14px; border:none; border-radius:14px; background:var(--grad); color:#fff; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; cursor:pointer; box-shadow:0 12px 28px -8px rgba(21,94,239,0.5); transition:transform 0.25s ease, box-shadow 0.25s ease;`)}>Получить план на 30 дней</button>
-
-              <div style={s(`font-size:12px; line-height:1.5; color:var(--ink-faint); text-align:center; margin-top:12px;`)}>{v.heroFootnote}</div>
-              <div style={s(`font-size:12px; line-height:1.5; color:var(--ink-faint); text-align:center; margin-top:6px;`)}>
-                Нажимая кнопку, вы соглашаетесь с <a href="/privacy" style={s(`color:var(--ink-faint); text-decoration:none; border-bottom:1px solid var(--line);`)}>политикой конфиденциальности</a>
-              </div>
-            </div>
-          </>
-        )}
+        <div style={s(`padding:18px 20px 20px;`)}>
+          <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; color:var(--ink);`)}>Расскажите о задаче</div>
+          <div style={s(`font-size:var(--t14); line-height:1.5; color:var(--ink-faint); margin:4px 0 6px;`)}>Свяжемся и пришлём план внедрения на 30 дней.</div>
+          <LeadForm source="hero" place="hero_form" where="главная страница" primary />
+        </div>
       </div>
 
       {/* строка доверия на телефоне — после окна, чтобы не разрывать путь к форме */}
       <div style={s(`display:${v.onlyMobile};`)}>
         <div style={s(`display:flex; gap:14px 20px; flex-wrap:wrap; font-family:monospace; font-size:12px; color:var(--ink-faint);`)}>
-          <span>план в течение рабочего дня</span>
-          <span>без звонков</span>
+          <span>ответ в течение рабочего дня</span>
           <span>без ТЗ на входе</span>
+          <span>можно оставить Telegram вместо телефона</span>
         </div>
       </div>
 
@@ -1848,22 +1611,31 @@ export default class MainPage extends React.Component {
     </div>
   </section>
 
-  {/* Отдельный продукт, а не услуга: генератор карточек продаётся сам по себе.
-      Ссылка пока ведёт на разбор с цифрами внутри /ai — как появится своя
-      страница, здесь меняется один href. Битой ссылки в индексе не будет. */}
+  {/* Отдельный продукт, а не услуга: генератор карточек продаётся сам по себе. С 02.11 —
+      в стилистике «Карточки·AI Лаб» (тёмная панель, знак продукта), как раздел /ai#content,
+      куда ведёт ссылка: там анимация «Как это работает» с сайта продукта. */}
   <section data-screen-label="Продукт — генератор карточек" style={s(`padding:0 ${v.padX}; max-width:var(--wrap); margin:0 auto;`)}>
-    <a className="mnfx10" data-reveal href="/ai#content" onClick={() => ymGoal('nav', { to: '/ai', place: 'product_card' })} style={s(`display:grid; grid-template-columns:${v.cols2}; gap:28px; align-items:center; background:linear-gradient(160deg, rgba(255,255,255,0.72), rgba(255,255,255,0.48)); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid rgba(255,255,255,0.75); border-radius:24px; padding:${v.migCardPad}; text-decoration:none; position:relative; overflow:hidden; box-shadow:0 30px 60px -34px rgba(20,23,28,0.26), inset 0 1px 1px rgba(255,255,255,0.9); transition:transform 0.25s ease;`)}>
-      <span aria-hidden="true" style={s(`position:absolute; top:-140px; right:-100px; width:360px; height:360px; border-radius:50%; background:var(--grad); opacity:0.12; filter:blur(90px); pointer-events:none;`)}></span>
+    <a className="mnfx10" data-reveal href="/ai#content" onClick={() => ymGoal('nav', { to: '/ai', place: 'product_card' })} style={s(`display:grid; grid-template-columns:${v.cols2}; gap:28px; align-items:center; background:#0B111B; border-radius:24px; padding:${v.migCardPad}; text-decoration:none; position:relative; overflow:hidden; isolation:isolate; box-shadow:0 40px 70px -40px rgba(11,17,27,0.6); transition:transform 0.25s ease;`)}>
+      <span aria-hidden="true" style={s(`position:absolute; inset:0; z-index:-1; background-image:linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size:44px 44px; -webkit-mask-image:radial-gradient(120% 100% at 0% 0%, #000 25%, transparent 70%); mask-image:radial-gradient(120% 100% at 0% 0%, #000 25%, transparent 70%);`)}></span>
+      <span aria-hidden="true" style={s(`position:absolute; z-index:-1; top:-160px; right:-120px; width:420px; height:420px; border-radius:50%; background:#155EEF; opacity:0.22; filter:blur(100px); pointer-events:none;`)}></span>
 
-      <span style={s(`position:relative; z-index:1; display:block; min-width:0;`)}>
-        <span style={s(`display:inline-flex; align-items:center; gap:8px; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#1F8A5B; background:#EBF7F0; border-radius:999px; padding:5px 12px;`)}>
-          <span style={s(`width:6px; height:6px; border-radius:50%; background:#1F8A5B; flex-shrink:0; animation:pulseDot 1.8s ease-in-out infinite;`)}></span>Готовый продукт
+      <span style={s(`display:block; min-width:0;`)}>
+        <span style={s(`display:inline-flex; align-items:center; gap:10px; flex-wrap:wrap;`)}>
+          <svg width="26" height="26" viewBox="0 0 10 10" aria-hidden="true" style={s(`flex-shrink:0; display:block;`)}>
+            <rect width="10" height="10" rx="2.4" fill="#155EEF"></rect>
+            <rect x="1.9" y="1.9" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+            <rect x="5.5" y="1.9" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+            <rect x="1.9" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#fff"></rect>
+            <rect x="5.5" y="5.5" width="2.6" height="2.6" rx="0.6" fill="#35C978"></rect>
+          </svg>
+          <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); letter-spacing:0.04em; text-transform:uppercase; color:#F7F8F4;`)}>Карточки·AI</span>
+          <span style={s(`font-family:monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#8290A6;`)}>готовый продукт</span>
         </span>
-        <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(21px,2.6vw,28px); line-height:1.2; letter-spacing:-0.02em; color:var(--ink); margin-top:14px;`)}>ИИ-генератор карточек товаров</span>
-        <span style={s(`display:block; font-size:var(--t16); line-height:1.6; color:var(--ink-soft); margin-top:12px; max-width:calc(560px * var(--t-scale));`)}>Отдельное решение, которое мы продаём как продукт: по названию и прайсу заполняет карточку целиком — характеристики, продающее описание, SEO-текст, — само находит фото и проверяет его ИИ-зрением. Работает в боевом интернет-магазине стройматериалов.</span>
+        <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:clamp(22px,2.6vw,30px); line-height:1.2; letter-spacing:-0.02em; color:#fff; margin-top:16px;`)}>Карточки товаров и SEO‑тексты — <span style={s(`color:#4F83FF;`)}>без контент‑менеджера</span></span>
+        <span style={s(`display:block; font-size:var(--t16); line-height:1.6; color:rgba(247,248,244,0.7); margin-top:12px; max-width:calc(560px * var(--t-scale));`)}>По названию и прайсу ИИ заполняет карточку целиком — описание, SEO-текст, характеристики со сверкой по сайтам производителей — и сам находит фото. Работает в боевом интернет-магазине стройматериалов.</span>
       </span>
 
-      <span style={s(`position:relative; z-index:1; display:block; min-width:0;`)}>
+      <span style={s(`display:block; min-width:0;`)}>
         <span style={s(`display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px;`)}>
           {[
             // Цифры — протокол № 01 сайта «Карточки·AI» (боевой прогон каталога,
@@ -1873,18 +1645,40 @@ export default class MainPage extends React.Component {
             ['98,6%', 'без ручных правок'],
             ['29 с', 'в среднем на карточку'],
           ].map(([n, l]) => (
-            <span key={l} style={s(`display:block; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:14px 16px;`)}>
-              <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; color:var(--ink);`)}>{n}</span>
-              <span style={s(`display:block; font-size:var(--mock-12); color:var(--ink-faint); margin-top:3px;`)}>{l}</span>
+            <span key={l} style={s(`display:block; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:14px 16px;`)}>
+              <span style={s(`display:block; font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:21px; letter-spacing:-0.01em; color:#fff;`)}>{n}</span>
+              <span style={s(`display:block; font-family:monospace; font-size:12px; color:#8290A6; margin-top:3px;`)}>{l}</span>
             </span>
           ))}
         </span>
-        <span style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:var(--ink); margin-top:18px;`)}>
-          <span style={s(`border-bottom:1px solid var(--ink); padding-bottom:2px;`)}>Как это работает</span>
+        <span style={s(`display:inline-flex; align-items:center; gap:8px; font-size:var(--t15); font-weight:600; color:#fff; margin-top:18px;`)}>
+          <span style={s(`border-bottom:1px solid rgba(255,255,255,0.6); padding-bottom:2px;`)}>Как это работает</span>
           <span aria-hidden="true">→</span>
         </span>
       </span>
     </a>
+  </section>
+
+  {/* Список задач владельца от 02.11 целиком — на /ai#more; здесь одна строка-вход,
+      чтобы не перегружать главную. */}
+  <section data-screen-label="Ещё автоматизируем" style={s(`padding:28px ${v.padX} 0; max-width:var(--wrap); margin:0 auto;`)}>
+    <div data-reveal style={s(`display:flex; align-items:center; flex-wrap:wrap; gap:10px 14px; border:1px solid var(--line); background:var(--paper); border-radius:20px; padding:18px 20px;`)}>
+      <span style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t16); color:var(--ink); margin-right:4px;`)}>Ещё автоматизируем:</span>
+      {[
+        ['Дашборды', '/ai#dashboards'],
+        ['Конверсию по менеджерам', '/ai#more'],
+        ['Склад и остатки', '/ai#more'],
+        ['Зарплаты и бухгалтерию', '/ai#more'],
+        ['Найм с hh.ru', '/ai#more'],
+        ['Цены конкурентов', '/ai#more'],
+        ['Ответы на отзывы', '/ai#more'],
+        ['Документы по шаблонам', '/ai#more'],
+        ['Голосового помощника', '/ai#assistant'],
+      ].map(([label, href]) => (
+        <a key={label} className="mnfx15" href={href} onClick={() => ymGoal('nav', { to: href, place: 'more_strip', item: label })} style={s(`font-size:var(--t14); font-weight:600; color:var(--ink-soft); background:#F6F6F3; border:1px solid var(--line); border-radius:999px; padding:7px 13px; text-decoration:none; transition:border-color 0.2s ease, color 0.2s ease;`)}>{label}</a>
+      ))}
+      <a href="/ai#more" onClick={() => ymGoal('nav', { to: '/ai#more', place: 'more_strip', item: 'all' })} style={s(`margin-left:auto; font-size:var(--t14); font-weight:600; color:var(--blue); text-decoration:none; white-space:nowrap;`)}>Все задачи →</a>
+    </div>
   </section>
 
   <section id="why" data-screen-label="Why us" style={s(`padding:${v.whyPad}; max-width:var(--wrap); margin:0 auto;`)}>
@@ -2032,9 +1826,9 @@ export default class MainPage extends React.Component {
         <div style={s(`display:flex; flex-direction:column; gap:12px;`)}>
           {/* CTA звал «Позвоните», а телефона на сайте не было вовсе.
               Теперь номер кликабельный и стоит первым. */}
-          <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--font-manrope),sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.01em; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px 28px; text-decoration:none;`)}>
+          <a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; gap:10px; font-family:var(--font-manrope),sans-serif; font-size:20px; font-weight:800; letter-spacing:-0.01em; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:12px; padding:15px 28px; text-decoration:none;`)}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={s(`flex-shrink:0;`)} aria-hidden="true"><path d="M6.6 3h3l1.5 4-2 1.4a13 13 0 006.5 6.5l1.4-2 4 1.5v3A2 2 0 0119 19.5 16.5 16.5 0 014.5 5 2 2 0 016.6 3z" fill="var(--blue)"></path></svg>
-            +7 925 677-70-27
+            {PHONE_HUMAN}
           </a>
           <a className="mnfx11" href={v.tgContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:#fff; background:var(--grad); border-radius:12px; padding:16px 28px; text-decoration:none; box-shadow:0 10px 24px rgba(21,94,239,0.22); transition:transform 0.2s ease, box-shadow 0.2s ease;`)}>Написать в Telegram</a>
           <a className="mnfx12" href={v.waContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('whatsapp', { place: 'contact' })} style={s(`display:flex; align-items:center; justify-content:center; font-family:var(--font-inter),sans-serif; font-size:var(--t16); font-weight:600; color:var(--ink); background:transparent; border:1px solid var(--line); border-radius:12px; padding:16px 28px; text-decoration:none; transition:border-color 0.2s ease;`)}>Написать в WhatsApp</a>
@@ -2100,8 +1894,8 @@ export default class MainPage extends React.Component {
       <div>
         <div style={s(`font-family:var(--font-manrope),sans-serif; font-weight:800; font-size:var(--t14); color:var(--ink); margin-bottom:14px;`)}>Контакты</div>
         <div style={s(`display:flex; flex-direction:column; gap:10px;`)}>
-          <a href="tel:+79256777027" onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`font-size:var(--t16); font-weight:700; color:var(--ink); text-decoration:none;`)}>+7 925 677-70-27</a>
-          <a href="mailto:magomedov_zak_05@mail.ru" style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a>
+          <a href={'tel:' + PHONE} onClick={() => ymGoal('phone', { place: 'footer' })} style={s(`font-size:var(--t16); font-weight:700; color:var(--ink); text-decoration:none;`)}>{PHONE_HUMAN}</a>
+          <a href="mailto:magomedov_zak_05@mail.ru" onClick={() => ymGoal('email', { place: 'footer' })} style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none; overflow-wrap:anywhere;`)}>magomedov_zak_05@mail.ru</a>
           <a href={v.tgContactHref} target="_blank" rel="noopener" onClick={() => ymGoal('telegram', { place: 'footer' })} style={s(`font-size:var(--t14); color:var(--ink-soft); text-decoration:none;`)}>Telegram</a>
           <a href="/contacts" style={s(`font-size:var(--t14); color:var(--blue); text-decoration:none;`)}>Все контакты и реквизиты</a>
         </div>

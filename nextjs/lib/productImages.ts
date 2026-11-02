@@ -35,35 +35,6 @@ export const PRODUCT_IMAGES = [
   },
 ] as const;
 
-/**
- * Каталог для демо «ИИ собирает карточку» на странице /ai.
- *
- * Товары намеренно другие, чем на главной: страницы стоят рядом в навигации,
- * и одинаковая анимация с теми же фото читалась бы как копипаста.
- */
-export const AI_PRODUCT_IMAGES = [
-  // Каждое фото проверено глазами и соответствует тексту карточки:
-  // дрель-шуруповёрт DeWalt, склад металлопроката, системный блок в стекле.
-  {
-    id: 'ai0',
-    src: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=520&q=80',
-    width: 520,
-    height: 347,
-  },
-  {
-    id: 'ai1',
-    src: 'https://images.unsplash.com/photo-1671022442106-c787685d9fed?auto=format&fit=crop&w=520&q=80',
-    width: 520,
-    height: 347,
-  },
-  {
-    id: 'ai2',
-    src: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=520&q=80',
-    width: 520,
-    height: 780,
-  },
-] as const;
-
 export type ProductImageId = (typeof PRODUCT_IMAGES)[number]['id'];
 export type ProductBlurMap = Record<string, BlurImageData>;
 
@@ -77,11 +48,6 @@ export type ProductBlurMap = Record<string, BlurImageData>;
  */
 export async function getProductBlurMap(): Promise<ProductBlurMap> {
   return blurMapFor(PRODUCT_IMAGES);
-}
-
-/** То же самое для демо-каталога на /ai. */
-export async function getAiProductBlurMap(): Promise<ProductBlurMap> {
-  return blurMapFor(AI_PRODUCT_IMAGES);
 }
 
 async function blurMapFor(

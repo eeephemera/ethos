@@ -23,8 +23,12 @@ export function ymGoal(name, params) {
 // страниц приходило голое «Здравствуйте» без задачи и источника.
 // Telegram подставляет ?text= в поле ввода (core.telegram.org/api/links,
 // «Public username links»), WhatsApp — wa.me/<номер>?text=.
-export const TG_USERNAME = 'Terraiib24';
+export const TG_USERNAME = 'EthosB24AI';
 export const WA_PHONE = '79285288598';
+
+// Телефон — один на весь сайт (шапка, меню, панель на телефоне, контакты, футер).
+export const PHONE = '+79384476969';
+export const PHONE_HUMAN = '+7 938 447-69-69';
 
 // where — «страница «Битрикс24»», topic — сценарий кнопки («пакет «Бизнес»»).
 // Хвост «Задача: » оставлен открытым — человек дописывает своё.
@@ -38,6 +42,15 @@ export function tgHref(text) {
 
 export function waHref(text) {
   return 'https://wa.me/' + WA_PHONE + (text ? '?text=' + encodeURIComponent(text) : '');
+}
+
+// Подсказка форме заявки (LeadForm): тема и задача из кнопки «Хочу такое» —
+// форма их подставит, страница доедет до формы. topic — ключ из lib/leadTopics.js.
+export function prefillLead({ topic, task } = {}) {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent('ethos:lead', { detail: { topic, task } }));
+  const el = document.querySelector('[data-lead-form="main"]') || document.querySelector('[data-lead-form]');
+  if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
 }
 
 // prefers-reduced-motion для JS-автоплея (CSS-анимации гасятся в globals.css).

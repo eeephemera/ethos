@@ -1,4 +1,5 @@
 import { Inter, Manrope } from 'next/font/google';
+import ClickGoals from '../components/ClickGoals';
 import CookieNotice from '../components/CookieNotice';
 import { CONSENT_HEAD_SCRIPT } from '../components/consent';
 import MobileActionBar from '../components/MobileActionBar';
@@ -66,7 +67,7 @@ const jsonLd = {
       logo: 'https://aiethos.ru/icon.png',
       image: 'https://aiethos.ru/opengraph-image',
       email: 'magomedov_zak_05@mail.ru',
-      telephone: '+7-925-677-70-27',
+      telephone: '+7-938-447-69-69',
       subOrganization: PROVIDERS.map(providerJsonLd),
       areaServed: 'RU',
       description:
@@ -84,7 +85,7 @@ const jsonLd = {
         {
           '@type': 'ContactPoint',
           contactType: 'sales',
-          telephone: '+7-925-677-70-27',
+          telephone: '+7-938-447-69-69',
           email: 'magomedov_zak_05@mail.ru',
           availableLanguage: 'Russian',
           areaServed: 'RU',
@@ -130,6 +131,7 @@ export default function RootLayout({ children }) {
         {children}
         <CookieNotice />
         <MobileActionBar />
+        <ClickGoals />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         {/* Яндекс Метрика подключается в CookieNotice — только после «Принять».
             Noscript-пиксель не ставим: он собирал бы данные без согласия. */}
