@@ -16,8 +16,9 @@ import { newLeadId, saveLead, viewUrl, type Lead } from '../../../lib/leads';
  * «отправлено», когда заявка действительно у нас.
  *
  * Секреты — только в env сервера (/etc/ethos.env):
- *   TG_BOT_TOKEN — токен бота; TG_CHAT_ID — ЧЕЙ-ТО чат (человек или группа), не id самого
+ *   TG_BOT_TOKEN — токен бота; TG_CHAT_ID — чаты людей или групп через запятую, не id самого
  *   бота: бот сам себе не пишет — так с 21.10 по 02.11 все уведомления падали с 403.
+ *   Человек попадает в рассылку, только нажав /start боту (иначе бот ему не пишет).
  *   LEAD_VIEW_SECRET — ключ подписи ссылки (необязателен, иначе — токен бота).
  */
 
@@ -53,10 +54,16 @@ function tooMany(ip: string) {
 const clip = (v: unknown, n: number) => String(v ?? '').trim().slice(0, n);
 
 // Уведомление уходит после ответа форме (after): посетитель не ждёт Telegram.
+// TG_CHAT_ID — один чат или несколько через запятую (02.11: владелец и Артём);
+// каждому — своё сообщение, отказ одного чата не мешает остальным.
 async function notify(lines: string[]) {
   const token = process.env.TG_BOT_TOKEN;
-  const chatId = process.env.TG_CHAT_ID;
-  if (!token || !chatId) return;
+  const chats = (process.env.TG_CHAT_ID || '').split(',').map((c) => c.trim()).filter(Boolean);
+  if (!token || !chats.length) return;
+  await Promise.all(chats.map((chatId) => send(token, chatId, lines.join('\n'))));
+}
+
+async function send(token: string, chatId: string, text: string) {
   // Сервер ходит к api.telegram.org только по IPv6 (IPv4 рвётся сразу, замер 02.11) —
   // бывает, первое соединение не успевает: одна повторная попытка на сеть, 429 и 5xx.
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -64,16 +71,16 @@ async function notify(lines: string[]) {
       const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), disable_web_page_preview: true }),
+        body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
         signal: AbortSignal.timeout(8000),
       });
       if (res.ok) return;
       // fetch не бросает на HTTP-ошибках: неверный токен или chat_id иначе
       // остались бы молчаливым отказом, который не найти по логам.
-      console.error(`[lead] telegram notify failed (${attempt}):`, res.status, await res.text());
+      console.error(`[lead] telegram notify to ${chatId} failed (${attempt}):`, res.status, await res.text());
       if (res.status !== 429 && res.status < 500) return;
     } catch (e) {
-      console.error(`[lead] telegram notify failed (${attempt}):`, e);
+      console.error(`[lead] telegram notify to ${chatId} failed (${attempt}):`, e);
     }
   }
 }
