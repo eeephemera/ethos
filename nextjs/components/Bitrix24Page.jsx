@@ -124,6 +124,10 @@ export default class Bitrix24Page extends React.Component {
       // Кнопка «к контактам»: место — в цель, сценарий — в текст сообщения.
       contactCta: (place, topic) => () => {
         ymGoal('cta_contact', { place, topic: topic || 'none' });
+        // Свои цели Битрикс24 (02.11): интерес к пакету внедрения и к поддержке видно
+        // отдельной строкой в Метрике, а не только параметром cta_contact.
+        if (place.indexOf('pkg_') === 0) ymGoal('b24_package', { package: place.slice(4) });
+        else if (place === 'sla') ymGoal('b24_sla', {});
         if (topic) {
           window.dispatchEvent(new CustomEvent('ethos:lead', { detail: { task: 'Интересует: ' + topic } }));
         }
@@ -141,7 +145,11 @@ export default class Bitrix24Page extends React.Component {
       vals['faqRows' + i] = openFaq === i ? '1fr' : '0fr';
       vals['faqIcon' + i] = openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)';
       vals['faqBg' + i] = openFaq === i ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)';
-      vals['toggleFaq' + i] = () => this.setState(s => ({ openFaq: s.openFaq === i ? -1 : i }));
+      vals['toggleFaq' + i] = () => {
+        // Вопрос FAQ — div, общий ui_click его не видит: открытие — цель b24_faq (номер вопроса).
+        if (this.state.openFaq !== i) ymGoal('b24_faq', { q: i + 1 });
+        this.setState(s => ({ openFaq: s.openFaq === i ? -1 : i }));
+      };
     }
 
     return vals;
@@ -809,7 +817,7 @@ export default class Bitrix24Page extends React.Component {
   </section>
 
   <section data-screen-label="Ссылка на ИИ-решения" style={s(`padding:0 ${v.padX}; max-width:var(--wrap); margin:0 auto;`)}>
-    <a className="b24fx15" data-reveal href="/ai" style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
+    <a className="b24fx15" data-reveal href="/ai" onClick={() => ymGoal('nav', { to: '/ai', place: 'b24_crosslink' })} style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
       <span style={s(`position:absolute; top:-120px; right:-80px; width:340px; height:340px; border-radius:50%; background:var(--grad); opacity:0.25; filter:blur(90px); pointer-events:none;`)}></span>
       <span style={s(`position:relative; z-index:1; display:block;`)}>
         <span style={s(`display:block; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>

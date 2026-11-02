@@ -21,6 +21,7 @@ import st from './LeadForm.module.css';
  *   form_start  — начал заполнять (раз за показ);
  *   form_topic  — выбрал тему;
  *   form_submit — заявка принята сервером (главная конверсия);
+ *   lead_b24 / lead_ai — та же заявка по направлению (тема или страница);
  *   form_error  — сервер не принял (сеть, лимит).
  *
  * Подсказка снаружи: prefillLead() из _ui.js шлёт событие ethos:lead —
@@ -102,6 +103,12 @@ export default function LeadForm({ source, place, where, defaultTopic = null, pr
     const goal = { place, topic: topic || 'none', contact: contactKind(contact) };
     if (ok) {
       ymGoal('form_submit', goal);
+      // Заявка по направлению: Битрикс24 и ИИ ведут разные исполнители (lib/requisites.js).
+      // Тема «Битрикс24» или страница /bitrix24 без темы — lead_b24, остальные темы и /ai — lead_ai.
+      const path = window.location.pathname;
+      const dir = topic === 'b24' || (!topic && path === '/bitrix24') ? 'lead_b24'
+        : topic || path === '/ai' ? 'lead_ai' : null;
+      if (dir) ymGoal(dir, goal);
       setState('sent');
     } else {
       ymGoal('form_error', goal);

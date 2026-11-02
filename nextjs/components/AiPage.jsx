@@ -1230,7 +1230,7 @@ export default class AiPage extends React.Component {
   </section>
 
   <section data-screen-label="Ссылка на Битрикс24" style={s(`padding:0 ${v.padX}; max-width:var(--wrap); margin:0 auto;`)}>
-    <a className="aifx13" data-reveal href="/bitrix24" style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
+    <a className="aifx13" data-reveal href="/bitrix24" onClick={() => ymGoal('nav', { to: '/bitrix24', place: 'ai_crosslink' })} style={s(`display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; background:var(--ink); border-radius:24px; padding:${v.bannerPad}; text-decoration:none; position:relative; overflow:hidden; transition:transform 0.25s ease;`)}>
       <span style={s(`position:absolute; top:-120px; right:-80px; width:340px; height:340px; border-radius:50%; background:var(--grad); opacity:0.25; filter:blur(90px); pointer-events:none;`)}></span>
       <span style={s(`position:relative; z-index:1; display:block;`)}>
         <span style={s(`display:block; font-family:monospace; font-size:var(--mock-12); font-weight:700; letter-spacing:0.08em; text-transform:uppercase; background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;`)}>Смотрите также</span>
