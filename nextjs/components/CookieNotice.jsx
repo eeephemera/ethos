@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { YM_ID } from './_ui';
-import { CONSENT_ATTR, CONSENT_KEY } from './consent';
+import { CONSENT_ATTR, CONSENT_KEY, TEAM_KEY } from './consent';
 
 // Яндекс Метрика загружается ТОЛЬКО после «Принять». Позиция Роскомнадзора:
 // cookie и IP — персональные данные, поэтому счётчик до согласия и формула
@@ -41,13 +41,42 @@ function startMetrika() {
 export default function CookieNotice() {
   // Первый рендер (сервер и гидрация) — всегда с баннером, разметка совпадает.
   const [decided, setDecided] = useState(false);
+  const [teamNote, setTeamNote] = useState(null);
 
   useEffect(() => {
+    // Метка сотрудника (см. TEAM_KEY): ?team=1 ставит, ?team=0 снимает, адрес чистим.
+    let team = false;
+    try {
+      const url = new URL(location.href);
+      const q = url.searchParams.get('team');
+      if (q === '1') localStorage.setItem(TEAM_KEY, '1');
+      if (q === '0') localStorage.removeItem(TEAM_KEY);
+      if (q === '1' || q === '0') {
+        url.searchParams.delete('team');
+        history.replaceState(null, '', url.pathname + url.search + url.hash);
+        setTeamNote(q === '1'
+          ? 'Готово: этот браузер не считается в Метрике (вы в команде).'
+          : 'Метка снята: этот браузер снова считается в Метрике после «Принять».');
+        setTimeout(() => setTeamNote(null), 6000);
+      }
+      team = localStorage.getItem(TEAM_KEY) === '1';
+    } catch {
+      /* хранилище недоступно — метки нет */
+    }
+    if (team) {
+      document.documentElement.setAttribute(CONSENT_ATTR, 'denied');
+      setDecided(true);
+      return;
+    }
     let value = null;
     try {
       value = localStorage.getItem(CONSENT_KEY);
     } catch {
       /* хранилище недоступно — спросим заново */
+    }
+    // ?team=0 после метки: баннер спрятал скрипт в <head> — вернуть вопрос.
+    if (!value && document.documentElement.getAttribute(CONSENT_ATTR) === 'denied') {
+      document.documentElement.removeAttribute(CONSENT_ATTR);
     }
     if (value === 'granted') startMetrika();
     if (value === 'granted' || value === 'denied') setDecided(true);
@@ -64,7 +93,8 @@ export default function CookieNotice() {
     setDecided(true);
   };
 
-  if (decided) return null;
+  // Подтверждение метки сотрудника — плашкой на 6 с (баннера у него нет).
+  if (decided) return teamNote ? <div role="status" className="team-note">{teamNote}</div> : null;
 
   // Вид — классами в globals.css (.cookie-notice): на телефоне баннер
   // сжимается до строки текста с кнопками в ряд. Полный вариант закрывал

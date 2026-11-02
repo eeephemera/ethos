@@ -772,6 +772,13 @@ button:focus-visible {
 /* Баннер согласия рендерится сервером всем; тем, кто уже нажал «Принять» или
    «Отклонить», его прячет атрибут, который ставит скрипт в <head>. */
 html[data-metrika-consent] .cookie-notice { display: none !important; }
+/* Плашка «этот браузер не считается в Метрике» после ссылки ?team=1 (CookieNotice). */
+.team-note {
+  position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  z-index: 60; max-width: calc(100vw - 32px); padding: 12px 18px; border-radius: 14px;
+  background: #14171C; color: #fff; font: 600 14px/1.4 var(--font-inter), sans-serif;
+  box-shadow: 0 16px 40px -12px rgba(20, 23, 28, 0.5); text-align: center;
+}
 
 .cookie-notice {
   position: fixed;
