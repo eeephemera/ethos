@@ -188,7 +188,12 @@ export async function handleUpdate(update: any) {
   const msg = update.message;
   if (!msg?.text) return;
   const chatId = String(msg.chat.id);
-  if (!allowed.includes(chatId)) return;
+  if (!allowed.includes(chatId)) {
+    // Чужой чат: бот молчит, но id и ник — в журнал (без текста): так добавляют нового
+    // получателя заявок — человек пишет боту /start, id берётся отсюда в TG_CHAT_ID.
+    console.log(`[bot] unknown chat id=${chatId} @${msg.from?.username || '-'} ${msg.from?.first_name || ''}`.trim());
+    return;
+  }
   const text = msg.text.trim();
 
   // Токен Метрики — только от владельца (первый чат в TG_CHAT_ID); сообщение с токеном удаляем.
