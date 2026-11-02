@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { contactKind, topicLabel } from '../../../lib/leadTopics';
 import { newLeadId, saveLead, viewUrl, type Lead } from '../../../lib/leads';
 
@@ -52,22 +52,29 @@ function tooMany(ip: string) {
 
 const clip = (v: unknown, n: number) => String(v ?? '').trim().slice(0, n);
 
+// Уведомление уходит после ответа форме (after): посетитель не ждёт Telegram.
 async function notify(lines: string[]) {
   const token = process.env.TG_BOT_TOKEN;
   const chatId = process.env.TG_CHAT_ID;
   if (!token || !chatId) return;
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), disable_web_page_preview: true }),
-      signal: AbortSignal.timeout(5000),
-    });
-    // fetch не бросает на HTTP-ошибках: неверный токен или chat_id иначе
-    // остались бы молчаливым отказом, который не найти по логам.
-    if (!res.ok) console.error('[lead] telegram notify failed:', res.status, await res.text());
-  } catch (e) {
-    console.error('[lead] telegram notify failed:', e);
+  // Сервер ходит к api.telegram.org только по IPv6 (IPv4 рвётся сразу, замер 02.11) —
+  // бывает, первое соединение не успевает: одна повторная попытка на сеть, 429 и 5xx.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text: lines.join('\n'), disable_web_page_preview: true }),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) return;
+      // fetch не бросает на HTTP-ошибках: неверный токен или chat_id иначе
+      // остались бы молчаливым отказом, который не найти по логам.
+      console.error(`[lead] telegram notify failed (${attempt}):`, res.status, await res.text());
+      if (res.status !== 429 && res.status < 500) return;
+    } catch (e) {
+      console.error(`[lead] telegram notify failed (${attempt}):`, e);
+    }
   }
 }
 
@@ -101,7 +108,7 @@ export async function POST(req: Request) {
     const lines = [`Новая заявка с сайта (${where})`, `Задача: ${task}`];
     if (size) lines.push(`Команда: ${size}`);
     lines.push(`Посетитель напишет сам в ${channel}`);
-    await notify(lines);
+    after(() => notify(lines));
     return NextResponse.json({ ok: true });
   }
 
@@ -132,7 +139,7 @@ export async function POST(req: Request) {
   lines.push(link
     ? `Имя и контакт: ${link}`
     : 'Имя и контакт — в журнале сервера (journalctl -u ethos), заявка не записалась файлом');
-  await notify(lines);
+  after(() => notify(lines));
 
   return NextResponse.json({ ok: true });
 }
