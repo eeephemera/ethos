@@ -1,6 +1,7 @@
 import { NextResponse, after } from 'next/server';
 import { contactKind, topicLabel } from '../../../lib/leadTopics';
 import { newLeadId, saveLead, viewUrl, type Lead } from '../../../lib/leads';
+import { chatIds, tg } from '../../../lib/telegram';
 
 /**
  * Приём заявки с сайта.
@@ -57,31 +58,19 @@ const clip = (v: unknown, n: number) => String(v ?? '').trim().slice(0, n);
 // TG_CHAT_ID — один чат или несколько через запятую (02.11: владелец и Артём);
 // каждому — своё сообщение, отказ одного чата не мешает остальным.
 async function notify(lines: string[]) {
-  const token = process.env.TG_BOT_TOKEN;
-  const chats = (process.env.TG_CHAT_ID || '').split(',').map((c) => c.trim()).filter(Boolean);
-  if (!token || !chats.length) return;
-  await Promise.all(chats.map((chatId) => send(token, chatId, lines.join('\n'))));
+  const chats = chatIds();
+  if (!process.env.TG_BOT_TOKEN || !chats.length) return;
+  await Promise.all(chats.map((chatId) => send(chatId, lines.join('\n'))));
 }
 
-async function send(token: string, chatId: string, text: string) {
-  // Сервер ходит к api.telegram.org только по IPv6 (IPv4 рвётся сразу, замер 02.11) —
-  // бывает, первое соединение не успевает: одна повторная попытка на сеть, 429 и 5xx.
+async function send(chatId: string, text: string) {
+  // Одна повторная попытка на сеть, 429 и 5xx (lib/telegram.ts — по IPv6).
   for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true }),
-        signal: AbortSignal.timeout(8000),
-      });
-      if (res.ok) return;
-      // fetch не бросает на HTTP-ошибках: неверный токен или chat_id иначе
-      // остались бы молчаливым отказом, который не найти по логам.
-      console.error(`[lead] telegram notify to ${chatId} failed (${attempt}):`, res.status, await res.text());
-      if (res.status !== 429 && res.status < 500) return;
-    } catch (e) {
-      console.error(`[lead] telegram notify to ${chatId} failed (${attempt}):`, e);
-    }
+    const r = await tg('sendMessage', { chat_id: chatId, text, disable_web_page_preview: true });
+    if (r.ok) return;
+    // Неверный токен или chat_id иначе остались бы молчаливым отказом, который не найти по логам.
+    console.error(`[lead] telegram notify to ${chatId} failed (${attempt}):`, r.status, JSON.stringify(r.body));
+    if (r.status && r.status !== 429 && r.status < 500) return;
   }
 }
 

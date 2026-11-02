@@ -88,6 +88,10 @@ npm start
   писать (не id самого бота: бот себе не пишет, 403), необязательный `LEAD_VIEW_SECRET` —
   ключ подписи ссылки (иначе — токен бота).
 - Цели Метрики — в шапке `components/LeadForm.jsx` и `components/ClickGoals.jsx`.
+- Бот аналитики (тот же бот, `lib/analyticsBot.ts`): /menu — панель с кнопками (период, обзор, цели,
+  кнопки, страницы, источники, заявки). Вебхук `app/api/tg/route.ts`, секрет — `TG_WEBHOOK_SECRET`
+  в env сервера; токен Метрики (metrika:read) владелец присылает боту командой `/token …` —
+  он ложится в `.data/metrika-token`, сообщение бот удаляет.
 
 ## Выкатка на сервер (aiethos.ru)
 

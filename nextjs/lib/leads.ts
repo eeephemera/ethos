@@ -85,6 +85,21 @@ export async function saveLead(lead: Lead) {
   }
 }
 
+/** Заявки не старше sinceMs, свежие первыми (отчёт «Заявки» в боте аналитики). */
+export async function listLeads(sinceMs: number): Promise<Lead[]> {
+  const folder = dir();
+  let files: string[] = [];
+  try { files = (await readdir(folder)).filter((f) => f.endsWith('.json')); } catch { return []; }
+  const out: Lead[] = [];
+  for (const f of files) {
+    try {
+      const lead: Lead = JSON.parse(await readFile(path.join(folder, f), 'utf8'));
+      if (Date.parse(lead.at) >= sinceMs) out.push(lead);
+    } catch {}
+  }
+  return out.sort((a, b) => b.at.localeCompare(a.at));
+}
+
 export async function loadLead(id: string): Promise<Lead | null> {
   if (!ID_RE.test(id)) return null;
   try {
