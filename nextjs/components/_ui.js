@@ -24,11 +24,11 @@ export function ymGoal(name, params) {
 // Telegram подставляет ?text= в поле ввода (core.telegram.org/api/links,
 // «Public username links»), WhatsApp — wa.me/<номер>?text=.
 export const TG_USERNAME = 'EthosB24AI';
-export const WA_PHONE = '79285288598';
+export const WA_PHONE = '79384476969';
 
 // Телефон — один на весь сайт (шапка, меню, панель на телефоне, контакты, футер).
-export const PHONE = '+79384476969';
-export const PHONE_HUMAN = '+7 938 447-69-69';
+export const PHONE = '+79256777027';
+export const PHONE_HUMAN = '+7 925 677-70-27';
 
 // where — «страница «Битрикс24»», topic — сценарий кнопки («пакет «Бизнес»»).
 // Хвост «Задача: » оставлен открытым — человек дописывает своё.

@@ -267,10 +267,10 @@ export default function PrivacyPage() {
         уточнения, блокирования или удаления данных — пишите по общим контактам ETHOS: обращение
         передадут тому Оператору, который обрабатывает ваши данные.<br />
         E-mail: <a href="mailto:magomedov_zak_05@mail.ru" style={link}>magomedov_zak_05@mail.ru</a><br />
-        Телефон: <a href="tel:+79384476969" style={link}>+7 938 447-69-69</a><br />
+        Телефон: <a href="tel:+79256777027" style={link}>+7 925 677-70-27</a><br />
         Мессенджеры:{' '}
         <a href="https://t.me/EthosB24AI" style={link} target="_blank" rel="noopener">Telegram</a>{' '}·{' '}
-        <a href="https://wa.me/79285288598" style={link} target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://wa.me/79384476969" style={link} target="_blank" rel="noopener">WhatsApp</a>
       </p>
       <p style={muted}>
         Ответ на обращение направляется в течение рабочего дня, но не позднее срока,

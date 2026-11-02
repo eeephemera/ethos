@@ -67,7 +67,7 @@ const jsonLd = {
       logo: 'https://aiethos.ru/icon.png',
       image: 'https://aiethos.ru/opengraph-image',
       email: 'magomedov_zak_05@mail.ru',
-      telephone: '+7-938-447-69-69',
+      telephone: '+7-925-677-70-27',
       subOrganization: PROVIDERS.map(providerJsonLd),
       areaServed: 'RU',
       description:
@@ -85,7 +85,7 @@ const jsonLd = {
         {
           '@type': 'ContactPoint',
           contactType: 'sales',
-          telephone: '+7-938-447-69-69',
+          telephone: '+7-925-677-70-27',
           email: 'magomedov_zak_05@mail.ru',
           availableLanguage: 'Russian',
           areaServed: 'RU',
