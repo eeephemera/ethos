@@ -3,7 +3,7 @@
 # Turnkey deploy for aiethos.ru (Ethos / Терра — Next.js landing).
 # Run this ON the server (Ubuntu/Debian) as root:
 #
-#   ssh root@185.207.66.202
+#   ssh root@<server>   (prod since 27.09.2026: 200.165.229.150 - see deploy/DEPLOY.md)
 #   apt-get update && apt-get install -y git
 #   git clone https://github.com/eeephemera/ethos.git /opt/ethos
 #   cd /opt/ethos && bash deploy/deploy.sh
